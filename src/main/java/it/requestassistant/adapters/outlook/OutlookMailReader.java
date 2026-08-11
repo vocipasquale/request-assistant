@@ -7,7 +7,6 @@ import it.requestassistant.domain.model.MailMessage;
 
 import static javax.management.remote.JMXConnectorFactory.connect;
 
-/// /   -Djava.library.path=lib
 
 public class OutlookMailReader implements MailReader {
 
