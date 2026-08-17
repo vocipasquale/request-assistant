@@ -3,12 +3,15 @@ package it.requestassistant.poc;
 import com.jacob.activeX.ActiveXComponent;
 import com.jacob.com.Dispatch;
 import com.jacob.com.Variant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OutlookConnectionTest {
+    public static Logger logger = LoggerFactory.getLogger(OutlookConnectionTest.class);
 
     public static void main(String[] args) {
 
-        System.out.println("Avvio test Outlook");
+        logger.info("Avvio test Outlook");
 
         ActiveXComponent outlook =
                 new ActiveXComponent("Outlook.Application");
@@ -23,7 +26,7 @@ public class OutlookConnectionTest {
                 );
 
         if (richiesteFolder == null) {
-            System.out.println("Cartella non trovata");
+            logger.info("Cartella non trovata");
             return;
         }
 
@@ -33,10 +36,10 @@ public class OutlookConnectionTest {
         int count =
                 Dispatch.get(items, "Count").getInt();
 
-        System.out.println("Email presenti: " + count);
+        logger.info("Email presenti: " + count);
 
         if (count == 0) {
-            System.out.println("Nessuna email");
+            logger.info("Nessuna email");
             return;
         }
 
@@ -56,46 +59,45 @@ public class OutlookConnectionTest {
         String received =
                 Dispatch.get(mail, "ReceivedTime").toString();
 
-        System.out.println();
-        System.out.println("EMAIL TROVATA");
-        System.out.println("--------------------");
-        System.out.println("Mittente : " + sender);
-        System.out.println("Oggetto  : " + subject);
-        System.out.println("Ricevuta : " + received);
+        logger.info("EMAIL TROVATA");
+        logger.info("--------------------");
+        logger.info("Mittente : " + sender);
+        logger.info("Oggetto  : " + subject);
+        logger.info("Ricevuta : " + received);
 
         outlook.safeRelease();
 
-        System.out.println("--------------------");
-        System.out.println("Fine test");
+        logger.info("--------------------");
+        logger.info("Fine test");
     }
 
 
-    private static Dispatch findFolder(Dispatch folders, String targetName) {
+    private static Dispatch findFolder(Dispatch parent, String targetName) {
+
+        String name =
+                Dispatch.get(parent, "Name").getString();
+
+        if (targetName.equals(name)) {
+            return parent;
+        }
+
+        Dispatch folders =
+                Dispatch.get(parent, "Folders").toDispatch();
 
         int count =
                 Dispatch.get(folders, "Count").getInt();
 
         for (int i = 1; i <= count; i++) {
 
-            Dispatch folder =
+            Dispatch child =
                     Dispatch.call(
                             folders,
                             "Item",
                             new Variant(i)
                     ).toDispatch();
 
-            String name =
-                    Dispatch.get(folder, "Name").getString();
-
-            if (targetName.equals(name)) {
-                return folder;
-            }
-
-            Dispatch subFolders =
-                    Dispatch.get(folder, "Folders").toDispatch();
-
             Dispatch result =
-                    findFolder(subFolders, targetName);
+                    findFolder(child, targetName);
 
             if (result != null) {
                 return result;

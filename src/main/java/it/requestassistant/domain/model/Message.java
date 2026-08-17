@@ -5,51 +5,102 @@ import java.util.List;
 import java.util.Objects;
 
 public record Message(
-        String sender,
-        List<String> reciversTo,
-        List<String> reciversCc,
         String subject,
+        String senderAddress,
+        LocalDateTime receivedAt,
+        String to,
+        String cc,
         String bodyText,
-        String bodyHtml,
-        LocalDateTime receivedAt){
+        String entryId,
+        String conversationId,
+        String conversationTopic,
+        Integer importance,
+        Boolean hasAttachment,
+        String category
+        ){
 
     public Message{
-        Objects.requireNonNull(sender);
-        Objects.requireNonNull(reciversTo);
-        Objects.requireNonNull(reciversCc);
         Objects.requireNonNull(subject);
-        Objects.requireNonNull(bodyText);
-        Objects.requireNonNull(bodyHtml);
+        Objects.requireNonNull(senderAddress);
         Objects.requireNonNull(receivedAt);
+        Objects.requireNonNull(to);
     }
 
-    public String getSender() {
-        return sender;
-    }
-
-
-    public String getSubject() {
+    @Override
+    public String subject() {
         return subject;
     }
 
-    public String getBodyText() {
-        return bodyText;
+    @Override
+    public String senderAddress() {
+        return senderAddress;
     }
 
-    public String getBodyHtml() {
-        return bodyHtml;
-    }
-
-    public LocalDateTime getReceivedAt() {
+    @Override
+    public LocalDateTime receivedAt() {
         return receivedAt;
     }
 
     @Override
+    public String to() {
+        return to;
+    }
+
+    @Override
+    public String cc() {
+        return cc;
+    }
+
+    @Override
+    public String bodyText() {
+        return bodyText;
+    }
+
+    @Override
+    public String entryId() {
+        return entryId;
+    }
+
+    @Override
+    public String conversationId() {
+        return conversationId;
+    }
+
+    @Override
+    public String conversationTopic() {
+        return conversationTopic;
+    }
+
+    @Override
+    public Integer importance() {
+        return importance;
+    }
+
+    @Override
+    public Boolean hasAttachment() {
+        return hasAttachment;
+    }
+
+    @Override
+    public String category() {
+        return category;
+    }
+
+    @Override
     public String toString() {
-        return "MailMessage{" +
-                "sender='" + sender + '\'' +
-                ", subject='" + subject + '\'' +
+        return "Message{" +
+                "subject='" + subject + '\'' +
+                ", senderAddress='" + senderAddress + '\'' +
                 ", receivedAt=" + receivedAt +
+                ", to='" + to + '\'' +
+                ", cc='" + cc + '\'' +
+                ", bodyText='" + bodyText + '\'' +
+                ", entryId='" + entryId + '\'' +
+                ", conversationId='" + conversationId + '\'' +
+                ", conversationTopic='" + conversationTopic + '\'' +
+                ", importance=" + importance +
+                ", hasAttachment=" + hasAttachment +
+                ", category='" + category + '\'' +
                 '}';
     }
 }
