@@ -1,3 +1,9 @@
 log:
   path: /logs
   level: INFO
+
+mail.folder:
+  root: Pa.Voci@almaviva.it
+  in_arrivo: RichiesteAbilitazioni
+  in_lavorazione: in_lavorazione
+  evase: evase

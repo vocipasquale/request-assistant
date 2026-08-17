@@ -1,6 +1,8 @@
 package it.requestassistant.playground;
 
-import it.requestassistant.adapters.outlook.OutlookMailReader;
+import com.jacob.activeX.ActiveXComponent;
+import com.jacob.com.Dispatch;
+import it.requestassistant.adapters.outlook.OutlookMailService;
 import it.requestassistant.domain.model.DecisionOption;
 import it.requestassistant.domain.model.Message;
 import it.requestassistant.domain.model.Request;
@@ -16,9 +18,6 @@ import java.util.Objects;
 @Component
 public class PlaygroundProcess implements CommandLineRunner {
     public Logger logger = LoggerFactory.getLogger(this.getClass());
-    
-    private static final String ROOT_FOLDER = "Pa.Voci@almaviva.it";
-    private static final String RICHIESTE_ABILITAZIONI = "RichiesteAbilitazioni";
 
     @Autowired
     private PlaygroundRequestSearch playgroundRequestSearch;
@@ -26,45 +25,48 @@ public class PlaygroundProcess implements CommandLineRunner {
     @Autowired
     private PlaygroundAiAnalyzer playgroundAiAnalyzer;
 
+    @Autowired
+    private OutlookMailService outlookMailService;
+
 //    @Autowired
 //    private PendingDecisionRepository pendingDecisionRepository;
 
 
     @Override
-    public void run(String... args) {
-
-
+    public void run(String... args) throws Exception {
         logger.info("=================================");
         logger.info(" Request Assistant - Playground");
         logger.info("=================================");
 
-        OutlookMailReader outlookMailReader = new OutlookMailReader();
-        List<Message> messages = outlookMailReader.getMessages(ROOT_FOLDER, RICHIESTE_ABILITAZIONI);
 
 
-        if (Objects.isNull(messages) || messages.isEmpty()) {
-            logger.info("Nessuna email");
-            return;
-        }
+            //recupero le nuove mail/messages nella cartella (in arrivo)
+            List<Message> messages = outlookMailService.getMessagesToProcess();
 
-        logger.info("Trovate "+messages.size()+" mail!");
+            if (Objects.isNull(messages) || messages.isEmpty()) {
+                logger.info("Nessuna email");
+                return;
+            }
 
-        messages.forEach(
-                message -> {
-                    //ricerca di una probabile pratica in cui inserire il messaggio
-                    Request request = playgroundRequestSearch.search(message);
+            logger.info("Trovate " + messages.size() + " mail!");
 
-                    //sottopongo il risultato della ricerca all'AI
-                    List<DecisionOption> options = playgroundAiAnalyzer.analyzeMessage(message, request);
+            //ricerca di una probabile pratica in cui inserire ogni messaggio
+            for (Message message : messages) {
+                logger.debug("mailID: "+message.entryId());
+                Request request = playgroundRequestSearch.search(message);
 
-                    //creo e persisto la "proposta" per una verifica dell'operatore tramite Dashboard
-                    // PendingDecision proposta = new PendingDecision()
-                    // pendingDecisionRepository.save()
+                //sottopongo il risultato della ricerca all'AI
+                List<DecisionOption> options = playgroundAiAnalyzer.analyzeMessage(message, request);
 
-                    //sposto la mail relativa al message corrente in modo che non venga analizzata ancora
+                //creo e persisto la "proposta" per una verifica dell'operatore tramite Dashboard
+                // PendingDecision proposta = new PendingDecision()
+                // pendingDecisionRepository.save()
 
-                }
-        );
+                //sposto la mail relativa al message corrente in modo che non venga analizzata ancora
+
+            }
+
+
 
     }
 }

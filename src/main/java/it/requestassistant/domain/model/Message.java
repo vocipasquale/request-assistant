@@ -12,12 +12,13 @@ public record Message(
         String cc,
         String bodyText,
         String entryId,
+        //StoreId
         String conversationId,
         String conversationTopic,
         Integer importance,
         Boolean hasAttachment,
         String category
-        ){
+){
 
     public Message{
         Objects.requireNonNull(subject);
