@@ -1,3 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:sqlite:./data/request-assistant.db
+    driver-class-name: org.sqlite.JDBC
+
+  flyway:
+    enabled: true
+
 log:
   path: /logs
   level: INFO

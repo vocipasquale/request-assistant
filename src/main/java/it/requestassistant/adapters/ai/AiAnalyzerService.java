@@ -1,4 +1,4 @@
-package it.requestassistant.playground;
+package it.requestassistant.adapters.ai;
 
 import it.requestassistant.application.port.out.AiAnalyzer;
 import it.requestassistant.domain.model.DecisionOption;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class PlaygroundAiAnalyzer implements AiAnalyzer {
+public class AiAnalyzerService implements AiAnalyzer {
     public Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override

@@ -1,9 +1,9 @@
-package it.requestassistant.domain.model;
+package it.requestassistant.adapters.persistence.entity;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public record Message(
+public record MessageEntity(
         String subject,
         String senderAddress,
         LocalDateTime receivedAt,
@@ -18,7 +18,7 @@ public record Message(
         String category
 ){
 
-    public Message{
+    public MessageEntity{
         Objects.requireNonNull(subject);
         Objects.requireNonNull(senderAddress);
         Objects.requireNonNull(receivedAt);

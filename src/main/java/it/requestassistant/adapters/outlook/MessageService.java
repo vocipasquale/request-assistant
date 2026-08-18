@@ -3,6 +3,7 @@ package it.requestassistant.adapters.outlook;
 import com.jacob.activeX.ActiveXComponent;
 import com.jacob.com.Dispatch;
 import com.jacob.com.Variant;
+import it.requestassistant.application.port.out.MessageInterface;
 import it.requestassistant.domain.model.Message;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-public class OutlookMailService {
+public class MessageService implements MessageInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Value("${mail.folder.root}")
@@ -33,6 +34,7 @@ public class OutlookMailService {
     private String evaseFolderName = "evase"; // Pa.Voci@almaviva.it/RichiesteAbilitazioni/evase
 
     private ActiveXComponent outlook;
+    private Dispatch namespace;
     private Dispatch rootFolder;
     private Dispatch inArrivoFolder;
     private Dispatch inLavorazioneFolder;
@@ -48,7 +50,11 @@ public class OutlookMailService {
         if(Objects.isNull(outlook)) throw new Exception("Errore durante recupero connessione Outlook!");
         logger.info("Stabilita connessione Outlook.");
 
-        rootFolder = getRootFolder(); //pa.voci@almaviva.it
+        namespace = outlook.getProperty("Session").toDispatch();
+        if(Objects.isNull(namespace)) throw new Exception("Errore durante recupero del Namespace!");
+        logger.info("Namespace recuperato.");
+
+        rootFolder = findFolder(namespace, rootFolderName); //pa.voci@almaviva.it
         if(Objects.isNull(rootFolder)) throw new Exception("Root folder "+rootFolderName +" non trovato!" );
         logger.info("Root folder "+rootFolderName +" trovato.");
 
@@ -79,19 +85,12 @@ public class OutlookMailService {
     }
 
     /**
-     * restituisce il root folder
+     * restituisce tutti i messaggi da elaborare
      *
      * @return
      */
-    private Dispatch getRootFolder() {
-        Dispatch namespace =
-                outlook.getProperty("Session").toDispatch();
-        logger.info("Prelevato session");
-
-        return findFolder(namespace, rootFolderName);
-    }
-
-    public List<Message> getMessagesToProcess() {
+    @Override
+    public List<Message> findMessagesToProcess() {
         List<Message> messages = new ArrayList<>();
 
         //recupero la mail dalla cartella delle richieste
@@ -109,8 +108,59 @@ public class OutlookMailService {
         return messages;
     }
 
+    /**
+     * metedo di utility, restituisce il dispatch del folder che contiene la mail con entryId passato per input.
+     *
+     * @param sourceFolder
+     * @param entryId
+     * @return
+     */
+    private Dispatch findMailByEntryId(Dispatch sourceFolder, String entryId) {
+        Dispatch mail = null;
+
+        logger.debug("Ricerca mail con entryId " + entryId);
+
+        Dispatch items =
+                Dispatch.get(sourceFolder, "Items").toDispatch();
+        int count = Dispatch.get(items, "Count").getInt();
+
+        for (int i = 1; i <= count; i++) {
+            mail = Dispatch.call(items, "Item", new Variant(i))
+                    .toDispatch();
+            if(entryId.equals(Dispatch.get(mail, "EntryID").getString())){
+                logger.debug("Mail con entryId " + entryId+" trovata.");
+                return mail;
+            }
+        }
+
+        return mail;
+    }
+
+    /**
+     * Sposta il message da inArrivoFolder a inLavorazioneFolder
+     *
+     * @param message
+     * @throws Exception
+     */
+    @Override
+    public void moveMessageInProgress(Message message) throws Exception {
+        Dispatch mailToMove = findMailByEntryId(inArrivoFolder, message.entryId());
+        Dispatch.call(mailToMove, "Move", inLavorazioneFolder);
+    }
+
+    @Override
+    public void moveMessageInDone(Message message) throws Exception {
+        Dispatch mailToMove = findMailByEntryId(inLavorazioneFolder, message.entryId());
+        Dispatch.call(mailToMove, "Move", evaseFolder);
+    }
 
 
+    /**
+     * Rimappa la "mail" in "message"
+     *
+     * @param mail
+     * @return
+     */
     private Message mailToMessage(Dispatch mail) {
 
         return new Message(
@@ -141,15 +191,6 @@ public class OutlookMailService {
 
     }
 
-
-
-    public void moveMessageInProgress(Message message) throws Exception {
-
-    }
-
-    public void moveMessageInDone(Message message) throws Exception {
-
-    }
 
     /**
      * restituisce il forder cercato partendo da una posizione
