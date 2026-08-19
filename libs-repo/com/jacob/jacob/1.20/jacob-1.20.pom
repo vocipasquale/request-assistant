@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.jacob</groupId>
+    <artifactId>jacob</artifactId>
+    <version>1.20</version>
+    <packaging>jar</packaging>
+    <description>JACOB - Java COM Bridge</description>
+</project>
+
