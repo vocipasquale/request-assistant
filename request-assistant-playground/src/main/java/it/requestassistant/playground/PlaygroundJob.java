@@ -1,10 +1,9 @@
-package it.requestassistant.client.playground;
+package it.requestassistant.playground;
 
-import it.requestassistant.adapters.ai.AiAnalyzerService;
-import it.requestassistant.adapters.outlook.MessageService;
-import it.requestassistant.domain.model.Message;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
+import it.requestassistant.playground.client.PlaygroundClient;
+import it.requestassistant.playground.dto.MessageDto;
+import it.requestassistant.playground.dto.MoveInProgressRequest;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,29 +12,26 @@ import java.util.List;
 import java.util.Objects;
 
 @Component
-public class PlaygroundProcess implements CommandLineRunner {
+public class PlaygroundJob {
     public Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    private final PlaygroundClient client;
 
-    @Autowired
-    private AiAnalyzerService playgroundAiAnalyzer;
-
-    @Autowired
-    private MessageService messageService;
-
-//    @Autowired
-//    private PendingDecisionRepository pendingDecisionRepository;
+    public PlaygroundJob(PlaygroundClient client) {
+        this.client = client;
+    }
 
 
-    @Override
-    public void run(String... args) throws Exception {
+    @Scheduled(fixedDelay = 30_000)
+    public void execute() {
+
         logger.info("=================================");
         logger.info(" Request Assistant - Playground");
         logger.info("=================================");
 
 
         //recupero le nuove mail/messages nella cartella (in arrivo)
-        List<Message> messages = messageService.findMessagesToProcess();
+        List<MessageDto> messages = client.getMessagesToProcess();
 
         if (Objects.isNull(messages) || messages.isEmpty()) {
             logger.info("Nessuna email");
@@ -45,8 +41,8 @@ public class PlaygroundProcess implements CommandLineRunner {
         logger.info("Trovate " + messages.size() + " mail!");
 
         //ricerca di una probabile pratica in cui inserire ogni messaggio
-        for (Message message : messages) {
-            logger.debug("mailID: " + message.entryId());
+        for (MessageDto message : messages) {
+            logger.debug("mailID: " + message);
             //Request request = playgroundRequestSearch.search(message);
 
             //sottopongo il risultato della ricerca all'AI
@@ -57,7 +53,7 @@ public class PlaygroundProcess implements CommandLineRunner {
             // pendingDecisionRepository.save()
 
             //sposto la mail relativa al message corrente in modo che non venga analizzata ancora
-            messageService.moveMessageInProgress(message);
+            client.moveMessageInProgress(new MoveInProgressRequest());
 
         }
 
