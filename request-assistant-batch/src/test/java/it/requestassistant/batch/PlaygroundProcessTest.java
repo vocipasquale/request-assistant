@@ -47,8 +47,8 @@ class PlaygroundProcessTest {
         Message secondMessage = buildMessage("entry-2");
         Request firstRequest = new Request();
         Request secondRequest = new Request();
-        List<DecisionOption> firstOptions = List.of(new DecisionOption("LINK_TO_REQUEST", 0.90, List.of("subject-match")));
-        List<DecisionOption> secondOptions = List.of(new DecisionOption("CREATE_NEW_REQUEST", 0.80, List.of("no-existing-request")));
+        List<DecisionOption> firstOptions = List.of(new DecisionOption("LINK_TO_REQUEST", 0.90, "subject-match"));
+        List<DecisionOption> secondOptions = List.of(new DecisionOption("CREATE_NEW_REQUEST", 0.80, "no-existing-request"));
 
         when(batchPort.getMessagesToProcess()).thenReturn(List.of(firstMessage, secondMessage));
         when(batchPort.searchRequestForMessage(firstMessage)).thenReturn(firstRequest);

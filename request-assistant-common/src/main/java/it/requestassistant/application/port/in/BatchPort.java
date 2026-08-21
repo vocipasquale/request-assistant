@@ -17,4 +17,6 @@ public interface BatchPort {
     void generateDecision(Message message, Request request, List<DecisionOption> options);
 
     void moveMessageInProgress(Message message) throws Exception;
+
+    void persistMessage(Message message);
 }

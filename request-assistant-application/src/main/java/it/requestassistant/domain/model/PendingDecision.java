@@ -8,7 +8,7 @@ public record PendingDecision(
         long id,
         LocalDateTime createdAt,
         Type type,
-        Target target,
+        String target,
         List<DecisionOption> options
 ) {
     public PendingDecision {
@@ -23,13 +23,4 @@ public record PendingDecision(
         REQUEST_ANALYSIS
     }
 
-    public sealed interface Target permits MessageTarget, RequestTarget {
-        long id();
-    }
-
-    public record MessageTarget(long id) implements Target {
-    }
-
-    public record RequestTarget(long id) implements Target {
-    }
 }

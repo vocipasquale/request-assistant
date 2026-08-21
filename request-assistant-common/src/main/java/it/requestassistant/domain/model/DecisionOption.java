@@ -5,9 +5,9 @@ import java.util.List;
 public record DecisionOption(
         String action,
         double confidence,
-        List<String> reasons
+        String reasons
 ) {
     public DecisionOption {
-        reasons = List.copyOf(reasons);
+
     }
 }

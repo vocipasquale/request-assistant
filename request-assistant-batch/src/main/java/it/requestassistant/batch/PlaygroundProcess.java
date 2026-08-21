@@ -1,7 +1,5 @@
 package it.requestassistant.batch;
 
-//import it.requestassistant.adapters.ai.AiAnalyzerService;
-//import it.requestassistant.adapters.outlook.MessageService;
 import it.requestassistant.application.port.in.BatchPort;
 import it.requestassistant.domain.model.DecisionOption;
 import it.requestassistant.domain.model.Message;
@@ -49,7 +47,12 @@ public class PlaygroundProcess implements CommandLineRunner {
         //ricerca di una probabile pratica in cui inserire ogni messaggio
         for (Message message : messages) {
             logger.debug("mailID: " + message.entryId());
+
+            //ricerco delle request inerenti al message
             Request request = batchPort.searchRequestForMessage(message);
+
+            //persisto sul DB il message: da fare dopo batchPort.searchRequestForMessage(message);
+            batchPort.persistMessage(message);
 
             //sottopongo il risultato della ricerca all'AI
             List<DecisionOption> options = batchPort.generateProposal(message, request);

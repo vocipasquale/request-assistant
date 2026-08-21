@@ -9,4 +9,5 @@ public interface MessageResearchPort {
     List<Message> findMessagesToProcess();
     void moveMessageInProgress(Message message) throws Exception;
     void moveMessageInDone(Message message) throws Exception;
+
 }

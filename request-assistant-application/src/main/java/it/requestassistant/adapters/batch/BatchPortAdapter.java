@@ -28,6 +28,9 @@ public class BatchPortAdapter implements BatchPort  {
     private RequestResearchPort requestResearchPort;
 
     @Autowired
+    private PersistenceDaoPort persistenceDaoPort;
+
+    @Autowired
     private AiAnalyzerPort aiAnalyzerPort;
 
     @Override
@@ -53,5 +56,10 @@ public class BatchPortAdapter implements BatchPort  {
     @Override
     public void moveMessageInProgress(Message message) throws Exception {
         messagePort.moveMessageInProgress(message);
+    }
+
+    @Override
+    public void persistMessage(Message message) {
+        persistenceDaoPort.insertMessage(message);
     }
 }

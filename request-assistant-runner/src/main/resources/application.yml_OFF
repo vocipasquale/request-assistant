@@ -2,9 +2,9 @@ spring:
   datasource:
     url: jdbc:sqlite:../request-assistant-application/data/request-assistant.db
     driver-class-name: org.sqlite.JDBC
-
   flyway:
     enabled: true
+  
 
 mail.folder:
   root: Pa.Voci@almaviva.it
