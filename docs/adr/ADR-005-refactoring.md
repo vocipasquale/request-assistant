@@ -20,6 +20,6 @@ D'ora in avanti il progetto sarà strutturato nel seguente modo:
 - **request-assistant**: modulo Maven principale (parent)
 - **request-assistant-application**: modulo Maven che contiene la business logic dell'applicazione (paradigma esagonale)
 - **request-assistant-batch**: modulo Maven relativo al processo batch (playground) orchestratore
-- **request-assistant-dashboard**: modulo Maven relativo alla dashboard grafica (web? Swing? ... ancora non so...)
+- **request-assistant-dashboard**: modulo Maven relativo alla dashboard grafica (JavaFX)
 - **request-assistant-common**: modulo Maven che contiene i componenti (classi java) comuni tra i vari moduli
 - **request-assistant-runner**: modulo Maven dedicato al packaging e all'avvio dell'applicazione 

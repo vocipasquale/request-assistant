@@ -9,7 +9,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.task.TaskExecutor;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,17 +21,14 @@ import static org.mockito.Mockito.when;
 class PlaygroundProcessTest {
 
     @Mock
-    private TaskExecutor taskExecutor;
-
-    @Mock
     private BatchPort batchPort;
 
     @Test
-    void run_doesNothingWhenNoMessages() throws Exception {
-        PlaygroundProcess process = new PlaygroundProcess(taskExecutor, batchPort);
+    void run_doesNothingWhenNoMessages() {
+        PlaygroundProcess process = new PlaygroundProcess(batchPort);
         when(batchPort.getMessagesToProcess()).thenReturn(List.of());
 
-        process.run();
+        process.runOnce();
 
         InOrder inOrder = inOrder(batchPort);
         inOrder.verify(batchPort).getMessagesToProcess();
@@ -41,7 +37,7 @@ class PlaygroundProcessTest {
 
     @Test
     void run_invokesAllBatchPortMethodsForEachMessage() throws Exception {
-        PlaygroundProcess process = new PlaygroundProcess(taskExecutor, batchPort);
+        PlaygroundProcess process = new PlaygroundProcess(batchPort);
 
         Message firstMessage = buildMessage("entry-1");
         Message secondMessage = buildMessage("entry-2");
@@ -56,17 +52,19 @@ class PlaygroundProcessTest {
         when(batchPort.generateProposal(firstMessage, firstRequest)).thenReturn(firstOptions);
         when(batchPort.generateProposal(secondMessage, secondRequest)).thenReturn(secondOptions);
 
-        process.run();
+        process.runOnce();
 
         InOrder inOrder = inOrder(batchPort);
         inOrder.verify(batchPort).getMessagesToProcess();
 
         inOrder.verify(batchPort).searchRequestForMessage(firstMessage);
+        inOrder.verify(batchPort).persistMessage(firstMessage);
         inOrder.verify(batchPort).generateProposal(firstMessage, firstRequest);
         inOrder.verify(batchPort).generateDecision(firstMessage, firstRequest, firstOptions);
         inOrder.verify(batchPort).moveMessageInProgress(firstMessage);
 
         inOrder.verify(batchPort).searchRequestForMessage(secondMessage);
+        inOrder.verify(batchPort).persistMessage(secondMessage);
         inOrder.verify(batchPort).generateProposal(secondMessage, secondRequest);
         inOrder.verify(batchPort).generateDecision(secondMessage, secondRequest, secondOptions);
         inOrder.verify(batchPort).moveMessageInProgress(secondMessage);

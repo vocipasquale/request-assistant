@@ -4,8 +4,6 @@ import it.requestassistant.application.port.in.BatchPort;
 import it.requestassistant.domain.model.DecisionOption;
 import it.requestassistant.domain.model.Message;
 import it.requestassistant.domain.model.Request;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,21 +12,17 @@ import java.util.List;
 import java.util.Objects;
 
 @Component
-public class PlaygroundProcess implements CommandLineRunner {
+public class PlaygroundProcess {
     public Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private final TaskExecutor taskExecutor;
     private final BatchPort batchPort;
 
-    public PlaygroundProcess(TaskExecutor taskExecutor, BatchPort batchPort) {
-        this.taskExecutor = taskExecutor;
+    public PlaygroundProcess(BatchPort batchPort) {
         this.batchPort = batchPort;
     }
 
 
-
-    @Override
-    public void run(String... args) throws Exception {
+    public void runOnce() {
         logger.info("=================================");
         logger.info(" Request Assistant - Playground");
         logger.info("=================================");
@@ -61,7 +55,11 @@ public class PlaygroundProcess implements CommandLineRunner {
             batchPort.generateDecision(message, request, options);
 
             //faccio spostare la mail relativa al message corrente in modo che non venga analizzata ancora
-            batchPort.moveMessageInProgress(message);
+            try {
+                batchPort.moveMessageInProgress(message);
+            } catch (Exception e) {
+                logger.error("Errore spostamento messaggio {}", message.entryId(), e);
+            }
         }
     }
 }

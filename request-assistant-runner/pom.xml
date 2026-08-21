@@ -19,6 +19,8 @@
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
+        <javafx.version>21</javafx.version>
+        <native.lib.dir>${project.basedir}/lib</native.lib.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -26,6 +28,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
         </dependency>
 
         <dependency>
@@ -71,15 +79,29 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <mainClass>it.requestassistant.RequestAssistantApplication</mainClass>
                     <additionalClasspathElements>
                         <additionalClasspathElement>
-                            ${project.basedir}/lib
+                            ${native.lib.dir}
                         </additionalClasspathElement>
                     </additionalClasspathElements>
                     <jvmArguments>
-                        -Djava.library.path=${project.basedir}/lib
+                        -Djava.library.path=${native.lib.dir}
                     </jvmArguments>
                     <!-- -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005 -->
+                </configuration>
+            </plugin>
+
+            <!-- Plugin per eseguire l'applicazione JavaFX -->
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <mainClass>it.requestassistant.RequestAssistantApplication</mainClass>
+                    <options>
+                        <option>-Djava.library.path=${native.lib.dir}</option>
+                    </options>
                 </configuration>
             </plugin>
 

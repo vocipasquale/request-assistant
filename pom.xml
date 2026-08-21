@@ -32,12 +32,17 @@
         <spring.boot.version>3.3.0</spring.boot.version>
     </properties>
 
-    <!-- Repository locale al progetto: consente di usare jacob.jar
-         senza installarlo manualmente su ogni macchina -->
     <repositories>
         <repository>
-            <id>project-local</id>
+            <id>project-libs-repo</id>
+            <name>Project Local Libraries</name>
             <url>file://${maven.multiModuleProjectDirectory}/libs-repo</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
     </repositories>
 

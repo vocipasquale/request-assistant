@@ -1,12 +1,39 @@
 package it.requestassistant;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import javafx.application.Application;
+import javafx.stage.Stage;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.ConfigurableApplicationContext;
 
-@SpringBootApplication
-public class RequestAssistantApplication {
+public class RequestAssistantApplication extends Application {
 
-    public static void main(String[] args) {
-        SpringApplication.run(RequestAssistantApplication.class, args);
+
+    private ConfigurableApplicationContext context;
+
+    public static void main(String[] args){
+        launch(args);
+    }
+
+    @Override
+    public void init() {
+
+        context = new SpringApplicationBuilder(
+                RequestAssistantSpringConfiguration.class
+        ).run();
+    }
+
+    @Override
+    public void start(Stage stage) {
+
+        stage.setTitle("Request Assistant");
+        stage.setWidth(800);
+        stage.setHeight(600);
+
+        stage.show();
+    }
+
+    @Override
+    public void stop() {
+        context.close();
     }
 }
