@@ -1,5 +1,0 @@
-package it.requestassistant.application.port.out;
-
-public interface PersistenceDao {
-
-}
