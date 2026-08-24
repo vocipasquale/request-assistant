@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="it.requestassistant.dashboard.view.DashboardShellController">
+    <top>
+        <VBox spacing="8.0">
+            <padding>
+                <Insets top="12.0" right="12.0" bottom="8.0" left="12.0" />
+            </padding>
+            <Label text="Request Assistant" style="-fx-font-size: 20px; -fx-font-weight: bold;" />
+            <MenuBar>
+                <menus>
+                    <Menu text="In progress" >
+                        <items>
+                            <MenuItem text="In progress" onAction="#onMenuInProgress" />
+                        </items>
+                    </Menu>
+                    <Menu text="Batch">
+                        <items>
+                            <MenuItem text="Batch" onAction="#onMenuBatch" />
+                        </items>
+                    </Menu>
+                    <Menu text="Archive">
+                        <items>
+                            <MenuItem text="Archive" onAction="#onMenuArchive" />
+                        </items>
+                    </Menu>
+                </menus>
+            </MenuBar>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="12.0">
+            <padding>
+                <Insets top="12.0" right="12.0" bottom="12.0" left="12.0" />
+            </padding>
+
+            <Label fx:id="currentSectionLabel" text="In progress" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+
+            <StackPane>
+                <VBox fx:id="inProgressPane" spacing="12.0" visible="false" managed="false">
+                    <fx:include source="in-progress-pane.fxml" />
+                </VBox>
+
+                <VBox fx:id="batchPane" spacing="12.0">
+                    <fx:include source="batch-pane.fxml" />
+                </VBox>
+
+                <VBox fx:id="archivePane" spacing="12.0" visible="false" managed="false">
+                    <fx:include source="archive-pane.fxml" />
+                </VBox>
+            </StackPane>
+        </VBox>
+    </center>
+</BorderPane>
+

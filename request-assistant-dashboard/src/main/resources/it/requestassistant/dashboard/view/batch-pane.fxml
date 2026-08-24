@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="it.requestassistant.dashboard.view.BatchPaneController"
+      spacing="12.0">
+    <Separator />
+    <ToggleButton fx:id="batchToggleButton" text="Avvia batch" onAction="#onToggleBatch" />
+    <Label fx:id="batchStatusLabel" text="Batch: STOPPED" />
+    <Label text="Start/stop brutale del PlaygroundProcess tramite DashboardPort." wrapText="true" />
+</VBox>
+

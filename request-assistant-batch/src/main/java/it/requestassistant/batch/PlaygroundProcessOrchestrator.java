@@ -1,5 +1,6 @@
 package it.requestassistant.batch;
 
+import it.requestassistant.application.port.out.PlaygroundProcessControlPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
-public class PlaygroundProcessOrchestrator {
+public class PlaygroundProcessOrchestrator implements PlaygroundProcessControlPort {
 
     private static final long DEFAULT_POLL_INTERVAL_MS = 5000L;
 
@@ -29,10 +30,11 @@ public class PlaygroundProcessOrchestrator {
         this.pollIntervalMs = pollIntervalMs;
     }
 
-    public boolean start() {
+    @Override
+    public void start() {
         if (!running.compareAndSet(false, true)) {
             logger.info("PlaygroundProcess già in esecuzione");
-            return false;
+            return;
         }
 
         logger.info("Avvio PlaygroundProcessOrchestrator");
@@ -52,17 +54,17 @@ public class PlaygroundProcessOrchestrator {
             logger.info("PlaygroundProcessOrchestrator arrestato");
         });
 
-        return true;
     }
 
-    public boolean stop() {
+    @Override
+    public void stop() {
         if (!running.compareAndSet(true, false)) {
             logger.info("PlaygroundProcess non in esecuzione");
-            return false;
+            return;
         }
-        return true;
     }
 
+    @Override
     public boolean isRunning() {
         return running.get();
     }
