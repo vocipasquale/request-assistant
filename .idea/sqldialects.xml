@@ -2,5 +2,6 @@
 <project version="4">
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/request-assistant-application/src/main/resources/db/migration/V1__initial_schema.sql" dialect="SQLite" />
+    <file url="file://$PROJECT_DIR$/request-assistant-application/src/main/resources/db/migration/V2__alter_table.sql" dialect="SQLite" />
   </component>
 </project>

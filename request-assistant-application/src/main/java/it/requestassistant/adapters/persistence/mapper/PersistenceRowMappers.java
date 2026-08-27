@@ -61,7 +61,9 @@ public final class PersistenceRowMappers {
             rs.getLong("id"),
             PersistenceConverters.toLocalDateTime(rs.getString("created_at")),
             rs.getString("type"),
-            rs.getString("target")
+            rs.getString("target"),
+            rs.getLong("message_id"),
+            rs.getLong("request_id")
     );
 
     public static final RowMapper<DecisionOptionRow> DECISION_OPTION = (rs, n) -> new DecisionOptionRow(

@@ -19,6 +19,8 @@ public class PlaygroundProcessOrchestrator implements PlaygroundProcessControlPo
     private final TaskExecutor taskExecutor;
     private final long pollIntervalMs;
     private final AtomicBoolean running = new AtomicBoolean(false);
+    private final AtomicBoolean stopRequsted = new AtomicBoolean(false);
+
 
     public PlaygroundProcessOrchestrator(
             PlaygroundProcess playgroundProcess,
@@ -39,21 +41,25 @@ public class PlaygroundProcessOrchestrator implements PlaygroundProcessControlPo
 
         logger.info("Avvio PlaygroundProcessOrchestrator");
         taskExecutor.execute(() -> {
-            while (running.get()) {
+            while (running.get() && !stopRequsted.get()) {
                 try {
                     playgroundProcess.runOnce();
                     Thread.sleep(pollIntervalMs);
                 } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    running.set(false);
                     logger.warn("PlaygroundProcess interrotto");
-                } catch (Exception e) {
+                    running.set(false);
+                    Thread.currentThread().interrupt();
+                } catch (Throwable e) {
                     logger.error("Errore durante l'esecuzione del PlaygroundProcess", e);
+                    running.set(false);
+                    Thread.currentThread().interrupt();
                 }
             }
-            logger.info("PlaygroundProcessOrchestrator arrestato");
-        });
 
+            if (stopRequsted.compareAndSet(true, false)) {
+                logger.info("PlaygroundProcessOrchestrator arrestato");
+            }
+        });
     }
 
     @Override
@@ -61,6 +67,10 @@ public class PlaygroundProcessOrchestrator implements PlaygroundProcessControlPo
         if (!running.compareAndSet(true, false)) {
             logger.info("PlaygroundProcess non in esecuzione");
             return;
+        }
+
+        if (stopRequsted.compareAndSet(false, true)) {
+            logger.info("Richiesto STOP PlaygroundProcess!");
         }
     }
 

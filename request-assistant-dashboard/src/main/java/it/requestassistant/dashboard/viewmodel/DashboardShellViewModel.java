@@ -1,6 +1,7 @@
 package it.requestassistant.dashboard.viewmodel;
 
 import it.requestassistant.application.port.in.DashboardPort;
+import it.requestassistant.domain.model.PendingDecision;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import javafx.beans.property.BooleanProperty;
@@ -13,13 +14,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class DashboardShellViewModel {
 
     public Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final DashboardPort dashboardPort;
-    private final ObjectProperty<DashboardSection> selectedSection = new SimpleObjectProperty<>(DashboardSection.IN_PROGRESS); //default: all'avvio mostra panel "In progress"
+    private final ObjectProperty<DashboardSection> selectedSection = new SimpleObjectProperty<>(DashboardSection.IN_PROGRESS);
     private final BooleanProperty batchRunning = new SimpleBooleanProperty(false);
     private final StringProperty batchStatusText = new SimpleStringProperty("Batch: STOPPED");
     private final StringProperty batchToggleText = new SimpleStringProperty("Avvia batch");
@@ -35,13 +38,16 @@ public class DashboardShellViewModel {
 
     @PreDestroy
     void shutdown() {
+        logger.debug("#########################  shutdown");
         dashboardPort.stopPlaygroundProcess();
     }
 
+
     public void selectSection(DashboardSection section) {
-        logger.info("Selezionata sezione: " + section);
+        logger.debug("Selezionata sezione: " + section);
         selectedSection.set(section);
     }
+
 
     public void toggleBatch() {
         if (batchRunning.get()) {
@@ -58,6 +64,23 @@ public class DashboardShellViewModel {
         batchStatusText.set(running ? "Batch: RUNNING" : "Batch: STOPPED");
         batchToggleText.set(running ? "Stop batch" : "Avvia batch");
     }
+
+    public List<PendingDecision> getMessagePendingDecisions() {
+        return dashboardPort.getMessagePendingDecisions();
+    }
+
+    public void deletePendingDecision(long id) {
+        dashboardPort.deletePendingDecision(id);
+    }
+
+    public void deleteDecisionOption(long id) {
+        dashboardPort.deleteDecisionOption(id);
+    }
+
+    public void acceptPendingDecision(long id) {
+        dashboardPort.acceptPendingDecision(id);
+    }
+
 
     public ObjectProperty<DashboardSection> selectedSectionProperty() {
         return selectedSection;

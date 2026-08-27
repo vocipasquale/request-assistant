@@ -1,9 +1,7 @@
 package it.requestassistant.batch;
 
 import it.requestassistant.application.port.in.BatchPort;
-import it.requestassistant.domain.model.DecisionOption;
 import it.requestassistant.domain.model.Message;
-import it.requestassistant.domain.model.Request;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +20,7 @@ public class PlaygroundProcess {
     }
 
 
-    public void runOnce() {
+    public void runOnce() throws Exception {
         logger.info("=================================");
         logger.info(" Request Assistant - Playground");
         logger.info("=================================");
@@ -35,31 +33,22 @@ public class PlaygroundProcess {
             logger.info("Nessuna email");
             return;
         }
-
         logger.info("Trovate " + messages.size() + " mail!");
 
-        //ricerca di una probabile pratica in cui inserire ogni messaggio
         for (Message message : messages) {
-            logger.debug("mailID: " + message.entryId());
+            logger.debug("Process message mailID: " + message.entryId());
 
-            //ricerco delle request inerenti al message
-            Request request = batchPort.searchRequestForMessage(message);
-
-            //persisto sul DB il message: da fare dopo batchPort.searchRequestForMessage(message);
-            batchPort.persistMessage(message);
-
-            //sottopongo il risultato della ricerca all'AI
-            List<DecisionOption> options = batchPort.generateProposal(message, request);
-
-            //richiedo la creazione della "decisione" che dovrà prendere l'operatore
-            batchPort.generateDecision(message, request, options);
-
-            //faccio spostare la mail relativa al message corrente in modo che non venga analizzata ancora
-            try {
-                batchPort.moveMessageInProgress(message);
-            } catch (Exception e) {
-                logger.error("Errore spostamento messaggio {}", message.entryId(), e);
+            if (batchPort.processMessage(message)) {//processamento messaggio
+                logger.debug("Message processed successfully mailID: " + message.entryId());
+                moveMessageInProgress(message);
+            } else {
+                logger.debug("Message processing failed mailID: " + message.entryId());
             }
         }
+    }
+
+    private void moveMessageInProgress(Message message) throws Exception {
+            logger.debug("Move mail in to InProgress, mailID: " + message.entryId());
+            batchPort.moveMessageInProgress(message);
     }
 }

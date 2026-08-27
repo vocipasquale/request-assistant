@@ -8,6 +8,5 @@
       fx:controller="it.requestassistant.dashboard.view.ArchivePaneController"
       spacing="12.0">
     <Separator />
-    <Label text="Template minimo: qui verranno mostrate le ricerche delle richieste evase." wrapText="true" />
+    <Label text="Template minimo: qui verranno mostrate le ricerche delle richieste evase." wrapText="true" styleClass="panel-label" />
 </VBox>
-

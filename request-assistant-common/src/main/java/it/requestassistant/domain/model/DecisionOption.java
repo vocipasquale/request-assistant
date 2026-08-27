@@ -1,8 +1,7 @@
 package it.requestassistant.domain.model;
 
-import java.util.List;
-
 public record DecisionOption(
+        long id,
         String action,
         double confidence,
         String reasons

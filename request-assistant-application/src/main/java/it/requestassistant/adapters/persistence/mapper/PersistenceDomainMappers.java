@@ -12,6 +12,8 @@ import it.requestassistant.domain.model.PendingDecision;
 import it.requestassistant.domain.model.Request;
 import it.requestassistant.domain.model.RequestItem;
 import it.requestassistant.domain.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,6 +21,8 @@ import java.util.Locale;
 import java.util.Objects;
 
 public final class PersistenceDomainMappers {
+
+    public static Logger logger = LoggerFactory.getLogger(PersistenceDomainMappers.class);
 
     private PersistenceDomainMappers() {
     }
@@ -99,23 +103,28 @@ public final class PersistenceDomainMappers {
 
     public static DecisionOption toDomain(DecisionOptionRow row) {
         return new DecisionOption(
+                row.id(),
                 row.action(),
                 row.confidence() == null ? 0.0d : row.confidence(),
                 row.reasons()
         );
     }
 
-    public static PendingDecision toDomain(PendingDecisionRow row, List<DecisionOptionRow> optionRows) {
+    public static PendingDecision toDomain(PendingDecisionRow row, List<DecisionOptionRow> optionRows,
+                                           MessageRow messageRow, RequestRow requestRow) {
         List<DecisionOption> options = optionRows == null
                 ? Collections.emptyList()
                 : optionRows.stream().map(PersistenceDomainMappers::toDomain).toList();
+        logger.debug("Mapping PendingDecisionRow to PendingDecision with {} options", options.size());
 
         return new PendingDecision(
                 row.id(),
                 row.createdAt(),
                 parseEnum(PendingDecision.Type.class, row.type()),
                 row.target(),
-                options
+                options,
+                null,
+                null
         );
     }
 
@@ -131,7 +140,7 @@ public final class PersistenceDomainMappers {
     public static MessageRow toRow(Message message) {
         return new MessageRow(
                 0L,    // id generato dal DB
-                null,  // requestId da settare se necessario
+                0L,  // requestId da settare se necessario
                 message.subject(),
                 message.senderAddress(),
                 message.receivedAt(),
@@ -191,10 +200,10 @@ public final class PersistenceDomainMappers {
         );
     }
 
-    public static DecisionOptionRow toRow(DecisionOption option) {
+    public static DecisionOptionRow toRow(DecisionOption option, long pendingDecisionId) {
         return new DecisionOptionRow(
-                0L,    // id generato dal DB
-                null,  // pendingDecisionId da settare se necessario
+                0L,    // id generato dal DB in INSERT
+                pendingDecisionId,
                 option.action(),
                 option.confidence(),
                 option.reasons()
@@ -202,11 +211,14 @@ public final class PersistenceDomainMappers {
     }
 
     public static PendingDecisionRow toRow(PendingDecision pendingDecision) {
+        //usato SOLO dalla INSERT
         return new PendingDecisionRow(
-                pendingDecision.id(),
-                pendingDecision.createdAt(),
-                pendingDecision.type() != null ? pendingDecision.type().name() : null,
-                pendingDecision.target()
+                0L, // id generato dal DB
+                pendingDecision.getCreatedAt(),
+                pendingDecision.getType() != null ? pendingDecision.getType().name() : null,
+                pendingDecision.getTarget(),
+                0L,
+                Objects.isNull(pendingDecision.getRequest())?0:pendingDecision.getRequest().getId()
         );
     }
 }
