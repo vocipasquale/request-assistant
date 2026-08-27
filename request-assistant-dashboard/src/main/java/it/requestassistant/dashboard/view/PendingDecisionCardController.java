@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -26,12 +27,21 @@ public class PendingDecisionCardController {
 
     @FXML private Label createdAtLabel;
     @FXML private Label targetLabel;
+    @FXML private Label subjectLabel;
+    @FXML private Label senderLabel;
+    @FXML private Label recivedAtLabel;
+    @FXML private Label toLabel;
+    @FXML private Label cCLabel;
+    @FXML private Label topicLabel;
+    @FXML private Label categoryLabel;
+    @FXML private Label attachmentLabel;
     @FXML private Button deleteCardButton;
+    @FXML private Button viewMesssageButton;
     @FXML private TableView<DecisionOption> optionsTable;
     @FXML private TableColumn<DecisionOption, String> actionColumn;
     @FXML private TableColumn<DecisionOption, String> confidenceColumn;
     @FXML private TableColumn<DecisionOption, String> reasonColumn;
-    @FXML private TableColumn<DecisionOption, Void> deleteOptionColumn;
+    @FXML private TableColumn<DecisionOption, Void> acceptOptionColumn;
 
     private PendingDecision pendingDecision;
     private Runnable onRefresh;
@@ -49,14 +59,14 @@ public class PendingDecisionCardController {
         reasonColumn.setCellValueFactory(
                 data -> new SimpleStringProperty(data.getValue().reasons()));
 
-        // Colonna con pulsante "Elimina" per ogni DecisionOption
-        deleteOptionColumn.setCellFactory(col -> new TableCell<>() {
+        // Colonna con pulsante "Accetta" per ogni DecisionOption
+        acceptOptionColumn.setCellFactory(col -> new TableCell<>() {
             private final Button btn = new Button("Accetta");
             {
                 btn.getStyleClass().add("accept-button");
                 btn.setOnAction(e -> {
                     DecisionOption option = getTableView().getItems().get(getIndex());
-                    viewModel.deleteDecisionOption(option.id());
+                   // viewModel.acceptOptionColumn(option.id());
                     if (onRefresh != null) onRefresh.run();
                 });
             }
@@ -69,6 +79,7 @@ public class PendingDecisionCardController {
 
         // Placeholder quando la tabella è vuota
         optionsTable.setPlaceholder(new Label("Nessuna opzione disponibile."));
+
     }
 
     /**
@@ -85,12 +96,23 @@ public class PendingDecisionCardController {
                 decision.getCreatedAt() != null ? decision.getCreatedAt().format(DATE_FMT) : "—");
         targetLabel.setText(
                 decision.getTarget() != null ? decision.getTarget() : "—");
+
+        if (!Objects.isNull(decision.getMessage())) {
+            subjectLabel.setText(decision.getMessage().subject() != null ? decision.getMessage().subject() : "—");
+            senderLabel.setText(decision.getMessage().senderAddress() != null ? decision.getMessage().senderAddress() : "—");
+            recivedAtLabel.setText(decision.getMessage().receivedAt() != null ? decision.getMessage().receivedAt().format(DATE_FMT) : "—");
+            toLabel.setText(decision.getMessage().to() != null ? decision.getMessage().to() : "—");
+            cCLabel.setText(decision.getMessage().cc() != null ? decision.getMessage().cc() : "—");
+            topicLabel.setText(decision.getMessage().conversationTopic() != null ? decision.getMessage().conversationId() : "—");
+            categoryLabel.setText(decision.getMessage().category() != null ? decision.getMessage().category() : "—");
+            attachmentLabel.setText(decision.getMessage().hasAttachment() != null && decision.getMessage().hasAttachment() ? "Si" : "No");
+        }
         optionsTable.setItems(FXCollections.observableArrayList(decision.getOptions()));
     }
 
     @FXML
     void onAccept() {
-        viewModel.acceptPendingDecision(pendingDecision.getId());
+        viewModel.acceptDecisionOption(pendingDecision.getId());
         if (onRefresh != null) onRefresh.run();
     }
 
@@ -98,6 +120,11 @@ public class PendingDecisionCardController {
     void onDelete() {
         viewModel.deletePendingDecision(pendingDecision.getId());
         if (onRefresh != null) onRefresh.run();
+    }
+
+    @FXML
+    void onViewMessage() {
+        System.out.println("Visualizza messaggio associato alla decisione: " + pendingDecision.getMessage());
     }
 }
 

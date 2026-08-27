@@ -73,12 +73,13 @@ public final class PersistenceDomainMappers {
         return item;
     }
 
-    public static Request toDomain(
-            RequestRow requestRow,
-            UserAccountRow userRow,
-            List<RequestItemRow> requestItemRows,
+    public static Request toDomain(RequestRow requestRow, UserAccountRow userRow, List<RequestItemRow> requestItemRows,
             List<MessageRow> messageRows
     ) {
+        if(Objects.isNull(requestRow)){
+            return null;
+        }
+
         Request request = new Request();
         request.setId(requestRow.id());
         request.setCreateAt(requestRow.createAt());
@@ -111,11 +112,23 @@ public final class PersistenceDomainMappers {
     }
 
     public static PendingDecision toDomain(PendingDecisionRow row, List<DecisionOptionRow> optionRows,
-                                           MessageRow messageRow, RequestRow requestRow) {
+                                           MessageRow messageRow, RequestRow requestRow, List<RequestItemRow> requestItemRowList,
+                                           UserAccountRow userAccountRow, List<MessageRow> messagesRequestRowList) {
+
         List<DecisionOption> options = optionRows == null
                 ? Collections.emptyList()
                 : optionRows.stream().map(PersistenceDomainMappers::toDomain).toList();
         logger.debug("Mapping PendingDecisionRow to PendingDecision with {} options", options.size());
+
+        Message message = Objects.isNull(messageRow)
+            ? null
+            : PersistenceDomainMappers.toDomain(messageRow);
+        logger.debug("Mapping message id {} for  PendingDecision id {}", message.entryId(), row.id());
+
+        Request request = Objects.isNull(PersistenceDomainMappers.toDomain(requestRow, userAccountRow, requestItemRowList, messagesRequestRowList))
+                ? null
+                : PersistenceDomainMappers.toDomain(requestRow, userAccountRow, requestItemRowList, messagesRequestRowList);
+        logger.debug("Mapping request for  PendingDecision id {}", row.id());
 
         return new PendingDecision(
                 row.id(),
@@ -123,8 +136,8 @@ public final class PersistenceDomainMappers {
                 parseEnum(PendingDecision.Type.class, row.type()),
                 row.target(),
                 options,
-                null,
-                null
+                message,
+                request
         );
     }
 

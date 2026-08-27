@@ -220,6 +220,29 @@
 }
 
 
+
+.simple-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #000000;
+    -fx-font-size: 12px;
+    -fx-padding: 5px 14px;
+    -fx-background-radius: 4px;
+    -fx-border-color: #000000;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-cursor: hand;
+}
+
+.simple-button:hover {
+    -fx-background-color: #F0F0F0;
+}
+
+.simple-button:pressed {
+    -fx-background-color: #D4D4D4;
+}
+
+
+
 /* ================================================================
    Pulsanti Accetta / Elimina (card)
    ================================================================ */

@@ -47,13 +47,9 @@ public class DashboardPortadapter implements DashboardPort {
 		persistenceDaoPort.deletePendingDecision(id);
 	}
 
-	@Override
-	public void deleteDecisionOption(long id) {
-		persistenceDaoPort.deleteDecisionOption(id);
-	}
 
 	@Override
-	public void acceptPendingDecision(long id) {
+	public void acceptDecisionOption(long id) {
 		// TODO: implementare la logica di applicazione della decisione in base al tipo.
 		// Per ora elimina semplicemente la PendingDecision (e le option in cascade via FK).
 		persistenceDaoPort.deletePendingDecision(id);

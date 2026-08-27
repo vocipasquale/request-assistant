@@ -73,12 +73,8 @@ public class DashboardShellViewModel {
         dashboardPort.deletePendingDecision(id);
     }
 
-    public void deleteDecisionOption(long id) {
-        dashboardPort.deleteDecisionOption(id);
-    }
-
-    public void acceptPendingDecision(long id) {
-        dashboardPort.acceptPendingDecision(id);
+    public void acceptDecisionOption(long id) {
+        dashboardPort.acceptDecisionOption(id);
     }
 
 

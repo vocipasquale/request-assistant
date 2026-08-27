@@ -10,6 +10,5 @@ public interface DashboardPort {
 	boolean isPlaygroundProcessRunning();
 	List<PendingDecision> getMessagePendingDecisions();
 	void deletePendingDecision(long id);
-	void deleteDecisionOption(long id);
-	void acceptPendingDecision(long id);
+	void acceptDecisionOption(long id);
 }

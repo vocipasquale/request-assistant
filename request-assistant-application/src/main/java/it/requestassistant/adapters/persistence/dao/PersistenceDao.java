@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Component
 public class PersistenceDao implements PersistenceDaoPort {
@@ -139,40 +140,72 @@ public class PersistenceDao implements PersistenceDaoPort {
     @Override
     public List<PendingDecision> findPendingDecisionsByType(PendingDecision.Type type) {
         List<PendingDecision> result = new ArrayList<>();
+        List<PendingDecisionRow> pendingDecisionsRow = null;
+
 
         String queryPd = """
                 SELECT pd.*
-                FROM pending_decision pd JOIN decision_option do ON pd.id = do.pending_decision_id
+                FROM pending_decision pd
                 WHERE pd.type like 'MESSAGE_CLASSIFICATION'
                 ORDER BY created_at DESC
                 """;
-        String queryDo = """
-                SELECT do.* FROM decision_option do
-                WHERE do.pending_decision_id = ?
-                """;
-        String queryMs = """
-                SELECT m.* FROM message m
-                WHERE m.id = ?
-                """;
 
-
-        List<PendingDecisionRow> pendingDecisionsRow = jdbcTemplate.query(
+        //pending decision...
+        pendingDecisionsRow = jdbcTemplate.query(
                 queryPd,
                 PersistenceRowMappers.PENDING_DECISION);
         logger.debug("Found {} pending decisions of type {}", pendingDecisionsRow.size(), type);
 
-
+        //relations...
         pendingDecisionsRow.forEach(pdRow -> {;
-            MessageRow messageRow = jdbcTemplate.queryForObject(
-                queryMs,
-                PersistenceRowMappers.MESSAGE,
-                    pdRow.messageId());
+            MessageRow messageRow = null;
+            RequestRow requestRow = null;
+            List<RequestItemRow> requestItemRowList = null;
+            List<MessageRow> messagesRequestRowList =null;
+            UserAccountRow userAccountRow = null;
 
-            List<DecisionOptionRow> decisionOptionRows =
-                    jdbcTemplate.query(queryDo, PersistenceRowMappers.DECISION_OPTION, pdRow.id());
+            //message of pending decision...
+            Optional<MessageRow> messageRowOptional = findMessageById(pdRow.messageId());
+            if(messageRowOptional.isPresent()) {
+                messageRow = messageRowOptional.get();
+                logger.debug("Found message id {} of pending decision id {}", messageRow.id(), pdRow.id());
+            }else {
+                logger.debug("Pending decision id {} has no user. ", pdRow.id());
+            }
 
-              result.add(PersistenceDomainMappers
-                      .toDomain(pdRow, decisionOptionRows, messageRow, null));
+            //request...
+            Optional<RequestRow> requestRowOptional = findRequestById(pdRow.requestId());
+            if(requestRowOptional.isPresent()){
+               requestRow = requestRowOptional.get();
+               logger.debug("Found request id {} of pending decision id {}", requestRow.id(), pdRow.id());
+
+                //request item..
+                requestItemRowList = findRequestItemByRequestId(requestRow.id());
+                logger.debug("Found {} request items of request id {}", requestItemRowList.size(), requestRow.id());
+
+                //messages of request...
+                messagesRequestRowList = findMessagesByRequestId(requestRow.id());
+                logger.debug("Found {} messages of request id {}", messagesRequestRowList.size(), requestRow.id());
+
+                //user..
+                Optional<UserAccountRow> userAccountRowOptional = findUserAccountById(requestRow.userId());
+                if (userAccountRowOptional.isPresent()){
+                    userAccountRow = userAccountRowOptional.get();
+                    logger.debug("Found user id {} of request id {}", userAccountRow.id(), requestRow.id());
+                }else{
+                    logger.debug("Request id {} has no user. ", requestRow.id());
+                }
+
+            }else {
+                logger.debug("Pending decision id {} has no request. ", pdRow.id());
+            }
+
+            //decision options...
+            List<DecisionOptionRow> decisionOptionRows = findDecisionOptionsByPendingDecisionId(pdRow.id());
+            logger.debug("Found {} decisions options for pending decision id {}", decisionOptionRows.size(), pdRow.id());
+
+            result.add(PersistenceDomainMappers
+                      .toDomain(pdRow, decisionOptionRows, messageRow, requestRow, requestItemRowList, userAccountRow, messagesRequestRowList));
         });
 
         return result;
@@ -312,7 +345,6 @@ public class PersistenceDao implements PersistenceDaoPort {
         );
     }
 
-
     private long insertMessage(Message message) {
         String query = """
                 INSERT INTO message (request_id, subject, sender_address, received_at, to_address, cc_address, body_text, entry_id, conversation_id, conversation_topic, importance, has_attachment, category)
@@ -360,4 +392,59 @@ public class PersistenceDao implements PersistenceDaoPort {
                 userAccountRow.utenza()
         );
     }
+
+    private List<DecisionOptionRow> findDecisionOptionsByPendingDecisionId(long pendingDecisionId){
+        String queryDo = """
+                SELECT do.* FROM decision_option do
+                WHERE do.pending_decision_id = ?
+                """;
+        return jdbcTemplate.query(queryDo, PersistenceRowMappers.DECISION_OPTION, pendingDecisionId);
+    }
+
+    private Optional<MessageRow> findMessageById(long id){
+        String queryMs = """
+                SELECT m.* FROM message m
+                WHERE m.id = ?
+                """;
+        return jdbcTemplate.query(queryMs, PersistenceRowMappers.MESSAGE, id)
+                .stream()
+                .findFirst();
+    }
+
+    private Optional<RequestRow> findRequestById(long id){
+        String queryRq = """
+                SELECT r.* FROM request r
+                WHERE r.id = ?
+                """;
+        return jdbcTemplate.query(queryRq, PersistenceRowMappers.REQUEST, id)
+                .stream()
+                .findFirst();
+    }
+
+    private List<RequestItemRow> findRequestItemByRequestId(long id){
+        String queryRqIt = """
+                SELECT ri.* FROM request_item ri
+                WHERE request_id = ?
+                """;
+        return jdbcTemplate.query(queryRqIt, PersistenceRowMappers.REQUEST_ITEM, id);
+    }
+
+    private Optional<UserAccountRow> findUserAccountById(long id){
+        String queryUser = """
+                SELECT u.* FROM user_account u
+                WHERE id = ?
+                """;
+        return jdbcTemplate.query(queryUser, PersistenceRowMappers.USER_ACCOUNT, id)
+                .stream()
+                .findFirst();
+    }
+
+    private List<MessageRow> findMessagesByRequestId(long id){
+        String queryMsRq = """
+                SELECT m.* FROM message m
+                WHERE m.request_id = ?
+                """;
+        return jdbcTemplate.query(queryMsRq, PersistenceRowMappers.MESSAGE, id);
+    }
+
 }
