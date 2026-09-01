@@ -1,6 +1,8 @@
 package it.requestassistant.dashboard.viewmodel;
 
 import it.requestassistant.application.port.in.DashboardPort;
+import it.requestassistant.domain.model.DecisionOption;
+import it.requestassistant.domain.model.Message;
 import it.requestassistant.domain.model.PendingDecision;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -69,12 +71,13 @@ public class DashboardShellViewModel {
         return dashboardPort.getMessagePendingDecisions();
     }
 
-    public void deletePendingDecision(long id) {
-        dashboardPort.deletePendingDecision(id);
+    public void deletePendingDecision(PendingDecision pd) {
+        dashboardPort.deletePendingDecision(pd);
     }
 
-    public void acceptDecisionOption(long id) {
-        dashboardPort.acceptDecisionOption(id);
+    public void acceptDecisionOption(PendingDecision pendingDecision, DecisionOption decisionOption) {
+        logger.info("Azioni accettate dall'operatore.");
+        dashboardPort.acceptDecisionOption(pendingDecision, decisionOption);
     }
 
 
@@ -92,6 +95,11 @@ public class DashboardShellViewModel {
 
     public StringProperty batchToggleTextProperty() {
         return batchToggleText;
+    }
+
+    public void showMessage(Message message) {
+        logger.debug("Message display id:{}",message.entryId());
+        dashboardPort.showMessage(message);
     }
 }
 

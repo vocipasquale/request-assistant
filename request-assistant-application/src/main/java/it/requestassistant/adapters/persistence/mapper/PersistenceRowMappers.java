@@ -1,4 +1,3 @@
-
 package it.requestassistant.adapters.persistence.mapper;
 
 import it.requestassistant.adapters.persistence.row.*;
@@ -69,8 +68,18 @@ public final class PersistenceRowMappers {
     public static final RowMapper<DecisionOptionRow> DECISION_OPTION = (rs, n) -> new DecisionOptionRow(
             rs.getLong("id"),
             PersistenceConverters.getNullableLong(rs, "pending_decision_id"),
-            rs.getString("action"),
+            rs.getLong("action_id"),
             (Double) rs.getObject("confidence"),
             rs.getString("reasons")
+    );
+
+    public static final RowMapper<ActionRow> ACTION = (rs, n) -> new ActionRow(
+            rs.getLong("id"),
+            rs.getString("title")
+    );
+
+    public static final RowMapper<ActionStepRow> ACTION_STEP = (rs, n) -> new ActionStepRow(
+            rs.getLong("action_id"),
+            rs.getString("step_description")
     );
 }

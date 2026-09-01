@@ -3,7 +3,7 @@ package it.requestassistant.adapters.persistence.row;
 public record DecisionOptionRow(
         long id,
         Long pendingDecisionId,
-        String action,
+        long actionId,
         Double confidence,
         String reasons
 ) {}

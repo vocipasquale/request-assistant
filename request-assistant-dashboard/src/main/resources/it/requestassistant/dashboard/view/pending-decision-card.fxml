@@ -12,12 +12,12 @@
 
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml"
       fx:controller="it.requestassistant.dashboard.view.PendingDecisionCardController"
-      styleClass="pending-decision-card" spacing="8.0" >
+      styleClass="pending-decision-card" spacing="8.0">
 
     <!-- Header: campi + pulsanti -->
     <HBox spacing="12.0" styleClass="card-header" alignment="CENTER_LEFT">
 
-        <!-- Campi createdAt e target -->
+        <!-- Area Pending Decision -->
         <VBox HBox.hgrow="ALWAYS" spacing="4.0">
             <HBox spacing="6.0" alignment="CENTER_LEFT">
                 <Label text="Data:" styleClass="card-field-label"/>
@@ -27,43 +27,24 @@
                 <Label text="Target:" styleClass="card-field-label"/>
                 <Label fx:id="targetLabel" text="—" styleClass="card-field-value"/>
             </HBox>
+            <!-- Spacer -->
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="deleteCardButton" text="Elimina"
+                    styleClass="delete-button"
+                    onAction="#onDelete"/>
         </VBox>
 
+        <!-- Area Message -->
         <VBox HBox.hgrow="ALWAYS" spacing="4.0">
             <HBox spacing="6.0" alignment="CENTER_LEFT">
                 <Label text="Subject:" styleClass="card-field-label"/>
                 <Label fx:id="subjectLabel" text="—" styleClass="card-field-value"/>
             </HBox>
             <HBox spacing="6.0" alignment="CENTER_LEFT">
-                <Label text="Sender:" styleClass="card-field-label"/>
-                <Label fx:id="senderLabel" text="—" styleClass="card-field-value"/>
-            </HBox>
-            <HBox spacing="6.0" alignment="CENTER_LEFT">
                 <Label text="Recived At:" styleClass="card-field-label"/>
                 <Label fx:id="recivedAtLabel" text="—" styleClass="card-field-value"/>
             </HBox>
-            <HBox spacing="6.0" alignment="CENTER_LEFT">
-                <Label text="To:" styleClass="card-field-label"/>
-                <Label fx:id="toLabel" text="—" styleClass="card-field-value"/>
-            </HBox>
-            <HBox spacing="6.0" alignment="CENTER_LEFT">
-                <Label text="Cc:" styleClass="card-field-label"/>
-                <Label fx:id="cCLabel" text="—" styleClass="card-field-value"/>
-            </HBox>
-        </VBox>
-        <VBox HBox.hgrow="ALWAYS" spacing="4.0">
-            <HBox spacing="6.0" alignment="CENTER_LEFT">
-                <Label text="Topic:" styleClass="card-field-label"/>
-                <Label fx:id="topicLabel" text="—" styleClass="card-field-value"/>
-            </HBox>
-            <HBox spacing="6.0" alignment="CENTER_LEFT">
-                <Label text="Category:" styleClass="card-field-label"/>
-                <Label fx:id="categoryLabel" text="—" styleClass="card-field-value"/>
-            </HBox>
-            <HBox spacing="6.0" alignment="CENTER_LEFT">
-                <Label text="Attachment:" styleClass="card-field-label"/>
-                <Label fx:id="attachmentLabel" text="—" styleClass="card-field-value"/>
-            </HBox>
+
             <HBox spacing="6.0" alignment="CENTER_LEFT">
                 <Button fx:id="viewMesssageButton" text="Visualizza messaggio"
                         styleClass="simple-button"
@@ -71,11 +52,40 @@
             </HBox>
         </VBox>
 
-        <!-- Spacer -->
-        <Region HBox.hgrow="ALWAYS"/>
-        <Button fx:id="deleteCardButton" text="Elimina"
-                styleClass="delete-button"
-                onAction="#onDelete"/>
+        <!-- Area Request -->
+        <HBox fx:id="hBoxRequest" spacing="6.0">
+
+            <VBox HBox.hgrow="ALWAYS" spacing="4.0">
+                <HBox spacing="6.0" alignment="CENTER_LEFT">
+                    <Label text="Created At:" styleClass="card-field-label"/>
+                    <Label fx:id="rqCreatedAtLabel" text="—" styleClass="card-field-value"/>
+                </HBox>
+                <HBox spacing="6.0" alignment="CENTER_LEFT">
+                    <Label text="Updated At:" styleClass="card-field-label"/>
+                    <Label fx:id="rqUpdatedAtLabel" text="—" styleClass="card-field-value"/>
+                </HBox>
+            </VBox>
+
+            <VBox HBox.hgrow="ALWAYS" spacing="4.0">
+                <HBox spacing="6.0" alignment="CENTER_LEFT">
+                    <Label text="Title:" styleClass="card-field-label"/>
+                    <Label fx:id="rqTitleLabel" text="—" styleClass="card-field-value"/>
+                </HBox>
+                <HBox spacing="6.0" alignment="CENTER_LEFT">
+                    <Label text="Status:" styleClass="card-field-label"/>
+                    <Label fx:id="rqStatusLabel" text="—" styleClass="card-field-value"/>
+                </HBox>
+
+                <HBox spacing="6.0" alignment="CENTER_LEFT">
+                    <Button fx:id="viewRequestButton" text="Visualizza richiesta"
+                            styleClass="simple-button"
+                            onAction="#onViewRequest"/>
+                </HBox>
+            </VBox>
+
+        </HBox>
+
+
     </HBox>
 
     <Separator styleClass="card-separator"/>
@@ -83,12 +93,12 @@
     <!-- ── Sezione opzioni ── -->
     <Label text="Opzioni:" styleClass="card-section-label"/>
 
-    <TableView fx:id="optionsTable" prefHeight="140" prefWidth="600" styleClass="options-table" >
+    <TableView fx:id="optionsTable" prefHeight="140" prefWidth="600" styleClass="options-table">
         <columns>
-            <TableColumn fx:id="actionColumn"     text="Action"     prefWidth="160"/>
+            <TableColumn fx:id="actionColumn" text="Action" prefWidth="160"/>
             <TableColumn fx:id="confidenceColumn" text="Confidence" prefWidth="100"/>
-            <TableColumn fx:id="reasonColumn"     text="Reason"     prefWidth="260"/>
-            <TableColumn fx:id="acceptOptionColumn" text=""         prefWidth="80"/>
+            <TableColumn fx:id="reasonColumn" text="Reason" prefWidth="260"/>
+            <TableColumn fx:id="acceptOptionColumn" text="" prefWidth="80"/>
         </columns>
     </TableView>
 

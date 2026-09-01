@@ -60,7 +60,7 @@ class PersistenceDaoInsertTest {
         request.setCreateAt(LocalDateTime.of(2026, 1, 10, 9, 0));
         request.setUpdateAt(LocalDateTime.of(2026, 1, 10, 9, 0));
         request.setTitle("Richiesta abilitazione VPN");
-        request.setStatus(Request.Status.IN_PROGRES);
+        request.setStatus(Request.Status.IN_PROGRESS);
         request.setNote("Nota di test");
         // Costruiamo uno User fittizio con l'id già salvato per il FK
         User fkUser = new User();

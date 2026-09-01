@@ -1,11 +1,11 @@
 package it.requestassistant.application.port.out;
 
+import it.requestassistant.domain.model.DecisionOption;
 import it.requestassistant.domain.model.Message;
 import it.requestassistant.domain.model.PendingDecision;
 import it.requestassistant.domain.model.Request;
 
-import java.util.List;
-
-public interface AiAnalyzerPort {
+public interface AiEnginePort {
     PendingDecision analyzeMessage(Message message, Request candidate);
+    void actionsPerform(PendingDecision pendingDecision, DecisionOption decisionOption) throws Exception;
 }

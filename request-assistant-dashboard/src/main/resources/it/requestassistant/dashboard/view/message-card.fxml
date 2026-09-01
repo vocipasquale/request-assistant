@@ -17,48 +17,25 @@
     <!-- Header: campi + pulsanti -->
     <HBox spacing="12.0" styleClass="card-header" alignment="CENTER_LEFT">
 
-        <!-- Campi createdAt e target -->
         <VBox HBox.hgrow="ALWAYS" spacing="4.0">
             <HBox spacing="6.0" alignment="CENTER_LEFT">
                 <Label text="Subject:" styleClass="card-field-label"/>
                 <Label fx:id="subjectLabel" text="—" styleClass="card-field-value"/>
             </HBox>
             <HBox spacing="6.0" alignment="CENTER_LEFT">
-                <Label text="Sender:" styleClass="card-field-label"/>
-                <Label fx:id="senderLabel" text="—" styleClass="card-field-value"/>
-            </HBox>
-            <HBox spacing="6.0" alignment="CENTER_LEFT">
                 <Label text="Recived At:" styleClass="card-field-label"/>
                 <Label fx:id="recivedAtLabel" text="—" styleClass="card-field-value"/>
             </HBox>
-            <HBox spacing="6.0" alignment="CENTER_LEFT">
-                <Label text="To:" styleClass="card-field-label"/>
-                <Label fx:id="toLabel" text="—" styleClass="card-field-value"/>
-            </HBox>
-            <HBox spacing="6.0" alignment="CENTER_LEFT">
-                <Label text="Cc:" styleClass="card-field-label"/>
-                <Label fx:id="cCLabel" text="—" styleClass="card-field-value"/>
-            </HBox>
-            <HBox spacing="6.0" alignment="CENTER_LEFT">
-                <Label text="Topic:" styleClass="card-field-label"/>
-                <Label fx:id="topicLabel" text="—" styleClass="card-field-value"/>
-            </HBox>
-            <HBox spacing="6.0" alignment="CENTER_LEFT">
-                <Label text="Category:" styleClass="card-field-label"/>
-                <Label fx:id="categoryLabel" text="—" styleClass="card-field-value"/>
-            </HBox>
-            <HBox spacing="6.0" alignment="CENTER_LEFT">
-                <Label text="Attachment:" styleClass="card-field-label"/>
-                <Label fx:id="attachmentLabel" text="—" styleClass="card-field-value"/>
-            </HBox>
         </VBox>
 
-        <!-- Spacer -->
         <Region HBox.hgrow="ALWAYS"/>
 
-        <Button fx:id="deleteCardButton" text="Elimina"
-                styleClass="delete-button"
-                onAction="#onDelete"/>
+        <HBox spacing="6.0" alignment="CENTER_LEFT">
+            <Button fx:id="viewMesssageButton" text="Visualizza messaggio"
+                    styleClass="simple-button"
+                    onAction="#onViewMessage"/>
+        </HBox>
+
     </HBox>
 
 

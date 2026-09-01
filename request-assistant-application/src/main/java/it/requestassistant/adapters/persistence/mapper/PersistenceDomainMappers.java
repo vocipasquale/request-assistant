@@ -6,6 +6,9 @@ import it.requestassistant.adapters.persistence.row.PendingDecisionRow;
 import it.requestassistant.adapters.persistence.row.RequestItemRow;
 import it.requestassistant.adapters.persistence.row.RequestRow;
 import it.requestassistant.adapters.persistence.row.UserAccountRow;
+import it.requestassistant.domain.model.Action;
+import it.requestassistant.adapters.persistence.row.ActionRow;
+import it.requestassistant.adapters.persistence.row.ActionStepRow;
 import it.requestassistant.domain.model.DecisionOption;
 import it.requestassistant.domain.model.Message;
 import it.requestassistant.domain.model.PendingDecision;
@@ -15,10 +18,7 @@ import it.requestassistant.domain.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 
 public final class PersistenceDomainMappers {
 
@@ -102,22 +102,36 @@ public final class PersistenceDomainMappers {
         return request;
     }
 
-    public static DecisionOption toDomain(DecisionOptionRow row) {
+    public static DecisionOption toDomain(DecisionOptionRow row, ActionRow actionRow, List<ActionStepRow> actionStepRows) {
         return new DecisionOption(
                 row.id(),
-                row.action(),
+                PersistenceDomainMappers.toDomain(actionRow, actionStepRows),
                 row.confidence() == null ? 0.0d : row.confidence(),
                 row.reasons()
         );
     }
 
+    public static Action toDaman(ActionRow row, List<String> steps){
+        return new Action(row.title(), steps);
+    }
+
+    public static String toDomain(ActionStepRow row){
+        return  row.stepDescription();
+    }
+
     public static PendingDecision toDomain(PendingDecisionRow row, List<DecisionOptionRow> optionRows,
                                            MessageRow messageRow, RequestRow requestRow, List<RequestItemRow> requestItemRowList,
-                                           UserAccountRow userAccountRow, List<MessageRow> messagesRequestRowList) {
+                                           UserAccountRow userAccountRow, List<MessageRow> messagesRequestRowList,
+                                           ActionRow actionRow, List<ActionStepRow> actionStepRows) {
 
-        List<DecisionOption> options = optionRows == null
+
+        List<DecisionOption> options = new ArrayList<>(optionRows == null
                 ? Collections.emptyList()
-                : optionRows.stream().map(PersistenceDomainMappers::toDomain).toList();
+                : optionRows.stream()
+                .map(optionRow ->
+                        PersistenceDomainMappers.toDomain(optionRow, actionRow, actionStepRows)).toList());
+
+
         logger.debug("Mapping PendingDecisionRow to PendingDecision with {} options", options.size());
 
         Message message = Objects.isNull(messageRow)
@@ -141,7 +155,7 @@ public final class PersistenceDomainMappers {
         );
     }
 
-    private static <T extends Enum<T>> T parseEnum(Class<T> enumClass, String rawValue) {
+    public static <T extends Enum<T>> T parseEnum(Class<T> enumClass, String rawValue) {
         if (rawValue == null || rawValue.isBlank()) {
             return null;
         }
@@ -213,11 +227,11 @@ public final class PersistenceDomainMappers {
         );
     }
 
-    public static DecisionOptionRow toRow(DecisionOption option, long pendingDecisionId) {
+    public static DecisionOptionRow toRow(DecisionOption option, long pendingDecisionId, long actionId) {
         return new DecisionOptionRow(
                 0L,    // id generato dal DB in INSERT
                 pendingDecisionId,
-                option.action(),
+                actionId,
                 option.confidence(),
                 option.reasons()
         );
@@ -234,5 +248,25 @@ public final class PersistenceDomainMappers {
                 Objects.isNull(pendingDecision.getRequest())?0:pendingDecision.getRequest().getId()
         );
     }
-}
 
+    public static Action toDomain(ActionRow row, List<ActionStepRow> stepRows) {
+        if (row == null) {
+            return null;
+        }
+        List<String> steps = stepRows == null
+                ? Collections.emptyList()
+                : stepRows.stream().map(ActionStepRow::stepDescription).toList();
+        return new Action(row.title(), steps);
+    }
+
+    public static ActionRow toRow(Action action) {
+        return new ActionRow(0L, action.title());
+    }
+
+    public static ActionStepRow toRow(long actionId, String stepDescription) {
+        return new ActionStepRow(
+                actionId,
+                stepDescription
+        );
+    }
+}

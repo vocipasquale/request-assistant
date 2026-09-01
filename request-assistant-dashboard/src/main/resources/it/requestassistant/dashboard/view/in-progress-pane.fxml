@@ -21,7 +21,7 @@
                     <Button fx:id="refreshMessagesButton" text="Refresh" onAction="#onRefresh" styleClass="refresh-button"/>
                     <Separator styleClass="separator"/>
 
-                    <ScrollPane fitToWidth="true" styleClass="content-scroll" prefHeight="520" VBox.vgrow="ALWAYS">
+                    <ScrollPane fitToWidth="true" styleClass="content-scroll" prefHeight="620" VBox.vgrow="ALWAYS">
                         <content>
 
                             <!--

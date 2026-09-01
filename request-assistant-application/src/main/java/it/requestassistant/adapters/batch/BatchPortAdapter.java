@@ -1,8 +1,8 @@
 package it.requestassistant.adapters.batch;
 
 import it.requestassistant.application.port.in.BatchPort;
-import it.requestassistant.application.port.out.AiAnalyzerPort;
-import it.requestassistant.application.port.out.MessageResearchPort;
+import it.requestassistant.application.port.out.AiEnginePort;
+import it.requestassistant.application.port.out.MessagePort;
 import it.requestassistant.application.port.out.PersistenceDaoPort;
 import it.requestassistant.application.port.out.RequestResearchPort;
 import it.requestassistant.domain.model.Message;
@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Objects;
 
 @Component
 public class BatchPortAdapter implements BatchPort  {
@@ -22,13 +21,13 @@ public class BatchPortAdapter implements BatchPort  {
     public Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private MessageResearchPort messagePort;
+    private MessagePort messagePort;
 
     @Autowired
     private RequestResearchPort requestResearchPort;
 
     @Autowired
-    private AiAnalyzerPort aiAnalyzerPort;
+    private AiEnginePort aiAnalyzerPort;
 
     @Autowired
     private PersistenceDaoPort persistenceDaoPort;
@@ -41,7 +40,10 @@ public class BatchPortAdapter implements BatchPort  {
 
     @Override
     public void moveMessageInProgress(Message message) throws Exception {
-        messagePort.moveMessageInProgress(message);
+        Message movedMessage = messagePort.moveMessageInProgress(message);
+        logger.debug("Refresh entryId, old: {}", message.entryId());
+        logger.debug("Refresh entryId, new : {}", movedMessage.entryId());
+        persistenceDaoPort.refreshEntryIdMessage(message.entryId(), movedMessage.entryId());
     }
 
     @Override

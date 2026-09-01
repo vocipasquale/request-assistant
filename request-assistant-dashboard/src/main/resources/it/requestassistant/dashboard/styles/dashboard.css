@@ -193,6 +193,13 @@
     -fx-padding: 2 0 0 0;
 }
 
+.card-note-important-label {
+    -fx-text-fill: #E80505;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 2 0 0 0;
+}
+
 /* Separatore interno alla card */
 .card-separator *.line {
     -fx-border-color: #E0E0E0;

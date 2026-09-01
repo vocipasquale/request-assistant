@@ -16,7 +16,7 @@ public class Request {
 
 
     public enum Status {
-        IN_PROGRES,
+        IN_PROGRESS,
         COMPLETE;
     }
 

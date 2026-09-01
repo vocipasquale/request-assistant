@@ -11,6 +11,10 @@ public interface PersistenceDaoPort {
     List<PendingDecision> findPendingDecisionsByType(PendingDecision.Type type);
     long insertRequest(Request request);
     long insertPendingDecision(PendingDecision pendingDecision);
-    void deletePendingDecision(long id);
+    void deletePendingDecision(PendingDecision pendingDecision);
     void deleteDecisionOption(long id);
+
+    void refreshEntryIdMessage(String s, String string);
+
+    void updateRequest(Request existingRequest);
 }

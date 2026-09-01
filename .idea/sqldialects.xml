@@ -3,5 +3,7 @@
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/request-assistant-application/src/main/resources/db/migration/V1__initial_schema.sql" dialect="SQLite" />
     <file url="file://$PROJECT_DIR$/request-assistant-application/src/main/resources/db/migration/V2__alter_table.sql" dialect="SQLite" />
+    <file url="file://$PROJECT_DIR$/request-assistant-application/src/main/resources/db/migration/V3__action_table.sql" dialect="SQLite" />
+    <file url="file://$PROJECT_DIR$/request-assistant-application/src/main/resources/db/migration/V4__action_table_title.sql" dialect="SQLite" />
   </component>
 </project>

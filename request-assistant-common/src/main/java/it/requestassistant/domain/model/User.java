@@ -7,6 +7,14 @@ public class User {
     private String email;
     private String utenza;
 
+    public User(){}
+
+    public User(String cognome, String nome, String utenza) {
+        Cognome = cognome;
+        Nome = nome;
+        this.utenza = utenza;
+    }
+
     public String getCognome() {
         return Cognome;
     }
