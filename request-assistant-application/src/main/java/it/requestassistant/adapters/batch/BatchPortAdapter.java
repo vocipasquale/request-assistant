@@ -41,14 +41,14 @@ public class BatchPortAdapter implements BatchPort  {
     @Override
     public void moveMessageInProgress(Message message) throws Exception {
         Message movedMessage = messagePort.moveMessageInProgress(message);
-        logger.debug("Refresh entryId, old: {}", message.entryId());
-        logger.debug("Refresh entryId, new : {}", movedMessage.entryId());
-        persistenceDaoPort.refreshEntryIdMessage(message.entryId(), movedMessage.entryId());
+        logger.debug("Refresh entryId, old: {}", message.getEntryId());
+        logger.debug("Refresh entryId, new : {}", movedMessage.getEntryId());
+        persistenceDaoPort.refreshEntryIdMessage(message.getEntryId(), movedMessage.getEntryId());
     }
 
     @Override
     public boolean processMessage(Message message) {
-        logger.debug("Research request for message entryID {}", message.entryId());
+        logger.debug("Research request for message entryID {}", message.getEntryId());
         Request request = requestResearchPort.searchByMessage(message);
 
         //sottopongo il risultato della ricerca all'AI

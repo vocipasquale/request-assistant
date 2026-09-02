@@ -98,7 +98,7 @@ public class DashboardShellViewModel {
     }
 
     public void showMessage(Message message) {
-        logger.debug("Message display id:{}",message.entryId());
+        logger.debug("Message display id:{}",message.getEntryId());
         dashboardPort.showMessage(message);
     }
 }

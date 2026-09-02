@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class RequestItem {
+    private long id;
     private Type type;
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
@@ -33,6 +34,14 @@ public class RequestItem {
         IN_ATTESA_RISCONTRO_UTENTE,
         RISCONTRO_OK,
         RISCONTRO_KO;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public Type getType() {

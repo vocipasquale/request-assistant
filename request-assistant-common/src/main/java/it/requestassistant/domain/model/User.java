@@ -1,34 +1,36 @@
 package it.requestassistant.domain.model;
 
 public class User {
-    private String Cognome;
-    private String Nome;
+    private long id;
+    private String cognome;
+    private String nome;
     private String codiceFiscale;
     private String email;
     private String utenza;
 
     public User(){}
 
-    public User(String cognome, String nome, String utenza) {
-        Cognome = cognome;
-        Nome = nome;
+    public User(long id, String cognome, String nome, String utenza) {
+        this.id = id;
+        this.cognome = cognome;
+        this.nome = nome;
         this.utenza = utenza;
     }
 
     public String getCognome() {
-        return Cognome;
+        return cognome;
     }
 
     public void setCognome(String cognome) {
-        Cognome = cognome;
+        this.cognome = cognome;
     }
 
     public String getNome() {
-        return Nome;
+        return nome;
     }
 
     public void setNome(String nome) {
-        Nome = nome;
+        this.nome = nome;
     }
 
     public String getCodiceFiscale() {

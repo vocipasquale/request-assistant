@@ -47,9 +47,9 @@ public class AiEngineAdapter implements AiEnginePort {
     @Override
     @Transactional
     public void actionsPerform(PendingDecision pendingDecision, DecisionOption decisionOption) throws Exception {
-        logger.info("Performing actions for decision option: " + decisionOption.id());
-        Action action = decisionOption.action();
-        List<String> steps = action.steps();
+        logger.info("Performing actions for decision option: " + decisionOption.getId());
+        Action action = decisionOption.getAction();
+        List<String> steps = action.getSteps();
 
         //per ora lascio questo controllo, poi capirò se toglierlo...
         if(Objects.isNull(pendingDecision.getMessage())){
@@ -73,7 +73,7 @@ public class AiEngineAdapter implements AiEnginePort {
             // Simulate creating a new request and associating the message
             Request newRequest = new Request();
             newRequest.setId(0L); // Simulate generated ID
-            newRequest.setTitle(decisionOption.action().title());
+            newRequest.setTitle(decisionOption.getAction().getTitle());
             newRequest.setStatus(Request.Status.IN_PROGRESS);
             newRequest.setCreateAt(LocalDateTime.now());
             newRequest.setUpdateAt(newRequest.getCreateAt());
@@ -93,7 +93,7 @@ public class AiEngineAdapter implements AiEnginePort {
             persistenceDaoPort.updateRequest(existingRequest);
         }
 
-        logger.info("AI: completed actions for decision option: " + decisionOption.id());
+        logger.info("AI: completed actions for decision option: " + decisionOption.getId());
     }
 
     /**
@@ -126,7 +126,7 @@ public class AiEngineAdapter implements AiEnginePort {
         Random random = new Random();
         String matricola = String.format("%06d", random.nextInt(1_000_000));
 
-        return new User("Rossi", "Mario", "U"+matricola);
+        return new User(-1L, "Rossi", "Mario", "U"+matricola);
     }
 
     // METODO CHE SIMULA IL LAVORO CHE ESEGUIRà IL MOTORE AI: GENERA LE DECISIONI CHE DOVRà PRENDERE L'OPERATORE
@@ -135,7 +135,7 @@ public class AiEngineAdapter implements AiEnginePort {
 
         if (Objects.isNull(candidate)) {
             //la request candidata è null: non è stata trovata per conversatioId o per tk
-            logger.debug("AI: No request found in the database for message with id: " + message.entryId());
+            logger.debug("AI: No request found in the database for message with id: " + message.getEntryId());
 
             List<String> steps = new ArrayList<>();
             steps.add("Crea una nuova Request e persistila nel database");
@@ -156,7 +156,7 @@ public class AiEngineAdapter implements AiEnginePort {
             options.add(new DecisionOption(0L, action, 90.00, "Nessuna richiesta trovata nel database attinente al messaggio."));
         } else {
             //la request candidata non è null: è stata trovata per conversatioId o per tk
-            logger.debug("AI: Request found in the database with id: " + candidate.getId() + " for message with id: " + message.entryId());
+            logger.debug("AI: Request found in the database with id: " + candidate.getId() + " for message with id: " + message.getEntryId());
 
             List<String> steps = new ArrayList<>();
             steps.add("Aggiungi (update) il Message alla richiesta id:" + candidate.getId());

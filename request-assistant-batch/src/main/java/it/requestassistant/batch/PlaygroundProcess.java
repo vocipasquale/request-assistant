@@ -36,19 +36,19 @@ public class PlaygroundProcess {
         logger.info("Trovate " + messages.size() + " mail!");
 
         for (Message message : messages) {
-            logger.debug("Process message mailID: " + message.entryId());
+            logger.debug("Process message mailID: " + message.getEntryId());
 
             if (batchPort.processMessage(message)) {//processamento messaggio
-                logger.debug("Message processed successfully mailID: " + message.entryId());
+                logger.debug("Message processed successfully mailID: " + message.getEntryId());
                 moveMessageInProgress(message);
             } else {
-                logger.debug("Message processing failed mailID: " + message.entryId());
+                logger.debug("Message processing failed mailID: " + message.getEntryId());
             }
         }
     }
 
     private void moveMessageInProgress(Message message) throws Exception {
-            logger.debug("Move mail in to InProgress, mailID: " + message.entryId());
+            logger.debug("Move mail in to InProgress, mailID: " + message.getEntryId());
             batchPort.moveMessageInProgress(message);
     }
 }

@@ -39,8 +39,8 @@ public class RequestResearch implements RequestResearchPort {
         logger.debug("searchByMessage....");
         Request result = null;
 
-        logger.info("Ricerca request per coversationId: "+message.conversationId());
-        result = persistenceDaoPort.findRequestByConversationId(message.conversationId());
+        logger.info("Ricerca request per coversationId: "+message.getConversationId());
+        result = persistenceDaoPort.findRequestByConversationId(message.getConversationId());
 
         if (Objects.isNull(result)){
             logger.info("La ricerca per coversationId non ha prodotto risultati.");

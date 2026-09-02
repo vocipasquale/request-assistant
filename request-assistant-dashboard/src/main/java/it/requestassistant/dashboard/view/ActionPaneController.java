@@ -45,13 +45,13 @@ public class ActionPaneController {
         this.message = message;
 
       //  decisionOptionIdLabel.setText(String.valueOf(option.id()));
-        confidenceLabel.setText(String.format("%.0f%%", option.confidence()));
-        reasonsLabel.setText(option.reasons() != null ? option.reasons() : "-");
+        confidenceLabel.setText(String.format("%.0f%%", option.getConfidence()));
+        reasonsLabel.setText(option.getReasons() != null ? option.getReasons() : "-");
 
-        Action action = option.action();
-        actionTitleLabel.setText(action.title());
+        Action action = option.getAction();
+        actionTitleLabel.setText(action.getTitle());
        // actionStepsCountLabel.setText(String.valueOf(action.steps().size()));
-        actionStepsList.setItems(FXCollections.observableArrayList(action.steps()));
+        actionStepsList.setItems(FXCollections.observableArrayList(action.getSteps()));
         viewMesssageButton.setDisable(message == null);
     }
 

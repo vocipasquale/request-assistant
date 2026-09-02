@@ -65,11 +65,11 @@ public class PendingDecisionCardController {
     @FXML
     void initialize() {
         actionColumn.setCellValueFactory(
-                data -> new SimpleStringProperty(data.getValue().action().title()));
+                data -> new SimpleStringProperty(data.getValue().getAction().getTitle()));
         confidenceColumn.setCellValueFactory(
-                data -> new SimpleStringProperty(String.format("%.0f%%", data.getValue().confidence())));
+                data -> new SimpleStringProperty(String.format("%.0f%%", data.getValue().getConfidence())));
         reasonColumn.setCellValueFactory(
-                data -> new SimpleStringProperty(data.getValue().reasons()));
+                data -> new SimpleStringProperty(data.getValue().getReasons()));
 
         // Colonna con pulsante "Accetta" per ogni DecisionOption
         acceptOptionColumn.setCellFactory(col -> new TableCell<>() {
@@ -109,8 +109,8 @@ public class PendingDecisionCardController {
                 decision.getTarget() != null ? decision.getTarget() : "—");
 
         if (!Objects.isNull(decision.getMessage())) {
-            subjectLabel.setText(decision.getMessage().subject() != null ? decision.getMessage().subject() : "—");
-            recivedAtLabel.setText(decision.getMessage().receivedAt() != null ? decision.getMessage().receivedAt().format(DATE_FMT) : "—");
+            subjectLabel.setText(decision.getMessage().getSubject() != null ? decision.getMessage().getSubject() : "—");
+            recivedAtLabel.setText(decision.getMessage().getReceivedAt() != null ? decision.getMessage().getReceivedAt().format(DATE_FMT) : "—");
         }
 
         if (Objects.isNull(decision.getRequest())){

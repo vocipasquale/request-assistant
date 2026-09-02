@@ -168,10 +168,10 @@ public class MessagePortAdapter implements MessagePort {
     public Message moveMessageInProgress(Message message) throws Exception {
         try {
             checkAndRefreshOutlookConnection();
-            Dispatch mailToMove = findMailByEntryId(inArrivoFolder, message.entryId());
+            Dispatch mailToMove = findMailByEntryId(inArrivoFolder, message.getEntryId());
 
             if (Objects.isNull(mailToMove)) {
-                throw new Exception("Mail con entryId " + message.entryId() + " non trovata nella cartella " + inArrivoFolderName);
+                throw new Exception("Mail con entryId " + message.getEntryId() + " non trovata nella cartella " + inArrivoFolderName);
             }
 
             return mailToMessage(Dispatch.call(mailToMove, "Move", inLavorazioneFolder).getDispatch());
@@ -184,10 +184,10 @@ public class MessagePortAdapter implements MessagePort {
     public Message moveMessageInDone(Message message) throws Exception {
         try {
             checkAndRefreshOutlookConnection();
-            Dispatch mailToMove = findMailByEntryId(inLavorazioneFolder, message.entryId());
+            Dispatch mailToMove = findMailByEntryId(inLavorazioneFolder, message.getEntryId());
 
             if (Objects.isNull(mailToMove)) {
-                throw new Exception("Mail con entryId " + message.entryId() + " non trovata nella cartella " + inLavorazioneFolderName);
+                throw new Exception("Mail con entryId " + message.getEntryId() + " non trovata nella cartella " + inLavorazioneFolderName);
             }
 
             return mailToMessage(Dispatch.call(mailToMove, "Move", evaseFolder).getDispatch());
@@ -200,10 +200,10 @@ public class MessagePortAdapter implements MessagePort {
     public Message moveMessageInDiscarded(Message message) throws Exception {
         try {
             checkAndRefreshOutlookConnection();
-            Dispatch mailToMove = findMailByEntryId(inLavorazioneFolder, message.entryId());
+            Dispatch mailToMove = findMailByEntryId(inLavorazioneFolder, message.getEntryId());
 
             if (Objects.isNull(mailToMove)) {
-                throw new Exception("Mail con entryId " + message.entryId() + " non trovata nella cartella " + inLavorazioneFolderName);
+                throw new Exception("Mail con entryId " + message.getEntryId() + " non trovata nella cartella " + inLavorazioneFolderName);
             }
 
             return mailToMessage(Dispatch.call(mailToMove, "Move", scartateFolder).getDispatch());
@@ -229,11 +229,11 @@ public class MessagePortAdapter implements MessagePort {
         try {
             checkAndRefreshOutlookConnection();
 
-            logger.debug("Mostro la mail con entryId {} che si trova in {}", message.entryId(), inLavorazioneFolderName);
-            Dispatch mailToShow = findMailByEntryId(inLavorazioneFolder, message.entryId());
+            logger.debug("Mostro la mail con entryId {} che si trova in {}", message.getEntryId(), inLavorazioneFolderName);
+            Dispatch mailToShow = findMailByEntryId(inLavorazioneFolder, message.getEntryId());
 
             if (Objects.isNull(mailToShow)) {
-                throw new RuntimeException("Mail con entryId " + message.entryId() + " non trovata nella cartella " + inLavorazioneFolderName);
+                throw new RuntimeException("Mail con entryId " + message.getEntryId() + " non trovata nella cartella " + inLavorazioneFolderName);
             }
 
             Dispatch.call(mailToShow, "Display", false);

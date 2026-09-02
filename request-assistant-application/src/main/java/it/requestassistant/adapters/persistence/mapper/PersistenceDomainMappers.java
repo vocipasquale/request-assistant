@@ -137,7 +137,7 @@ public final class PersistenceDomainMappers {
         Message message = Objects.isNull(messageRow)
             ? null
             : PersistenceDomainMappers.toDomain(messageRow);
-        logger.debug("Mapping message id {} for  PendingDecision id {}", message.entryId(), row.id());
+        logger.debug("Mapping message id {} for  PendingDecision id {}", message.getEntryId(), row.id());
 
         Request request = Objects.isNull(PersistenceDomainMappers.toDomain(requestRow, userAccountRow, requestItemRowList, messagesRequestRowList))
                 ? null
@@ -166,20 +166,20 @@ public final class PersistenceDomainMappers {
 
     public static MessageRow toRow(Message message) {
         return new MessageRow(
-                0L,    // id generato dal DB
-                0L,  // requestId da settare se necessario
-                message.subject(),
-                message.senderAddress(),
-                message.receivedAt(),
-                message.to(),
-                message.cc(),
-                message.bodyText(),
-                message.entryId(),
-                message.conversationId(),
-                message.conversationTopic(),
-                message.importance(),
-                message.hasAttachment(),
-                message.category()
+                -1L,    // id generato dal DB
+                -1L,  // requestId da settare se necessario
+                message.getSubject(),
+                message.getSenderAddress(),
+                message.getReceivedAt(),
+                message.getTo(),
+                message.getCc(),
+                message.getBodyText(),
+                message.getEntryId(),
+                message.getConversationId(),
+                message.getConversationTopic(),
+                message.getImportance(),
+                message.getHasAttachment(),
+                message.getCategory()
         );
     }
 
@@ -232,8 +232,8 @@ public final class PersistenceDomainMappers {
                 0L,    // id generato dal DB in INSERT
                 pendingDecisionId,
                 actionId,
-                option.confidence(),
-                option.reasons()
+                option.getConfidence(),
+                option.getReasons()
         );
     }
 
@@ -260,7 +260,7 @@ public final class PersistenceDomainMappers {
     }
 
     public static ActionRow toRow(Action action) {
-        return new ActionRow(0L, action.title());
+        return new ActionRow(0L, action.getTitle());
     }
 
     public static ActionStepRow toRow(long actionId, String stepDescription) {

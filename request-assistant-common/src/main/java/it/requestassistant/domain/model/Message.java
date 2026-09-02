@@ -3,103 +3,155 @@ package it.requestassistant.domain.model;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public record Message(
-        String subject,
-        String senderAddress,
-        LocalDateTime receivedAt,
-        String to,
-        String cc,
-        String bodyText,
-        String entryId,
-        String conversationId,
-        String conversationTopic,
-        Integer importance,
-        Boolean hasAttachment,
-        String category
-){
+public class Message{
+    private long id;
+    private String subject;
+    private String senderAddress;
+    private LocalDateTime receivedAt;
+    private String to;
+    private String cc;
+    private String bodyText;
+    private String entryId;
+    private String conversationId;
+    private String conversationTopic;
+    private Integer importance;
+    private Boolean hasAttachment;
+    private String category;
 
-    public Message{
-        Objects.requireNonNull(subject);
-        Objects.requireNonNull(senderAddress);
-        Objects.requireNonNull(receivedAt);
-        Objects.requireNonNull(to);
+    public Message(){}
+
+    public Message(String subject, String senderAddress, LocalDateTime receivedAt, String to, String cc, String bodyText, String entryId, String conversationId, String conversationTopic, Integer importance, Boolean hasAttachment, String category) {
+        this.subject = subject;
+        this.senderAddress = senderAddress;
+        this.receivedAt = receivedAt;
+        this.to = to;
+        this.cc = cc;
+        this.bodyText = bodyText;
+        this.entryId = entryId;
+        this.conversationId = conversationId;
+        this.conversationTopic = conversationTopic;
+        this.importance = importance;
+        this.hasAttachment = hasAttachment;
+        this.category = category;
     }
 
-    @Override
-    public String subject() {
+    public Message(long id, String subject, String senderAddress, LocalDateTime receivedAt, String to, String cc, String bodyText, String entryId, String conversationId, String conversationTopic, Integer importance, Boolean hasAttachment, String category) {
+        this.id = id;
+        this.subject = subject;
+        this.senderAddress = senderAddress;
+        this.receivedAt = receivedAt;
+        this.to = to;
+        this.cc = cc;
+        this.bodyText = bodyText;
+        this.entryId = entryId;
+        this.conversationId = conversationId;
+        this.conversationTopic = conversationTopic;
+        this.importance = importance;
+        this.hasAttachment = hasAttachment;
+        this.category = category;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getSubject() {
         return subject;
     }
 
-    @Override
-    public String senderAddress() {
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public String getSenderAddress() {
         return senderAddress;
     }
 
-    @Override
-    public LocalDateTime receivedAt() {
+    public void setSenderAddress(String senderAddress) {
+        this.senderAddress = senderAddress;
+    }
+
+    public LocalDateTime getReceivedAt() {
         return receivedAt;
     }
 
-    @Override
-    public String to() {
+    public void setReceivedAt(LocalDateTime receivedAt) {
+        this.receivedAt = receivedAt;
+    }
+
+    public String getTo() {
         return to;
     }
 
-    @Override
-    public String cc() {
+    public void setTo(String to) {
+        this.to = to;
+    }
+
+    public String getCc() {
         return cc;
     }
 
-    @Override
-    public String bodyText() {
+    public void setCc(String cc) {
+        this.cc = cc;
+    }
+
+    public String getBodyText() {
         return bodyText;
     }
 
-    @Override
-    public String entryId() {
+    public void setBodyText(String bodyText) {
+        this.bodyText = bodyText;
+    }
+
+    public String getEntryId() {
         return entryId;
     }
 
-    @Override
-    public String conversationId() {
+    public void setEntryId(String entryId) {
+        this.entryId = entryId;
+    }
+
+    public String getConversationId() {
         return conversationId;
     }
 
-    @Override
-    public String conversationTopic() {
+    public void setConversationId(String conversationId) {
+        this.conversationId = conversationId;
+    }
+
+    public String getConversationTopic() {
         return conversationTopic;
     }
 
-    @Override
-    public Integer importance() {
+    public void setConversationTopic(String conversationTopic) {
+        this.conversationTopic = conversationTopic;
+    }
+
+    public Integer getImportance() {
         return importance;
     }
 
-    @Override
-    public Boolean hasAttachment() {
+    public void setImportance(Integer importance) {
+        this.importance = importance;
+    }
+
+    public Boolean getHasAttachment() {
         return hasAttachment;
     }
 
-    @Override
-    public String category() {
+    public void setHasAttachment(Boolean hasAttachment) {
+        this.hasAttachment = hasAttachment;
+    }
+
+    public String getCategory() {
         return category;
     }
 
-    @Override
-    public String toString() {
-        return "Message{" +
-                "subject='" + subject + '\'' +
-                ", senderAddress='" + senderAddress + '\'' +
-                ", receivedAt=" + receivedAt +
-                ", to='" + to + '\'' +
-                ", cc='" + cc + '\'' +
-                ", bodyText='" + bodyText + '\'' +
-                ", entryId='" + entryId + '\'' +
-                ", conversationId='" + conversationId + '\'' +
-                ", conversationTopic='" + conversationTopic + '\'' +
-                ", importance=" + importance +
-                ", hasAttachment=" + hasAttachment +
-                ", category='" + category + '\'' +
-                '}';
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

@@ -365,7 +365,7 @@ public class PersistenceDao implements PersistenceDaoPort {
             ps.setString(3, pendingDecisionRow.target());
             ps.setLong(4, messageId);
             if(!Objects.isNull(pendingDecision.getRequest())){//ATTENZIONE!!!
-                ps.setLong(4, pendingDecision.getId());
+                ps.setLong(5, pendingDecision.getId());
             }
             return ps;
         }, keyHolder);
@@ -388,16 +388,23 @@ public class PersistenceDao implements PersistenceDaoPort {
                 VALUES (?, ?, ?, ?, ?, ?)
                 """;
         RequestRow requestRow = PersistenceDomainMappers.toRow(request);
+        KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(query,
-                requestRow.createAt() != null ? requestRow.createAt().toString() : null,
-                requestRow.updateAt() != null ? requestRow.updateAt().toString() : null,
-                requestRow.title(),
-                requestRow.status(),
-                requestRow.note(),
-                requestRow.userId()
-        );
-        long requestId = -1;
+        jdbcTemplate.update(con -> {
+            var ps = con.prepareStatement(query, java.sql.Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, requestRow.createAt() != null ? requestRow.createAt().toString() : null);
+            ps.setString(2, requestRow.updateAt() != null ? requestRow.updateAt().toString() : null);
+            ps.setString(3, requestRow.title());
+            ps.setString(4, requestRow.status());
+            ps.setString(5, requestRow.note());
+            ps.setLong(6, requestRow.userId());
+
+            return ps;
+        }, keyHolder);
+
+        long requestId = keyHolder.getKey().longValue();
+        logger.debug("Request saved with id:{}", requestId);
+
 
         //insert items...
         request.getItems().forEach(item -> {
@@ -418,10 +425,10 @@ public class PersistenceDao implements PersistenceDaoPort {
 
     private void insertDecisionOption(DecisionOption decisionOption, long pendingDecisionId) {
         //insert Action...
-        long actionId = insertAction(decisionOption.action());
+        long actionId = insertAction(decisionOption.getAction());
 
         //insert action steps...
-        decisionOption.action().steps().forEach(step -> {
+        decisionOption.getAction().getSteps().forEach(step -> {
             insertActionStep(step, actionId);
         });
 
