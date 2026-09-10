@@ -1,10 +1,7 @@
 package it.requestassistant.adapters.dashboard;
 
 import it.requestassistant.application.port.in.DashboardPort;
-import it.requestassistant.application.port.out.AiEnginePort;
-import it.requestassistant.application.port.out.MessagePort;
-import it.requestassistant.application.port.out.PersistenceDaoPort;
-import it.requestassistant.application.port.out.PlaygroundProcessControlPort;
+import it.requestassistant.application.port.out.*;
 import it.requestassistant.domain.model.DecisionOption;
 import it.requestassistant.domain.model.Message;
 import it.requestassistant.domain.model.PendingDecision;
@@ -19,14 +16,14 @@ public class DashboardPortAdapter implements DashboardPort {
 	private final PlaygroundProcessControlPort playgroundProcessControlPort;
 	private final PersistenceDaoPort persistenceDaoPort;
 	private final MessagePort messagePort;
-	private final AiEnginePort aiEnginePort;
+	private final ActionPerformerPort actionPerformerPort;
 
 	public DashboardPortAdapter(PlaygroundProcessControlPort playgroundProcessControlPort,
-                                PersistenceDaoPort persistenceDaoPort, MessagePort messagePort, AiEnginePort aiEnginePort) {
+                                PersistenceDaoPort persistenceDaoPort, MessagePort messagePort, ActionPerformerPort actionPerformerPort) {
 		this.playgroundProcessControlPort = playgroundProcessControlPort;
 		this.persistenceDaoPort = persistenceDaoPort;
         this.messagePort = messagePort;
-        this.aiEnginePort = aiEnginePort;
+        this.actionPerformerPort = actionPerformerPort;
     }
 
 	@Override
@@ -67,7 +64,7 @@ public class DashboardPortAdapter implements DashboardPort {
 	@Override
 	public void acceptDecisionOption(PendingDecision pendingDecision, DecisionOption decisionOption)  {
         try {
-            aiEnginePort.actionsPerform(pendingDecision, decisionOption);
+			actionPerformerPort.perform(pendingDecision, decisionOption);
 			//dopo aver eseguito le azioni, elimino la pending decision dal DB
 			persistenceDaoPort.deletePendingDecision(pendingDecision);
 		} catch (Exception e) {
@@ -80,6 +77,11 @@ public class DashboardPortAdapter implements DashboardPort {
 	@Override
 	public void showMessage(Message message) {
 		messagePort.displayMessage(message);
+	}
+
+	@Override
+	public List<PendingDecision> getRequestPendingDecisions() {
+		return persistenceDaoPort.findPendingDecisionsByType(PendingDecision.Type.REQUEST_ANALYSIS);
 	}
 }
 

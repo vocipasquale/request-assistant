@@ -17,4 +17,6 @@ public interface PersistenceDaoPort {
     void refreshEntryIdMessage(String s, String string);
 
     void updateRequest(Request existingRequest);
+
+    List<Request> findRequestsToProcess();
 }

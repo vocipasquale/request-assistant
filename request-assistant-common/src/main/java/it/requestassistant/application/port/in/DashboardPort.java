@@ -14,4 +14,6 @@ public interface DashboardPort {
 	void deletePendingDecision(PendingDecision pd);
 	void acceptDecisionOption(PendingDecision pendingDecision, DecisionOption decisionOption);
     void showMessage(Message message);
+
+	List<PendingDecision> getRequestPendingDecisions();
 }

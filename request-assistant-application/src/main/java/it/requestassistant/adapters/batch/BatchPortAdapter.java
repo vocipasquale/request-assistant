@@ -63,6 +63,22 @@ public class BatchPortAdapter implements BatchPort  {
         return true;
     }
 
+    @Override
+    public List<Request> getRequestsToProcess() {
+        return persistenceDaoPort.findRequestsToProcess();
+    }
+
+    @Override
+    public void processRequest(Request request) {
+        //sottopongo la request all'AI
+        //AI si preoccupa di creare le proposte/decisioni che dovrà prendere l'operatore
+        logger.debug("Analisi AI in corso per request id {}", request.getId());
+        PendingDecision pendingDecision = aiAnalyzerPort.analyzeRequest(request);
+
+        logger.debug("Persisto la pending decision sul database...");
+        persistToDb(pendingDecision);
+    }
+
     private void persistToDb(PendingDecision pendingDecision){
         //...logging in dao...
         persistenceDaoPort.insertPendingDecision(pendingDecision);

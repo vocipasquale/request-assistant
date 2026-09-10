@@ -49,7 +49,7 @@ public class ActionPaneController {
         reasonsLabel.setText(option.getReasons() != null ? option.getReasons() : "-");
 
         Action action = option.getAction();
-        actionTitleLabel.setText(action.getTitle());
+        actionTitleLabel.setText(action.getTitle().getTitle());
        // actionStepsCountLabel.setText(String.valueOf(action.steps().size()));
         actionStepsList.setItems(FXCollections.observableArrayList(action.getSteps()));
         viewMesssageButton.setDisable(message == null);

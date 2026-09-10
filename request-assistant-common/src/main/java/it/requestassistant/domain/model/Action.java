@@ -1,24 +1,49 @@
 package it.requestassistant.domain.model;
 
 import java.util.List;
-import java.util.Objects;
 
 public class Action{
     private long id;
-    private String title;
+    private Title title;
     private List<String> steps;
 
     public Action (){}
 
-    public Action(String title, List<String> steps) {
+    public Action(Title title, List<String> steps) {
         this.title = title;
         this.steps = steps;
     }
 
-    public Action(long id, String title, List<String> steps) {
+    public Action(long id, Title title, List<String> steps) {
         this.id = id;
         this.title = title;
         this.steps = steps;
+    }
+
+    public enum Title {
+        INVIA_MAIL("Invia mail"),
+        NUOVA_RICHIESTA("Nuova richiesta"),
+        MODIFICA_RICHIESTA("Modifica richiesta"),
+        CHIUDI_RICHIESTA("Chiudi richiesta");
+
+        private final String title;
+
+        Title(String title) {
+            this.title = title;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public static Title fromTitle(String title) {
+            for (Title t : values()) {
+                if (t.title.equalsIgnoreCase(title)) {
+                    return t;
+                }
+            }
+            throw new IllegalArgumentException("Tipo azione non supportato: " + title);
+        }
     }
 
     public long getId() {
@@ -29,11 +54,11 @@ public class Action{
         this.id = id;
     }
 
-    public String getTitle() {
+    public Title getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(Title title) {
         this.title = title;
     }
 

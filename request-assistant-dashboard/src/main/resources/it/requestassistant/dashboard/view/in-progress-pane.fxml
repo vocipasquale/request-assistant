@@ -23,7 +23,6 @@
 
                     <ScrollPane fitToWidth="true" styleClass="content-scroll" prefHeight="620" VBox.vgrow="ALWAYS">
                         <content>
-
                             <!--
                                 Container popolato dinamicamente dal controller.
                                 Il controller creerà un nodo "pending-decision-card.fxml"
@@ -46,6 +45,11 @@
             <content>
                 <ScrollPane fitToWidth="true" styleClass="content-scroll" VBox.vgrow="ALWAYS">
                     <content>
+                        <!--
+                                Container popolato dinamicamente dal controller.
+                                Il controller creerà un nodo "pending-decision-card.fxml"
+                                per ogni PendingDecision e lo aggiungerà qui.
+                        -->
                         <VBox fx:id="pendingDecisionRequestsContainer"
                               spacing="10.0"
                               styleClass="cards-container"/>

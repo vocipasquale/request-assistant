@@ -2,6 +2,7 @@ package it.requestassistant.batch;
 
 import it.requestassistant.application.port.in.BatchPort;
 import it.requestassistant.domain.model.Message;
+import it.requestassistant.domain.model.Request;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,28 @@ public class PlaygroundProcess {
         logger.info(" Request Assistant - Playground");
         logger.info("=================================");
 
+        processMessages();
+        processRequests();
 
+    }
+
+    private void processRequests() {
+        //recuper le richieste in pending...
+        List<Request> requests = batchPort.getRequestsToProcess();
+
+        if (Objects.isNull(requests) || requests.isEmpty()) {
+            logger.info("Nessuna richiesta pendente");
+            return;
+        }
+
+        logger.info("Trovate " + requests.size() + " richieste da processare!");
+        requests.stream().forEach(request ->{
+            logger.debug("Request id {} in lavorazione..." + request.getId());
+            batchPort.processRequest(request);
+        });
+    }
+
+    private void processMessages() throws Exception {
         //recupero le nuove mail/messages nella cartella (in arrivo)
         List<Message> messages = batchPort.getMessagesToProcess();
 

@@ -27,10 +27,10 @@ public class AiEngineAdapter implements AiEnginePort {
 
     @Override
     public PendingDecision analyzeMessage(Message message, Request candidate) {
-        logger.info("AI: analyzing Message...");
+        logger.info("AI: analisi messaggio...");
         List<DecisionOption> options = generateDecisionOptions(message, candidate);
 
-        logger.debug("building pending decision...");
+        logger.debug("costruisco pending decision...");
         PendingDecision pendingDecision = new PendingDecision(
                 0,
                 LocalDateTime.now(),
@@ -43,91 +43,24 @@ public class AiEngineAdapter implements AiEnginePort {
         return pendingDecision;
     }
 
-
     @Override
-    @Transactional
-    public void actionsPerform(PendingDecision pendingDecision, DecisionOption decisionOption) throws Exception {
-        logger.info("Performing actions for decision option: " + decisionOption.getId());
-        Action action = decisionOption.getAction();
-        List<String> steps = action.getSteps();
+    public PendingDecision analyzeRequest(Request request) {
+        logger.info("AI: analisi richiesta...");
+        List<DecisionOption> options = generateDecisionOptions(request);
 
-        //per ora lascio questo controllo, poi capirò se toglierlo...
-        if(Objects.isNull(pendingDecision.getMessage())){
-            logger.error("Pending decision {} has no associated message. Cannot perform actions!", pendingDecision.getId());
-            throw new Exception("Pending decision has no associated message. Cannot perform actions!");
-        }
+        logger.debug("costruisco pending decision...");
+        PendingDecision pendingDecision = new PendingDecision(
+                0,
+                LocalDateTime.now(),
+                PendingDecision.Type.REQUEST_ANALYSIS,
+                "Inviare sollecito al cliente",
+                options,
+                null,
+                request);
 
-        for (String step : steps) {
-            logger.info("Executing step: " + step);
-            //....
-
-
-        }
-
-        // Simulo due azioni:
-        // 1. creo una nuova request e le associo il messaggio della pending decision
-        // 2. associo il messaggio della pending decision alla rquest passata e già presente in DB
-
-        if(Objects.isNull(pendingDecision.getRequest())){
-            logger.info("Pending decision {} has no associated request. Creating a new request and associating the message.", pendingDecision.getId());
-            // Simulate creating a new request and associating the message
-            Request newRequest = new Request();
-            newRequest.setId(0L); // Simulate generated ID
-            newRequest.setTitle(decisionOption.getAction().getTitle());
-            newRequest.setStatus(Request.Status.IN_PROGRESS);
-            newRequest.setCreateAt(LocalDateTime.now());
-            newRequest.setUpdateAt(newRequest.getCreateAt());
-            newRequest.setMessages(List.of(pendingDecision.getMessage()));
-            newRequest.setItems(List.of(getRequestItem("step")));
-            newRequest.setNote("test manuale");
-            newRequest.setUser(getUser(pendingDecision, decisionOption));
-            persistenceDaoPort.insertRequest(newRequest);
-        }else {
-            logger.info("Pending decision {} has an associated request with ID {}. Associating the message to this request.", pendingDecision.getId(), pendingDecision.getRequest().getId());
-            // Simulate associating the message to the existing request
-            Request existingRequest = pendingDecision.getRequest();
-            List<Message> updatedMessages = new ArrayList<>(existingRequest.getMessages());
-            updatedMessages.add(pendingDecision.getMessage());
-            existingRequest.setMessages(updatedMessages);
-            existingRequest.setUpdateAt(LocalDateTime.now());
-            persistenceDaoPort.updateRequest(existingRequest);
-        }
-
-        logger.info("AI: completed actions for decision option: " + decisionOption.getId());
+        return pendingDecision;
     }
 
-    /**
-     * genera un RequestItem generico, in futuro dovrà essere
-     * generato in base alle informazioni degli steps
-     *
-     */
-    private RequestItem getRequestItem(String step) {
-        RequestItem result = new RequestItem();
-        result.setType(RequestItem.Type.DOMINIO_APN_VPN);
-        result.setCreateAt(LocalDateTime.now());
-        result.setUpdateAt(result.getCreateAt());
-        result.setDettaglio("Dettaglio generico");
-        result.setAmbiente(List.of(RequestItem.Ambiente.SVILUPPO, RequestItem.Ambiente.COLLAUDO));
-        result.setNota("test manuale");
-        result.setStatus(RequestItem.Status.DA_RICHIEDERE);
-
-        return result;
-    }
-
-    /**
-     * Stabilisce se si tratta di user già censito nel db e lo restituisce altrimenti
-     * lo crea, lo salva nel db e poi lo restituisce.
-     *
-     * @param pendingDecision
-     * @param decisionOption
-     * @return
-     */
-    private User getUser(PendingDecision pendingDecision, DecisionOption decisionOption) {
-        Random random = new Random();
-        String matricola = String.format("%06d", random.nextInt(1_000_000));
-
-        return new User(-1L, "Rossi", "Mario", "U"+matricola);
-    }
 
     // METODO CHE SIMULA IL LAVORO CHE ESEGUIRà IL MOTORE AI: GENERA LE DECISIONI CHE DOVRà PRENDERE L'OPERATORE
     private List<DecisionOption> generateDecisionOptions(Message message, Request candidate) {
@@ -151,7 +84,7 @@ public class AiEngineAdapter implements AiEnginePort {
             steps.add("Sposta la mail inviata in in progress folder...");
 
 
-            Action action = new Action("Crea una nuova richiesta", steps);
+            Action action = new Action(Action.Title.NUOVA_RICHIESTA, steps);
 
             options.add(new DecisionOption(0L, action, 90.00, "Nessuna richiesta trovata nel database attinente al messaggio."));
         } else {
@@ -162,9 +95,31 @@ public class AiEngineAdapter implements AiEnginePort {
             steps.add("Aggiungi (update) il Message alla richiesta id:" + candidate.getId());
             steps.add("Sposta la mail corrente in in progress folder...");
 
-            Action action = new Action("Crea una nuova richiesta", steps);
+            Action action = new Action(Action.Title.MODIFICA_RICHIESTA, steps);
             options.add(new DecisionOption(0L, action, 10.00, "Trovata richiesta id " + candidate.getId() + " attinente al messaggio."));
         }
+
+        return options;
+    }
+
+
+    // METODO CHE SIMULA IL LAVORO CHE ESEGUIRà IL MOTORE AI: GENERA LE DECISIONI CHE DOVRà PRENDERE L'OPERATORE
+    private List<DecisionOption> generateDecisionOptions(Request request) {
+        List<DecisionOption> options = new ArrayList<>();
+
+        if (Objects.isNull(request)) {
+            logger.warn("AI: nessuna richiesta da analizzare!");
+            return options;
+        }
+
+        List<String> steps = new ArrayList<>();
+        steps.add("Invia una mail di sollecito al cliente per tk {}:" + request.getItems().stream().findFirst().map(RequestItem::getTicket).orElse("N/A"));
+
+        Action action = new Action(Action.Title.INVIA_MAIL, steps);
+        options.add(new DecisionOption(0L, action, 90.00,
+                String.format("Nessuna risposta da parte del cliente alla mail (id {}) per richiesta {}",
+                        request.getMessages().stream().findFirst().map(Message::getEntryId).orElse("N/A"),
+                        request.getItems().stream().findFirst().map(RequestItem::getDettaglio).orElse("N/A"))));
 
         return options;
     }

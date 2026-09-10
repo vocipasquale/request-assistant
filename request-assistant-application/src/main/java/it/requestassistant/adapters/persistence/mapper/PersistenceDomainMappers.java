@@ -74,8 +74,8 @@ public final class PersistenceDomainMappers {
     }
 
     public static Request toDomain(RequestRow requestRow, UserAccountRow userRow, List<RequestItemRow> requestItemRows,
-            List<MessageRow> messageRows
-    ) {
+            List<MessageRow> messageRows) {
+
         if(Objects.isNull(requestRow)){
             return null;
         }
@@ -112,7 +112,7 @@ public final class PersistenceDomainMappers {
     }
 
     public static Action toDaman(ActionRow row, List<String> steps){
-        return new Action(row.title(), steps);
+        return new Action(Action.Title.fromTitle(row.title()), steps);
     }
 
     public static String toDomain(ActionStepRow row){
@@ -256,11 +256,11 @@ public final class PersistenceDomainMappers {
         List<String> steps = stepRows == null
                 ? Collections.emptyList()
                 : stepRows.stream().map(ActionStepRow::stepDescription).toList();
-        return new Action(row.title(), steps);
+        return new Action(Action.Title.fromTitle(row.title()), steps);
     }
 
     public static ActionRow toRow(Action action) {
-        return new ActionRow(0L, action.getTitle());
+        return new ActionRow(0L, action.getTitle().getTitle());
     }
 
     public static ActionStepRow toRow(long actionId, String stepDescription) {

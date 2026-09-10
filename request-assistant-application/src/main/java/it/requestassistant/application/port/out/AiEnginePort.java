@@ -7,5 +7,5 @@ import it.requestassistant.domain.model.Request;
 
 public interface AiEnginePort {
     PendingDecision analyzeMessage(Message message, Request candidate);
-    void actionsPerform(PendingDecision pendingDecision, DecisionOption decisionOption) throws Exception;
+    PendingDecision analyzeRequest(Request request);
 }

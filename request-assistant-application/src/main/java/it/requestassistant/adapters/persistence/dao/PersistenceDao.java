@@ -13,10 +13,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static it.requestassistant.adapters.persistence.mapper.PersistenceDomainMappers.parseEnum;
 
@@ -319,6 +316,50 @@ public class PersistenceDao implements PersistenceDaoPort {
             );
         });
 
+    }
+
+    @Override
+    public List<Request> findRequestsToProcess() {
+        List<Request> result = new ArrayList<>();
+
+        String query = """
+                SELECT r.*
+                FROM request r
+                LEFT JOIN pending_decision pd
+                  ON pd.request_id = r.id
+                WHERE r.status = 'IN_PROGRESS'
+                AND pd.id IS NULL
+                """;
+        List<RequestRow> requestRows = jdbcTemplate.query(query, PersistenceRowMappers.REQUEST);
+        if(requestRows.isEmpty()){
+            logger.info("No requests to process found.");
+            return result;
+        }
+
+        requestRows.stream().forEach(requestRow -> {
+            //request item..
+            List<RequestItemRow> requestItemRowList = findRequestItemByRequestId(requestRow.id());
+            logger.debug("Found {} request items of request id {}", requestItemRowList.size(), requestRow.id());
+
+            //messages of request...
+            List<MessageRow> messagesRequestRowList = findMessagesByRequestId(requestRow.id());
+            logger.debug("Found {} messages of request id {}", messagesRequestRowList.size(), requestRow.id());
+
+            //user..
+            Optional<UserAccountRow> userAccountRowOptional = findUserAccountById(requestRow.userId());
+            UserAccountRow userAccountRow = null;
+            if (userAccountRowOptional.isPresent()){
+                userAccountRow = userAccountRowOptional.get();
+                logger.debug("Found user id {} of request id {}", userAccountRow.id(), requestRow.id());
+            }else{
+                logger.debug("Request id {} has no user. ", requestRow.id());
+            }
+
+            result.add(PersistenceDomainMappers
+                    .toDomain(requestRow, userAccountRow, requestItemRowList, messagesRequestRowList));
+        });
+
+        return result;
     }
 
 

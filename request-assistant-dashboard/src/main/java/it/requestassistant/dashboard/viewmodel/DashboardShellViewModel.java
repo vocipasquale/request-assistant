@@ -101,5 +101,9 @@ public class DashboardShellViewModel {
         logger.debug("Message display id:{}",message.getEntryId());
         dashboardPort.showMessage(message);
     }
+
+    public List<PendingDecision> getRequestPendingDecisions() {
+        return dashboardPort.getRequestPendingDecisions();
+    }
 }
 

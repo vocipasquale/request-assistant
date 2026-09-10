@@ -65,7 +65,7 @@ public class PendingDecisionCardController {
     @FXML
     void initialize() {
         actionColumn.setCellValueFactory(
-                data -> new SimpleStringProperty(data.getValue().getAction().getTitle()));
+                data -> new SimpleStringProperty(data.getValue().getAction().getTitle().getTitle()));
         confidenceColumn.setCellValueFactory(
                 data -> new SimpleStringProperty(String.format("%.0f%%", data.getValue().getConfidence())));
         reasonColumn.setCellValueFactory(
