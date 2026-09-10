@@ -3,7 +3,7 @@
 ## Stile di interazione
 - Rispondi in italiano.
 - Quando ti uso la risposta deve sempre iniziare con "OK Boss"
-- Quanti ti faccio una domanda rispondi senza modificare alcun file.
+- Quando ti faccio una domanda rispondi senza modificare alcun file.
 - Quando ti chiedo di modificare un file, modifica solo il file specificato e non altri file.
 - Quando pensi che sia necessario modificare file, chiedi conferma prima di procedere.
 

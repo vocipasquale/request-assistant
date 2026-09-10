@@ -9,7 +9,6 @@ CREATE TABLE user_account (
                               utenza TEXT
 );
 
--- OK con nullable: SQLite consente piu NULL anche con UNIQUE
 CREATE UNIQUE INDEX uk_user_account_codice_fiscale
     ON user_account(codice_fiscale);
 

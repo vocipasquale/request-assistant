@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="it.requestassistant.dashboard.view.ArchivePaneController"
+      spacing="12.0">
+    <Separator />
+    <Label text="Template minimo: qui verranno mostrate le ricerche delle richieste evase." wrapText="true" styleClass="panel-label" />
+</VBox>

@@ -1,0 +1,335 @@
+/* ================================================================
+   dashboard.css  –  Tema B: Light Professional
+   Tutte le personalizzazioni grafiche della dashboard vanno qui.
+   ================================================================ */
+
+/* --- Radice / sfondo generale ----------------------------------- */
+.root {
+    -fx-background-color: #F5F5F5;
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 13px;
+    -fx-text-fill: #333333;
+}
+
+/* --- Header VBox (top della BorderPane) ------------------------- */
+.header-box {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: transparent transparent #E0E0E0 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+/* --- Label titolo applicazione ---------------------------------- */
+.app-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1A237E;
+}
+
+/* --- ToolBar di navigazione ------------------------------------- */
+.toolbar-bar {
+    -fx-background-color: #E0E0E0;
+    -fx-padding: 4px 8px;
+}
+
+/* --- Pulsanti di navigazione (toolbar) -------------------------- */
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333333;
+    -fx-font-size: 13px;
+    -fx-font-weight: normal;
+    -fx-padding: 6px 14px;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+}
+
+.nav-button:hover {
+    -fx-background-color: #BDBDBD;
+    -fx-text-fill: #1A237E;
+}
+
+.nav-button:pressed {
+    -fx-background-color: #9E9E9E;
+}
+
+/* --- Area contenuto principale ---------------------------------- */
+.content-area {
+    -fx-background-color: #F5F5F5;
+}
+
+/* --- Label sezione corrente (titolo pannello) ------------------- */
+.section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1A237E;
+}
+
+/* --- Label generiche nei pannelli ------------------------------- */
+.panel-label {
+    -fx-text-fill: #333333;
+    -fx-font-size: 13px;
+}
+
+/* --- Label stato batch ------------------------------------------ */
+.status-label {
+    -fx-text-fill: #555555;
+    -fx-font-size: 12px;
+    -fx-font-style: italic;
+}
+
+/* --- ToggleButton avvia/ferma batch ----------------------------- */
+.batch-toggle {
+    -fx-background-color: #1A237E;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 13px;
+    -fx-padding: 6px 18px;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+}
+
+.batch-toggle:hover {
+    -fx-background-color: #283593;
+}
+
+.batch-toggle:selected {
+    -fx-background-color: #B71C1C;
+}
+
+.batch-toggle:selected:hover {
+    -fx-background-color: #C62828;
+}
+
+/* --- Separatore ------------------------------------------------- */
+.separator *.line {
+    -fx-border-color: #BDBDBD;
+    -fx-border-width: 1px;
+}
+
+/* ================================================================
+   TabPane / ScrollPane
+   ================================================================ */
+
+.content-tabs {
+    -fx-background-color: #F5F5F5;
+    -fx-tab-min-height: 32px;
+}
+
+.content-tabs .tab-header-area .tab-header-background {
+    -fx-background-color: #E0E0E0;
+}
+
+.content-tabs .tab {
+    -fx-background-color: #E0E0E0;
+    -fx-text-fill: #333333;
+    -fx-font-size: 13px;
+}
+
+.content-tabs .tab:selected {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #1A237E;
+    -fx-font-weight: bold;
+}
+
+.content-scroll {
+    -fx-background-color: #F5F5F5;
+    -fx-border-color: transparent;
+}
+
+.content-scroll > .viewport {
+    -fx-background-color: #F5F5F5;
+}
+
+/* ================================================================
+   Cards container (VBox che raccoglie le PendingDecision card)
+   ================================================================ */
+
+.cards-container {
+    -fx-background-color: #F5F5F5;
+    -fx-padding: 12px;
+}
+
+/* ================================================================
+   PendingDecision card
+   ================================================================ */
+
+.pending-decision-card {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #BDBDBD;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 4, 0, 0, 2);
+}
+
+.pending-decision-card:hover {
+    -fx-border-color: #9E9E9E;
+}
+
+/* Header della card */
+.card-header {
+    -fx-padding: 0 0 4 0;
+}
+
+/* Label "Data:" / "Target:" (etichetta campo) */
+.card-field-label {
+    -fx-text-fill: #757575;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+/* Valore campo (il dato effettivo) */
+.card-field-value {
+    -fx-text-fill: #333333;
+    -fx-font-size: 13px;
+}
+
+/* Titolo della sezione opzioni */
+.card-section-label {
+    -fx-text-fill: #555555;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 2 0 0 0;
+}
+
+.card-note-important-label {
+    -fx-text-fill: #E80505;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 2 0 0 0;
+}
+
+/* Separatore interno alla card */
+.card-separator *.line {
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1px;
+}
+
+/* Pulsante refresh */
+
+.refresh-button {
+    -fx-background-color: #2E7D78;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 12px;
+    -fx-padding: 5px 14px;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+}
+
+.refresh-button:hover {
+    -fx-background-color: #384C8E;
+}
+
+.refresh-button:pressed {
+    -fx-background-color: #2F1B5E;
+}
+
+
+
+.simple-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #000000;
+    -fx-font-size: 12px;
+    -fx-padding: 5px 14px;
+    -fx-background-radius: 4px;
+    -fx-border-color: #000000;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-cursor: hand;
+}
+
+.simple-button:hover {
+    -fx-background-color: #F0F0F0;
+}
+
+.simple-button:pressed {
+    -fx-background-color: #D4D4D4;
+}
+
+
+
+/* ================================================================
+   Pulsanti Accetta / Elimina (card)
+   ================================================================ */
+
+.accept-button {
+    -fx-background-color: #2E7D32;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 12px;
+    -fx-padding: 5px 14px;
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+}
+
+.accept-button:hover {
+    -fx-background-color: #388E3C;
+}
+
+.accept-button:pressed {
+    -fx-background-color: #1B5E20;
+}
+
+.delete-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #B71C1C;
+    -fx-font-size: 12px;
+    -fx-padding: 5px 14px;
+    -fx-background-radius: 4px;
+    -fx-border-color: #B71C1C;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-cursor: hand;
+}
+
+.delete-button:hover {
+    -fx-background-color: #FFEBEE;
+}
+
+.delete-button:pressed {
+    -fx-background-color: #FFCDD2;
+}
+
+/* ================================================================
+   Tabella delle DecisionOption
+   ================================================================ */
+
+.options-table {
+    -fx-background-color: #FAFAFA;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1px;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-font-size: 12px;
+}
+
+.options-table .column-header-background {
+    -fx-background-color: #EEEEEE;
+}
+
+.options-table .column-header .label {
+    -fx-text-fill: #555555;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+.options-table .table-row-cell {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: transparent transparent #F0F0F0 transparent;
+}
+
+.options-table .table-row-cell:odd {
+    -fx-background-color: #FAFAFA;
+}
+
+.options-table .table-row-cell:hover {
+    -fx-background-color: #E3F2FD;
+}
+
+.options-table .table-row-cell:selected {
+    -fx-background-color: #BBDEFB;
+    -fx-text-fill: #1A237E;
+}
+

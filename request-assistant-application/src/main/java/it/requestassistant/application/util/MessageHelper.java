@@ -5,7 +5,7 @@ import it.requestassistant.domain.model.Message;
 public class MessageHelper {
 
     public static String extractTk(Message message) {
-        String subject = message.subject();
+        String subject = message.getSubject();
 
         int start = subject.indexOf('[');
         int end = subject.indexOf(']', start);

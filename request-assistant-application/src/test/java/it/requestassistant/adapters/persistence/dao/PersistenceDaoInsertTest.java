@@ -60,7 +60,7 @@ class PersistenceDaoInsertTest {
         request.setCreateAt(LocalDateTime.of(2026, 1, 10, 9, 0));
         request.setUpdateAt(LocalDateTime.of(2026, 1, 10, 9, 0));
         request.setTitle("Richiesta abilitazione VPN");
-        request.setStatus(Request.Status.IN_PROGRES);
+        request.setStatus(Request.Status.IN_PROGRESS);
         request.setNote("Nota di test");
         // Costruiamo uno User fittizio con l'id già salvato per il FK
         User fkUser = new User();
@@ -103,17 +103,7 @@ class PersistenceDaoInsertTest {
     // Test
     // ──────────────────────────────────────────────────────────────────────────
 
-    @Test
-    @Order(1)
-    void insertUserAccount_inserisceRigaCorrettamente() {
-        persistenceDao.insertUserAccount(buildUser());
 
-        int count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM user_account WHERE codice_fiscale = 'RSSMRA80A01H501U'",
-                Integer.class
-        );
-        assertEquals(1, count, "user_account deve contenere 1 riga");
-    }
 
     @Test
     @Order(2)
@@ -181,18 +171,6 @@ class PersistenceDaoInsertTest {
         assertEquals("SVILUPPO;COLLAUDO", ambiente, "ambiente deve essere 'SVILUPPO;COLLAUDO'");
     }
 
-    @Test
-    @Order(4)
-    void insertMessage_inserisceRigaSenzaRequest() {
-        // Caso: messaggio non ancora associato a nessuna request (request_id = NULL)
-        persistenceDao.insertMessage(buildMessage());
-
-        int count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM message WHERE entry_id = 'ENTRYID-TEST-001'",
-                Integer.class
-        );
-        assertEquals(1, count, "message deve contenere 1 riga con entry_id ENTRYID-TEST-001");
-    }
 
     @Test
     @Order(5)

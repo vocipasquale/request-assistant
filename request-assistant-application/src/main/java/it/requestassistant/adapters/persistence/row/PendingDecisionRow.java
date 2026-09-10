@@ -6,5 +6,7 @@ public record PendingDecisionRow(
         long id,
         LocalDateTime createdAt,
         String type,
-        String target
+        String target,
+        long messageId,
+        long requestId
 ) {}
