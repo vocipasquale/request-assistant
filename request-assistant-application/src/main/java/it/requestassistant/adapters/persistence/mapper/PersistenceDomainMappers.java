@@ -102,18 +102,15 @@ public final class PersistenceDomainMappers {
         return request;
     }
 
-    public static DecisionOption toDomain(DecisionOptionRow row, ActionRow actionRow, List<ActionStepRow> actionStepRows) {
+    public static DecisionOption toDomain(DecisionOptionRow row, ActionRow actionRow) {
         return new DecisionOption(
                 row.id(),
-                PersistenceDomainMappers.toDomain(actionRow, actionStepRows),
+                PersistenceDomainMappers.toDomain(actionRow),
                 row.confidence() == null ? 0.0d : row.confidence(),
                 row.reasons()
         );
     }
 
-    public static Action toDaman(ActionRow row, List<String> steps){
-        return new Action(Action.Title.fromTitle(row.title()), steps);
-    }
 
     public static String toDomain(ActionStepRow row){
         return  row.stepDescription();
@@ -122,14 +119,14 @@ public final class PersistenceDomainMappers {
     public static PendingDecision toDomain(PendingDecisionRow row, List<DecisionOptionRow> optionRows,
                                            MessageRow messageRow, RequestRow requestRow, List<RequestItemRow> requestItemRowList,
                                            UserAccountRow userAccountRow, List<MessageRow> messagesRequestRowList,
-                                           ActionRow actionRow, List<ActionStepRow> actionStepRows) {
+                                           ActionRow actionRow) {
 
 
         List<DecisionOption> options = new ArrayList<>(optionRows == null
                 ? Collections.emptyList()
                 : optionRows.stream()
                 .map(optionRow ->
-                        PersistenceDomainMappers.toDomain(optionRow, actionRow, actionStepRows)).toList());
+                        PersistenceDomainMappers.toDomain(optionRow, actionRow)).toList());
 
 
         logger.debug("Mapping PendingDecisionRow to PendingDecision with {} options", options.size());
@@ -249,18 +246,16 @@ public final class PersistenceDomainMappers {
         );
     }
 
-    public static Action toDomain(ActionRow row, List<ActionStepRow> stepRows) {
+    public static Action toDomain(ActionRow row) {
         if (row == null) {
             return null;
         }
-        List<String> steps = stepRows == null
-                ? Collections.emptyList()
-                : stepRows.stream().map(ActionStepRow::stepDescription).toList();
-        return new Action(Action.Title.fromTitle(row.title()), steps);
+
+        return new Action(Action.Title.fromTitle(row.title()), row.aiResponse());
     }
 
     public static ActionRow toRow(Action action) {
-        return new ActionRow(0L, action.getTitle().getTitle());
+        return new ActionRow(0L, action.getTitle().getTitle(), action.getAiResponse());
     }
 
     public static ActionStepRow toRow(long actionId, String stepDescription) {

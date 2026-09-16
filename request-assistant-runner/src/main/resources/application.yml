@@ -12,3 +12,13 @@ mail.folder:
   in_lavorazione: in_lavorazione
   evase: evase
   scartate: scartate
+
+log:
+  path: /logs
+  level: INFO
+
+ai:
+  api:
+    #key: ${AI_API_KEY}
+    model: qwen3-8b-request-assistant-v4
+    base-url: http://192.168.1.9:11434

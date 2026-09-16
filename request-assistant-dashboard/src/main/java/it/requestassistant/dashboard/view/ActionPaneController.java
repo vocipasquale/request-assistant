@@ -15,6 +15,8 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @FxmlView("/it/requestassistant/dashboard/view/action-pane.fxml")
@@ -27,7 +29,7 @@ public class ActionPaneController {
     @FXML private Label reasonsLabel;
 
     @FXML private Label actionTitleLabel;
-  //  @FXML private Label actionStepsCountLabel;
+    @FXML private Label actionStepsCountLabel;
     @FXML private ListView<String> actionStepsList;
     @FXML private Button viewMesssageButton;
 
@@ -51,7 +53,7 @@ public class ActionPaneController {
         Action action = option.getAction();
         actionTitleLabel.setText(action.getTitle().getTitle());
        // actionStepsCountLabel.setText(String.valueOf(action.steps().size()));
-        actionStepsList.setItems(FXCollections.observableArrayList(action.getSteps()));
+        actionStepsList.setItems(FXCollections.observableArrayList(List.of()));
         viewMesssageButton.setDisable(message == null);
     }
 

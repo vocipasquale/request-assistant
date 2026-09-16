@@ -22,19 +22,19 @@ public class MessagePortAdapter implements MessagePort {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Value("${mail.folder.root}")
-    private String rootFolderName = "Pa.Voci@almaviva.it";
+    private String rootFolderName; // = "Pa.Voci@almaviva.it";
 
     @Value("${mail.folder.in_arrivo}")
-    private String inArrivoFolderName = "RichiesteAbilitazioni";
+    private String inArrivoFolderName; // = "RichiesteAbilitazioni";
 
     @Value("${mail.folder.in_lavorazione}")
-    private String inLavorazioneFolderName = "in_lavorazione"; // Pa.Voci@almaviva.it/RichiesteAbilitazioni/in_lavorazione
+    private String inLavorazioneFolderName; // = "in_lavorazione"; // Pa.Voci@almaviva.it/RichiesteAbilitazioni/in_lavorazione
 
     @Value("${mail.folder.evase}")
-    private String evaseFolderName = "evase"; // Pa.Voci@almaviva.it/RichiesteAbilitazioni/evase
+    private String evaseFolderName; // = "evase"; // Pa.Voci@almaviva.it/RichiesteAbilitazioni/evase
 
     @Value("${mail.folder.scartate}")
-    private String scartateFolderName = "scartate"; // Pa.Voci@almaviva.it/RichiesteAbilitazioni/scartate
+    private String scartateFolderName; // = "scartate"; // Pa.Voci@almaviva.it/RichiesteAbilitazioni/scartate
 
     private ActiveXComponent outlook;
     private Dispatch namespace;

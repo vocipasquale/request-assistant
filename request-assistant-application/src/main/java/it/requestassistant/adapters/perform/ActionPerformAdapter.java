@@ -27,22 +27,20 @@ public class ActionPerformAdapter implements ActionPerformerPort {
     @Override
     @Transactional
     public void perform(PendingDecision pendingDecision, DecisionOption decisionOption) throws Exception {
-        logger.info("Performing actions for decision option: " + decisionOption.getId());
+        logger.debug("Esecuzione azioni decision id {}: " + decisionOption.getId());
         Action action = decisionOption.getAction();
-        List<String> steps = action.getSteps();
+
+        logger.info("Azione {}",action.getTitle().getTitle());
+
+
 
         //per ora lascio questo controllo, poi capirò se toglierlo...
-        if (Objects.isNull(pendingDecision.getMessage())) {
-            logger.error("Pending decision {} has no associated message. Cannot perform actions!", pendingDecision.getId());
-            throw new Exception("Pending decision has no associated message. Cannot perform actions!");
-        }
-
-        for (String step : steps) {
-            logger.info("Executing step: " + step);
-            //....
+//        if (Objects.isNull(pendingDecision.getMessage())) {
+//            logger.error("Pending decision {} has no associated message. Cannot perform actions!", pendingDecision.getId());
+//            throw new Exception("Pending decision has no associated message. Cannot perform actions!");
+//        }
 
 
-        }
 
         // Simulo due azioni:
         // 1. creo una nuova request e le associo il messaggio della pending decision

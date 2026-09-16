@@ -1,27 +1,30 @@
 package it.requestassistant.domain.model;
 
-import java.util.List;
-
 public class Action{
     private long id;
     private Title title;
-    private List<String> steps;
+    private String aiResponse;
 
     public Action (){}
 
-    public Action(Title title, List<String> steps) {
-        this.title = title;
-        this.steps = steps;
+    public Action(String action) {
+        this.title = Title.fromName(action);
     }
 
-    public Action(long id, Title title, List<String> steps) {
+    public Action(Title title, String aiResponse) {
+        this.title = title;
+        this.aiResponse = aiResponse;
+    }
+
+    public Action(long id, Title title, String aiResponse) {
         this.id = id;
         this.title = title;
-        this.steps = steps;
+        this.aiResponse = aiResponse;
     }
 
     public enum Title {
-        INVIA_MAIL("Invia mail"),
+        RISPONDI_A_MAIL("Rispondi a mail"),
+        INOLTRA_MAIL("Inoltra mail"),
         NUOVA_RICHIESTA("Nuova richiesta"),
         MODIFICA_RICHIESTA("Modifica richiesta"),
         CHIUDI_RICHIESTA("Chiudi richiesta");
@@ -44,6 +47,16 @@ public class Action{
             }
             throw new IllegalArgumentException("Tipo azione non supportato: " + title);
         }
+
+        public static Title fromName(String name) {
+            for (Title t : values()) {
+                if (t.name().equalsIgnoreCase(name)) {
+                    return t;
+                }
+            }
+            throw new IllegalArgumentException("Tipo azione non supportato: " + name);
+        }
+
     }
 
     public long getId() {
@@ -62,11 +75,11 @@ public class Action{
         this.title = title;
     }
 
-    public List<String> getSteps() {
-        return steps;
+    public String getAiResponse() {
+        return aiResponse;
     }
 
-    public void setSteps(List<String> steps) {
-        this.steps = steps;
+    public void setAiResponce(String aiResponse) {
+        this.aiResponse = aiResponse;
     }
 }

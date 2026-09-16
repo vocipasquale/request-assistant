@@ -468,11 +468,6 @@ public class PersistenceDao implements PersistenceDaoPort {
         //insert Action...
         long actionId = insertAction(decisionOption.getAction());
 
-        //insert action steps...
-        decisionOption.getAction().getSteps().forEach(step -> {
-            insertActionStep(step, actionId);
-        });
-
         //insert decision options...
         String query = """
                 INSERT INTO decision_option (pending_decision_id, action_id, confidence, reasons)
@@ -488,21 +483,9 @@ public class PersistenceDao implements PersistenceDaoPort {
         logger.debug("Decision option saved for pending decision id:{}", pendingDecisionId);
     }
 
-    private void insertActionStep(String step, long actionId) {
-        String query = """
-                INSERT INTO action_step (action_id, step_description)
-                VALUES (?, ?)
-                """;
-        ActionStepRow row = PersistenceDomainMappers.toRow(actionId, step);
-        jdbcTemplate.update(query,
-                row.actionId(),
-                row.stepDescription()
-        );
-        logger.debug("Action step saved for action id:{}", actionId);
-    }
 
     private long insertAction(Action action) {
-        String queryAct = "INSERT INTO action (title) VALUES (?)";
+        String queryAct = "INSERT INTO action (title, ai_response) VALUES (?, ?)";
 
         ActionRow actionRow = PersistenceDomainMappers.toRow(action);
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -510,6 +493,7 @@ public class PersistenceDao implements PersistenceDaoPort {
         jdbcTemplate.update(con -> {
             var ps = con.prepareStatement(queryAct, java.sql.Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, actionRow.title());
+            ps.setString(2, actionRow.aiResponse());
             return ps;
         }, keyHolder);
         long actionId = keyHolder.getKey().longValue();
@@ -604,15 +588,13 @@ public class PersistenceDao implements PersistenceDaoPort {
 
             if(actionRowOptional.isPresent()){
                 actionRow = actionRowOptional.get();
-                actionStepRows = findActionSteps(actionRow.id());
             }else{
-               actionRow = new ActionRow(0L, "Nessuna azione proposta.");
-                actionStepRows = new ArrayList<>();
+               actionRow = new ActionRow(0L, "Nessuna azione proposta.", "");
             }
 
             result.add(new DecisionOption(
                     decisionOptionRow.id(),
-                    PersistenceDomainMappers.toDomain(actionRow, actionStepRows),
+                    PersistenceDomainMappers.toDomain(actionRow),
                     decisionOptionRow.confidence(),
                     decisionOptionRow.reasons()
             ));
@@ -627,10 +609,6 @@ public class PersistenceDao implements PersistenceDaoPort {
                         .findFirst();
     }
 
-    private List<ActionStepRow> findActionSteps(long actionId){
-        String queryAc = "SELECT * FROM action_step WHERE action_id = ?";
-        return jdbcTemplate.query(queryAc, PersistenceRowMappers.ACTION_STEP, actionId);
-    }
 
     private Optional<MessageRow> findMessageById(long id){
         String queryMs = """
@@ -709,13 +687,6 @@ public class PersistenceDao implements PersistenceDaoPort {
 
         decisionOptionList.forEach(option -> {
             long actionId = option.actionId();
-            logger.debug("Deleting action steps for action id:{}", actionId);
-            String queryActionSteps = """
-                    DELETE FROM action_step
-                    WHERE action_id = ?
-                    """;
-            int deletedSteps = jdbcTemplate.update(queryActionSteps, actionId);
-            logger.info("Deleted {} action steps for action id:{}", deletedSteps, actionId);
 
             logger.debug("Deleting action with id:{}", actionId);
             String queryAction = """
