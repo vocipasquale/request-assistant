@@ -60,25 +60,25 @@ public class MessagePortAdapter implements MessagePort {
         logger.info("Namespace recuperato.");
 
         rootFolder = findFolder(namespace, rootFolderName); //pa.voci@almaviva.it
-        if (Objects.isNull(rootFolder)) throw new Exception("Root folder " + rootFolderName + " non trovato!");
-        logger.info("Root folder " + rootFolderName + " trovato.");
+        if (Objects.isNull(rootFolder)) throw new Exception("Cartella radice " + rootFolderName + " non trovata!");
+        logger.info("Cartella radice " + rootFolderName + " trovata.");
 
         inArrivoFolder = findFolder(rootFolder, inArrivoFolderName);
-        if (Objects.isNull(inArrivoFolder)) throw new Exception("Folder " + inArrivoFolderName + " non trovato!");
-        logger.info("Folder " + inArrivoFolderName + " trovato.");
+        if (Objects.isNull(inArrivoFolder)) throw new Exception("Cartella " + inArrivoFolderName + " non trovata!");
+        logger.info("Cartella " + inArrivoFolderName + " trovata.");
 
         inLavorazioneFolder = findFolder(inArrivoFolder, inLavorazioneFolderName);
         if (Objects.isNull(inLavorazioneFolder))
-            throw new Exception("Folder " + inLavorazioneFolderName + " non trovato!");
-        logger.info("Folder " + inLavorazioneFolderName + " trovato.");
+            throw new Exception("Cartella " + inLavorazioneFolderName + " non trovata!");
+        logger.info("Cartella " + inLavorazioneFolderName + " trovata.");
 
         evaseFolder = findFolder(inArrivoFolder, evaseFolderName);
-        if (Objects.isNull(evaseFolder)) throw new Exception("Folder " + evaseFolderName + " non trovato!");
-        logger.info("Folder " + evaseFolderName + " trovato.");
+        if (Objects.isNull(evaseFolder)) throw new Exception("Cartella " + evaseFolderName + " non trovata!");
+        logger.info("Cartella " + evaseFolderName + " trovata.");
 
         scartateFolder = findFolder(inArrivoFolder, scartateFolderName);
-        if (Objects.isNull(scartateFolder)) throw new Exception("Folder " + scartateFolderName + " non trovato!");
-        logger.info("Folder " + scartateFolderName + " trovato.");
+        if (Objects.isNull(scartateFolder)) throw new Exception("Cartella " + scartateFolderName + " non trovata!");
+        logger.info("Cartella " + scartateFolderName + " trovata.");
     }
 
     /**
@@ -125,7 +125,7 @@ public class MessagePortAdapter implements MessagePort {
     }
 
     /**
-     * metedo di utility, restituisce il dispatch del folder che contiene la mail con entryId passato per input.
+     * metodo di utilità, restituisce il dispatch della cartella che contiene la mail con entryId passato in input.
      *
      * @param sourceFolder
      * @param entryId
@@ -135,7 +135,7 @@ public class MessagePortAdapter implements MessagePort {
         Dispatch mail = null;
         boolean trovata = false;
 
-        logger.debug("Ricerca mail con entryId {} nel folder {}",
+        logger.debug("Ricerca mail con entryId {} nella cartella {}",
                 entryId, Dispatch.get(sourceFolder, "Name").getString());
 
         Dispatch items =
@@ -247,7 +247,7 @@ public class MessagePortAdapter implements MessagePort {
 
 
     /**
-     * Rimappa la "mail" in "message"
+     * Converte la "mail" in "message"
      *
      * @param mail
      * @return
@@ -283,7 +283,7 @@ public class MessagePortAdapter implements MessagePort {
 
 
     /**
-     * restituisce il forder cercato partendo da una posizione
+     * restituisce la cartella cercata partendo da una posizione
      *
      * @param startFolder
      * @param targetFolderName
@@ -295,10 +295,10 @@ public class MessagePortAdapter implements MessagePort {
 
         Dispatch folders =
                 Dispatch.get(startFolder, "Folders").toDispatch();
-        logger.info("Prelevati folders");
+        logger.info("Cartelle recuperate");
 
         int count = Dispatch.get(folders, "Count").getInt();
-        logger.info("Folder trovati: " + count);
+        logger.info("Cartelle trovate: " + count);
 
         for (int i = 1; i <= count && !trovata; i++) {
             foundFolder = Dispatch.call(

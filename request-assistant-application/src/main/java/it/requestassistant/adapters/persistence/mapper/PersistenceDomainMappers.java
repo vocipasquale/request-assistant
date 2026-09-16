@@ -129,17 +129,17 @@ public final class PersistenceDomainMappers {
                         PersistenceDomainMappers.toDomain(optionRow, actionRow)).toList());
 
 
-        logger.debug("Mapping PendingDecisionRow to PendingDecision with {} options", options.size());
+        logger.debug("Mapping di PendingDecisionRow verso PendingDecision con {} opzioni", options.size());
 
         Message message = Objects.isNull(messageRow)
             ? null
             : PersistenceDomainMappers.toDomain(messageRow);
-        logger.debug("Mapping message id {} for  PendingDecision id {}", message.getEntryId(), row.id());
+        logger.debug("Mapping del messaggio id {} per la PendingDecision id {}", message.getEntryId(), row.id());
 
         Request request = Objects.isNull(PersistenceDomainMappers.toDomain(requestRow, userAccountRow, requestItemRowList, messagesRequestRowList))
                 ? null
                 : PersistenceDomainMappers.toDomain(requestRow, userAccountRow, requestItemRowList, messagesRequestRowList);
-        logger.debug("Mapping request for  PendingDecision id {}", row.id());
+        logger.debug("Mapping della request per la PendingDecision id {}", row.id());
 
         return new PendingDecision(
                 row.id(),
@@ -159,12 +159,12 @@ public final class PersistenceDomainMappers {
         return Enum.valueOf(enumClass, rawValue.trim().toUpperCase(Locale.ROOT));
     }
 
-    // ============ Domain -> Row Mapping ============
+    // ============ Mapping Dominio -> Riga ============
 
     public static MessageRow toRow(Message message) {
         return new MessageRow(
                 -1L,    // id generato dal DB
-                -1L,  // requestId da settare se necessario
+                -1L,  // requestId da impostare se necessario
                 message.getSubject(),
                 message.getSenderAddress(),
                 message.getReceivedAt(),
@@ -200,7 +200,7 @@ public final class PersistenceDomainMappers {
         }
         return new RequestItemRow(
                 0L,    // id generato dal DB
-                null,  // requestId da settare se necessario
+                null,  // requestId da impostare se necessario
                 item.getType() != null ? item.getType().name() : null,
                 item.getCreateAt(),
                 item.getUpdateAt(),
@@ -235,7 +235,7 @@ public final class PersistenceDomainMappers {
     }
 
     public static PendingDecisionRow toRow(PendingDecision pendingDecision) {
-        //usato SOLO dalla INSERT
+        //usato SOLO dall'INSERT
         return new PendingDecisionRow(
                 0L, // id generato dal DB
                 pendingDecision.getCreatedAt(),

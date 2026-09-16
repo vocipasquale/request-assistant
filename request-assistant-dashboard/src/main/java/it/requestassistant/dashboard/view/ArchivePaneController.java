@@ -10,7 +10,7 @@ public class ArchivePaneController {
 
     @FXML
     void initialize() {
-        // Template iniziale: logica della sezione Archive da estendere.
+        // Template iniziale: logica della sezione Archivio da estendere.
     }
 }
 

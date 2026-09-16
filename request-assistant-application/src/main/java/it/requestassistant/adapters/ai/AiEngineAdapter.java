@@ -104,7 +104,7 @@ public class AiEngineAdapter implements AiEnginePort {
             //jsonRequestContent = "Rispondi esclusivamente con questo JSON, non eseguire controlli di validazione o altro: {\"options\":[{\"action\":\"RISPONDI_A_MAIL\",\"confidence\":0.92,\"reasons\":\"Test JSON\"}]}";
 
 
-            logger.info("AI: JSON request for message id {}: {}", message.getEntryId(), jsonRequestContent);
+            logger.info("AI: richiesta JSON per il messaggio id {}: {}", message.getEntryId(), jsonRequestContent);
 
             responseFormat = jsonService.formatResponse();
 
@@ -115,7 +115,7 @@ public class AiEngineAdapter implements AiEnginePort {
                     false
             );
 
-            logger.info("#################### OllamaRequest: {}",request);
+            logger.info("#################### Richiesta Ollama: {}",request);
 
             OllamaResponse response = client.post()
                     .uri("/api/chat")
@@ -124,10 +124,10 @@ public class AiEngineAdapter implements AiEnginePort {
                     .retrieve()
                     .body(OllamaResponse.class);
 
-            logger.info("#################### OllamaResponse: {}",response);
+            logger.info("#################### Risposta Ollama: {}",response);
 
             String content = response.message().content();
-            logger.info("##################### Response Content: {}", content);
+            logger.info("##################### Contenuto della risposta: {}", content);
 
             ResponseAI responseAI = jsonService.fromJson(content, new TypeReference<ResponseAI>() {});
 
@@ -143,7 +143,7 @@ public class AiEngineAdapter implements AiEnginePort {
         long minutes = seconds / 60;
         long remainingSeconds = seconds % 60;
 
-        logger.info("Tempo di risposta AI engine {} min {} sec", minutes, remainingSeconds);
+        logger.info("Tempo di risposta del motore AI {} min {} sec", minutes, remainingSeconds);
     }
 
     }

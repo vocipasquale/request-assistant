@@ -23,7 +23,7 @@ public class PlaygroundProcess {
 
     public void runOnce() throws Exception {
         logger.info("=================================");
-        logger.info(" Request Assistant - Playground");
+        logger.info(" Assistente Richieste - Playground");
         logger.info("=================================");
 
         processMessages();
@@ -42,7 +42,7 @@ public class PlaygroundProcess {
 
         logger.info("Trovate " + requests.size() + " richieste da processare!");
         requests.stream().forEach(request ->{
-            logger.debug("Request id {} in lavorazione..." + request.getId());
+            logger.debug("Richiesta id {} in lavorazione..." + request.getId());
             batchPort.processRequest(request);
         });
     }
@@ -58,19 +58,19 @@ public class PlaygroundProcess {
         logger.info("Trovate " + messages.size() + " mail!");
 
         for (Message message : messages) {
-            logger.debug("Process message mailID: " + message.getEntryId());
+            logger.debug("Elaboro il messaggio mailID: " + message.getEntryId());
 
             if (batchPort.processMessage(message)) {//processamento messaggio
-                logger.debug("Message processed successfully mailID: " + message.getEntryId());
+                logger.debug("Messaggio elaborato correttamente, mailID: " + message.getEntryId());
                 moveMessageInProgress(message);
             } else {
-                logger.debug("Message processing failed mailID: " + message.getEntryId());
+                logger.debug("Elaborazione del messaggio fallita, mailID: " + message.getEntryId());
             }
         }
     }
 
     private void moveMessageInProgress(Message message) throws Exception {
-            logger.debug("Move mail in to InProgress, mailID: " + message.getEntryId());
+            logger.debug("Sposto la mail in lavorazione, mailID: " + message.getEntryId());
             batchPort.moveMessageInProgress(message);
     }
 }

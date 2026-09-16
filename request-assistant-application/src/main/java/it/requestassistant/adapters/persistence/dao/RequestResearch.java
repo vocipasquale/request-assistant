@@ -27,8 +27,8 @@ public class RequestResearch implements RequestResearchPort {
      * Per ora mi limito ad eseguire un ricerca su database
      * ma l'obiettivo finale e di delegare la ricerca al motore AI.
      *
-     * 1. ricerca di Request con Message che hanno stesso "ConversationID" del message in input
-     * 2. ricerca di Request con RequestItem che hanno tk uguale a quello contenuto nell'oggetto del Message in input
+     * 1. ricerca di Request con Message che hanno lo stesso "ConversationID" del messaggio in input
+     * 2. ricerca di Request con RequestItem che hanno tk uguale a quello contenuto nell'oggetto Message in input
      * 3. ...altro
      *
      * @param message
@@ -36,7 +36,7 @@ public class RequestResearch implements RequestResearchPort {
      */
     @Override
     public Request searchByMessage(Message message) {
-        logger.debug("searchByMessage....");
+        logger.debug("Eseguo searchByMessage...");
         Request result = null;
 
         logger.info("Ricerca request per coversationId: "+message.getConversationId());

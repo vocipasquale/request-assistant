@@ -1,0 +1,11 @@
+permessi
+
+chown -R ollama:ollama /usr/share/ollama/model-definitions/request-assistant/v4
+chmod 750 /usr/share/ollama/model-definitions/request-assistant/v4
+chmod 640 /usr/share/ollama/model-definitions/request-assistant/v4/Modelfile
+
+
+modello personalizzato
+
+cd /usr/share/ollama/model-definitions/request-assistant/v4
+ollama create qwen3-8b-request-assistant-v4 -f Modelfile

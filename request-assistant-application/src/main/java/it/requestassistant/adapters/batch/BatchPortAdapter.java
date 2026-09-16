@@ -41,23 +41,23 @@ public class BatchPortAdapter implements BatchPort  {
     @Override
     public void moveMessageInProgress(Message message) throws Exception {
         Message movedMessage = messagePort.moveMessageInProgress(message);
-        logger.debug("Refresh entryId, old: {}", message.getEntryId());
-        logger.debug("Refresh entryId, new : {}", movedMessage.getEntryId());
+        logger.debug("Aggiorno entryId, precedente: {}", message.getEntryId());
+        logger.debug("Aggiorno entryId, nuovo: {}", movedMessage.getEntryId());
         persistenceDaoPort.refreshEntryIdMessage(message.getEntryId(), movedMessage.getEntryId());
     }
 
     @Override
     public boolean processMessage(Message message) {
-        logger.debug("Research request for message entryID {}", message.getEntryId());
+        logger.debug("Ricerca request per entryId del messaggio {}", message.getEntryId());
         Request request = requestResearchPort.searchByMessage(message);
 
         //sottopongo il risultato della ricerca all'AI
         //AI si preoccupa di creare le proposte/decisioni che dovrà prendere l'operatore
-        logger.debug("Result analysis using an AI engine...");
+        logger.debug("Analisi del risultato tramite motore AI...");
         PendingDecision pendingDecision = aiAnalyzerPort.analyzeMessage(message, request);
 
-        //persist in to DB
-        logger.debug("All persist on database.");
+        //persisto su database
+        logger.debug("Persistenza completa su database.");
         persistToDb(pendingDecision);
 
         return true;
@@ -80,7 +80,7 @@ public class BatchPortAdapter implements BatchPort  {
     }
 
     private void persistToDb(PendingDecision pendingDecision){
-        //...logging in dao...
+        //...logging nel dao...
         persistenceDaoPort.insertPendingDecision(pendingDecision);
     }
 }

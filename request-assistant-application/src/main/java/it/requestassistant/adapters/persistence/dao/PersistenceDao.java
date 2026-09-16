@@ -99,7 +99,7 @@ public class PersistenceDao implements PersistenceDaoPort {
         List<RequestRow> requestRows = jdbcTemplate.query(requestByIdQuery, PersistenceRowMappers.REQUEST, requestId);
         if (requestRows.isEmpty()) {
             //caso improbabile, il requestId trovato non è associato ad alcuna request
-            logger.warn("Request {} non trovata partendo da conversationId {}", requestId, conversationId);
+            logger.warn("Richiesta {} non trovata partendo da conversationId {}", requestId, conversationId);
             return null;
         }
 
@@ -107,7 +107,7 @@ public class PersistenceDao implements PersistenceDaoPort {
         RequestRow requestRow = requestRows.getFirst();
         List<UserAccountRow> userRows = jdbcTemplate.query(userByIdQuery, PersistenceRowMappers.USER_ACCOUNT, requestRow.userId());
         if (userRows.isEmpty()) {
-            logger.warn("User {} non trovato per requestId {}", requestRow.userId(), requestId);
+            logger.warn("Utente {} non trovato per requestId {}", requestRow.userId(), requestId);
             return null;
         }
 
@@ -148,13 +148,13 @@ public class PersistenceDao implements PersistenceDaoPort {
                 ORDER BY created_at DESC
                 """;
 
-        //get pending decision...
+        //recupero le pending decision...
         pendingDecisionsRow = jdbcTemplate.query(
                 queryPd,
                 PersistenceRowMappers.PENDING_DECISION);
-        logger.debug("Found {} pending decisions of type {}", pendingDecisionsRow.size(), type);
+        logger.debug("Trovate {} pending decision di tipo {}", pendingDecisionsRow.size(), type);
 
-        //relations...
+        //relazioni...
         pendingDecisionsRow.forEach(pdRow -> {;
             MessageRow messageRow = null; //message della pending decision...
             RequestRow requestRow = null; //request
@@ -162,13 +162,13 @@ public class PersistenceDao implements PersistenceDaoPort {
             List<MessageRow> messagesRequestRowList =null; //messages della request...
             UserAccountRow userAccountRow = null; //user della request...
 
-            //message of pending decision...
+            //messaggio della pending decision...
             Optional<MessageRow> messageRowOptional = findMessageById(pdRow.messageId());
             if(messageRowOptional.isPresent()) {
                 messageRow = messageRowOptional.get();
-                logger.debug("Found message id {} of pending decision id {}", messageRow.id(), pdRow.id());
+                logger.debug("Trovato il messaggio id {} della pending decision id {}", messageRow.id(), pdRow.id());
             }else {
-                logger.debug("Pending decision id {} has no user. ", pdRow.id());
+                logger.debug("La pending decision id {} non ha utente. ", pdRow.id());
             }
 
             ///////////////////////////////////////////////////////////////////////////////////////////
@@ -176,33 +176,33 @@ public class PersistenceDao implements PersistenceDaoPort {
             Optional<RequestRow> requestRowOptional = findRequestById(pdRow.requestId());
             if(requestRowOptional.isPresent()){
                requestRow = requestRowOptional.get();
-               logger.debug("Found request id {} of pending decision id {}", requestRow.id(), pdRow.id());
+               logger.debug("Trovata la request id {} della pending decision id {}", requestRow.id(), pdRow.id());
 
                 //request item..
                 requestItemRowList = findRequestItemByRequestId(requestRow.id());
-                logger.debug("Found {} request items of request id {}", requestItemRowList.size(), requestRow.id());
+                logger.debug("Trovati {} elementi della request id {}", requestItemRowList.size(), requestRow.id());
 
-                //messages of request...
+                //messaggi della request...
                 messagesRequestRowList = findMessagesByRequestId(requestRow.id());
-                logger.debug("Found {} messages of request id {}", messagesRequestRowList.size(), requestRow.id());
+                logger.debug("Trovati {} messaggi della request id {}", messagesRequestRowList.size(), requestRow.id());
 
                 //user..
                 Optional<UserAccountRow> userAccountRowOptional = findUserAccountById(requestRow.userId());
                 if (userAccountRowOptional.isPresent()){
                     userAccountRow = userAccountRowOptional.get();
-                    logger.debug("Found user id {} of request id {}", userAccountRow.id(), requestRow.id());
+                    logger.debug("Trovato l'utente id {} della request id {}", userAccountRow.id(), requestRow.id());
                 }else{
-                    logger.debug("Request id {} has no user. ", requestRow.id());
+                    logger.debug("La request id {} non ha utente. ", requestRow.id());
                 }
             }else {
-                logger.debug("Pending decision id {} has no request. ", pdRow.id());
+                logger.debug("La pending decision id {} non ha request. ", pdRow.id());
             }
             ///////////////////////////////////////////////////////////////////////////////////////////////
 
             ///////////////////////////////////////////////////////////////////////////////////////////////
-            //decision options...
+            //decision option...
             List<DecisionOption> decisionOption = findDecisionOptionsByPendingDecisionId(pdRow.id());
-            logger.debug("Found {} decisions options for pending decision id {}", decisionOption.size(), pdRow.id());
+            logger.debug("Trovate {} decision option per la pending decision id {}", decisionOption.size(), pdRow.id());
             ///////////////////////////////////////////////////////////////////////////////////////////////
 
             result.add(new PendingDecision(
@@ -232,13 +232,13 @@ public class PersistenceDao implements PersistenceDaoPort {
         deleteMessageById(pendingDecision.getId());
 
         //delete pending decision
-        logger.debug("Deleting pending decision by id:{}",pendingDecision.getId());
+        logger.debug("Elimino la pending decision con id:{}",pendingDecision.getId());
         String query = """
                 DELETE FROM pending_decision
                 WHERE id = ?
                 """;
         int deleted = jdbcTemplate.update(query, pendingDecision.getId());
-        logger.info("Deleted {} pending decision with id:{}",deleted, pendingDecision.getId());
+        logger.info("Eliminate {} decisioni pendenti con id:{}",deleted, pendingDecision.getId());
     }
 
     @Override
@@ -332,27 +332,27 @@ public class PersistenceDao implements PersistenceDaoPort {
                 """;
         List<RequestRow> requestRows = jdbcTemplate.query(query, PersistenceRowMappers.REQUEST);
         if(requestRows.isEmpty()){
-            logger.info("No requests to process found.");
+            logger.info("Nessuna richiesta da elaborare trovata.");
             return result;
         }
 
         requestRows.stream().forEach(requestRow -> {
             //request item..
             List<RequestItemRow> requestItemRowList = findRequestItemByRequestId(requestRow.id());
-            logger.debug("Found {} request items of request id {}", requestItemRowList.size(), requestRow.id());
+            logger.debug("Trovati {} elementi della request id {}", requestItemRowList.size(), requestRow.id());
 
-            //messages of request...
+            //messaggi della request...
             List<MessageRow> messagesRequestRowList = findMessagesByRequestId(requestRow.id());
-            logger.debug("Found {} messages of request id {}", messagesRequestRowList.size(), requestRow.id());
+            logger.debug("Trovati {} messaggi della request id {}", messagesRequestRowList.size(), requestRow.id());
 
             //user..
             Optional<UserAccountRow> userAccountRowOptional = findUserAccountById(requestRow.userId());
             UserAccountRow userAccountRow = null;
             if (userAccountRowOptional.isPresent()){
                 userAccountRow = userAccountRowOptional.get();
-                logger.debug("Found user id {} of request id {}", userAccountRow.id(), requestRow.id());
+                logger.debug("Trovato l'utente id {} della request id {}", userAccountRow.id(), requestRow.id());
             }else{
-                logger.debug("Request id {} has no user. ", requestRow.id());
+                logger.debug("La request id {} non ha utente. ", requestRow.id());
             }
 
             result.add(PersistenceDomainMappers
@@ -375,26 +375,26 @@ public class PersistenceDao implements PersistenceDaoPort {
 
         String queryPd = "";
 
-        //persist message
+        //persisto il messaggio
         long messageId = insertMessage(pendingDecision.getMessage());
 
         //la request NON va salvata/aggiornata ora...
         if(Objects.isNull(pendingDecision.getRequest())){
-            logger.debug("Request absent in pending decision...");
+            logger.debug("Richiesta assente nella pending decision...");
             queryPd = """
                 INSERT INTO pending_decision (created_at, type, target, message_id)
                 VALUES (?, ?, ?, ?)
                 """;
         }else{
             //ATTENZIONE AL ps.setLong(4, pendingDecision.getId());
-            logger.debug("Request already saved in the database...");
+            logger.debug("Richiesta già salvata nel database...");
             queryPd = """
                 INSERT INTO pending_decision (created_at, type, target, message_id, request_id)
                 VALUES (?, ?, ?, ?, ?)
                 """;
         }
 
-        //Persist pending decision...
+        //persisto la pending decision...
         PendingDecisionRow pendingDecisionRow = PersistenceDomainMappers.toRow(pendingDecision);
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -411,9 +411,9 @@ public class PersistenceDao implements PersistenceDaoPort {
             return ps;
         }, keyHolder);
         long pendingDecisionId = keyHolder.getKey().longValue();
-        logger.debug("Pending decision saved with id:{}", pendingDecisionId);
+        logger.debug("Pending decision salvata con id:{}", pendingDecisionId);
 
-        //persist decision options
+        //persisto le decision option
         pendingDecision.getOptions()
                 .forEach(option ->
                         insertDecisionOption(option, pendingDecisionId));
@@ -444,15 +444,15 @@ public class PersistenceDao implements PersistenceDaoPort {
         }, keyHolder);
 
         long requestId = keyHolder.getKey().longValue();
-        logger.debug("Request saved with id:{}", requestId);
+        logger.debug("Richiesta salvata con id:{}", requestId);
 
 
-        //insert items...
+        //inserisco gli elementi...
         request.getItems().forEach(item -> {
             insertRequestItem(item, requestId);
         });
 
-        //associating messages at request...
+        //associo i messaggi alla request...
         request.getMessages().forEach(message -> {
 
             updateRequestIdOfMessage(message, requestId);
@@ -465,10 +465,10 @@ public class PersistenceDao implements PersistenceDaoPort {
     }
 
     private void insertDecisionOption(DecisionOption decisionOption, long pendingDecisionId) {
-        //insert Action...
+        //inserisco la action...
         long actionId = insertAction(decisionOption.getAction());
 
-        //insert decision options...
+        //inserisco le decision option...
         String query = """
                 INSERT INTO decision_option (pending_decision_id, action_id, confidence, reasons)
                 VALUES (?, ?, ?, ?)
@@ -480,7 +480,7 @@ public class PersistenceDao implements PersistenceDaoPort {
                 row.confidence(),
                 row.reasons()
         );
-        logger.debug("Decision option saved for pending decision id:{}", pendingDecisionId);
+        logger.debug("Decision option salvata per la pending decision id:{}", pendingDecisionId);
     }
 
 
@@ -497,7 +497,7 @@ public class PersistenceDao implements PersistenceDaoPort {
             return ps;
         }, keyHolder);
         long actionId = keyHolder.getKey().longValue();
-        logger.info("Saved action id:{}", actionId);
+        logger.info("Azione salvata con id:{}", actionId);
 
         return actionId;
     }
@@ -549,7 +549,7 @@ public class PersistenceDao implements PersistenceDaoPort {
             return ps;
         }, keyHolder);
         long messageId = keyHolder.getKey().longValue();
-        logger.info("Saved message id:{}", messageId);
+        logger.info("Messaggio salvato con id:{}", messageId);
 
         return messageId;
     }
@@ -580,7 +580,7 @@ public class PersistenceDao implements PersistenceDaoPort {
         List<DecisionOptionRow> decisionOptionList =
                 jdbcTemplate.query(queryDo, PersistenceRowMappers.DECISION_OPTION, pendingDecisionId);
 
-        //action e action steps
+        //action e action step
         for(DecisionOptionRow decisionOptionRow:decisionOptionList){
             Optional<ActionRow> actionRowOptional = findActionRow(decisionOptionRow.actionId());
             ActionRow actionRow=null;
@@ -657,23 +657,23 @@ public class PersistenceDao implements PersistenceDaoPort {
     }
 
     private void deleteDecisionOptionByPendingDecisionId(long pendingDecisionId) {
-        logger.debug("Deleting decision options by pending decision id:{}",pendingDecisionId);
+        logger.debug("Elimino le decision option per la pending decision id:{}",pendingDecisionId);
         String query = """
                 DELETE FROM decision_option
                 WHERE pending_decision_id = ?
                 """;
         int deleted = jdbcTemplate.update(query, pendingDecisionId);
-        logger.info("Deleted {} decision options by pending decision id:{}",deleted, pendingDecisionId);
+        logger.info("Eliminate {} opzioni decisionali per la pending decision id:{}",deleted, pendingDecisionId);
     }
 
     private void deleteMessageById(long id){
-        logger.debug("Deleting message by id:{}", id);
+        logger.debug("Elimino il messaggio con id:{}", id);
         String query = """
                 DELETE FROM message
                 WHERE id = ?
                 """;
         int deleted = jdbcTemplate.update(query, id);
-        logger.info("Deleted {} message with id:{}",deleted, id);
+        logger.info("Eliminati {} messaggi con id:{}",deleted, id);
     }
 
     private void deleteActionAndActionSteps(PendingDecision pendingDecision) {
@@ -688,13 +688,13 @@ public class PersistenceDao implements PersistenceDaoPort {
         decisionOptionList.forEach(option -> {
             long actionId = option.actionId();
 
-            logger.debug("Deleting action with id:{}", actionId);
+            logger.debug("Elimino l'azione con id:{}", actionId);
             String queryAction = """
                     DELETE FROM action
                     WHERE id = ?
                     """;
             int deletedActions = jdbcTemplate.update(queryAction, actionId);
-            logger.info("Deleted {} actions with id:{}", deletedActions, actionId);
+            logger.info("Eliminate {} azioni con id:{}", deletedActions, actionId);
         });
     }
 

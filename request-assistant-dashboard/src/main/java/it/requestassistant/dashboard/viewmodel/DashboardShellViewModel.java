@@ -26,7 +26,7 @@ public class DashboardShellViewModel {
     private final DashboardPort dashboardPort;
     private final ObjectProperty<DashboardSection> selectedSection = new SimpleObjectProperty<>(DashboardSection.IN_PROGRESS);
     private final BooleanProperty batchRunning = new SimpleBooleanProperty(false);
-    private final StringProperty batchStatusText = new SimpleStringProperty("Batch: STOPPED");
+    private final StringProperty batchStatusText = new SimpleStringProperty("Batch: FERMO");
     private final StringProperty batchToggleText = new SimpleStringProperty("Avvia batch");
 
     public DashboardShellViewModel(DashboardPort dashboardPort) {
@@ -40,7 +40,7 @@ public class DashboardShellViewModel {
 
     @PreDestroy
     void shutdown() {
-        logger.debug("#########################  shutdown");
+        logger.debug("#########################  arresto");
         dashboardPort.stopPlaygroundProcess();
     }
 
@@ -63,8 +63,8 @@ public class DashboardShellViewModel {
     public void refreshBatchState() {
         boolean running = dashboardPort.isPlaygroundProcessRunning();
         batchRunning.set(running);
-        batchStatusText.set(running ? "Batch: RUNNING" : "Batch: STOPPED");
-        batchToggleText.set(running ? "Stop batch" : "Avvia batch");
+        batchStatusText.set(running ? "Batch: IN ESECUZIONE" : "Batch: FERMO");
+        batchToggleText.set(running ? "Ferma batch" : "Avvia batch");
     }
 
     public List<PendingDecision> getMessagePendingDecisions() {
@@ -98,7 +98,7 @@ public class DashboardShellViewModel {
     }
 
     public void showMessage(Message message) {
-        logger.debug("Message display id:{}",message.getEntryId());
+        logger.debug("Visualizzazione messaggio id:{}",message.getEntryId());
         dashboardPort.showMessage(message);
     }
 

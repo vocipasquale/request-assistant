@@ -64,9 +64,9 @@ public class DashboardShellController {
         archivePane.setManaged(archiveSelected);
         archivePane.setVisible(archiveSelected);
         currentSectionLabel.setText(switch (section) {
-            case IN_PROGRESS -> "In progress";
+            case IN_PROGRESS -> "In lavorazione";
             case BATCH -> "Batch";
-            case ARCHIVE -> "Archive";
+            case ARCHIVE -> "Archivio";
         });
     }
 }

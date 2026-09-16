@@ -36,8 +36,8 @@ public class ActionPerformAdapter implements ActionPerformerPort {
 
         //per ora lascio questo controllo, poi capirò se toglierlo...
 //        if (Objects.isNull(pendingDecision.getMessage())) {
-//            logger.error("Pending decision {} has no associated message. Cannot perform actions!", pendingDecision.getId());
-//            throw new Exception("Pending decision has no associated message. Cannot perform actions!");
+//            logger.error("La pending decision {} non ha un messaggio associato. Impossibile eseguire le azioni!", pendingDecision.getId());
+//            throw new Exception("La pending decision non ha un messaggio associato. Impossibile eseguire le azioni!");
 //        }
 
 
@@ -47,22 +47,22 @@ public class ActionPerformAdapter implements ActionPerformerPort {
         // 2. associo il messaggio della pending decision alla rquest passata e già presente in DB
 
         if (Objects.isNull(pendingDecision.getRequest())) {
-            logger.info("Pending decision {} has no associated request. Creating a new request and associating the message.", pendingDecision.getId());
-            // Simulate creating a new request and associating the message
+            logger.info("La pending decision {} non ha una request associata. Creo una nuova request e associo il messaggio.", pendingDecision.getId());
+            // Simulo la creazione di una nuova request e l'associazione del messaggio
             Request newRequest = new Request();
-            newRequest.setId(0L); // Simulate generated ID
+            newRequest.setId(0L); // Simulo l'id generato
             newRequest.setTitle(decisionOption.getAction().getTitle().getTitle());
             newRequest.setStatus(Request.Status.IN_PROGRESS);
             newRequest.setCreateAt(LocalDateTime.now());
             newRequest.setUpdateAt(newRequest.getCreateAt());
             newRequest.setMessages(List.of(pendingDecision.getMessage()));
-            newRequest.setItems(List.of(getRequestItem("step")));
+            newRequest.setItems(List.of(getRequestItem("passo")));
             newRequest.setNote("test manuale");
             newRequest.setUser(getUser(pendingDecision, decisionOption));
             persistenceDaoPort.insertRequest(newRequest);
         } else {
-            logger.info("Pending decision {} has an associated request with ID {}. Associating the message to this request.", pendingDecision.getId(), pendingDecision.getRequest().getId());
-            // Simulate associating the message to the existing request
+            logger.info("La pending decision {} ha una request associata con ID {}. Associo il messaggio a questa request.", pendingDecision.getId(), pendingDecision.getRequest().getId());
+            // Simulo l'associazione del messaggio alla request esistente
             Request existingRequest = pendingDecision.getRequest();
             List<Message> updatedMessages = new ArrayList<>(existingRequest.getMessages());
             updatedMessages.add(pendingDecision.getMessage());
@@ -71,7 +71,7 @@ public class ActionPerformAdapter implements ActionPerformerPort {
             persistenceDaoPort.updateRequest(existingRequest);
         }
 
-        logger.info("AI: completed actions for decision option: " + decisionOption.getId());
+        logger.info("AI: azioni completate per l'opzione decisionale: " + decisionOption.getId());
     }
 
     /**

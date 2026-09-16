@@ -97,7 +97,7 @@ public class PendingDecisionCardController {
      * Popola la card con i dati di una PendingDecision.
      *
      * @param decision  la PendingDecision da mostrare
-     * @param onRefresh callback richiamato dopo accept/delete per aggiornare la lista
+     * @param onRefresh richiamata dopo accettazione/eliminazione per aggiornare la lista
      */
     public void setData(PendingDecision decision, Runnable onRefresh) {
         this.pendingDecision = decision;
@@ -145,7 +145,7 @@ public class PendingDecisionCardController {
 
     @FXML
     void onViewRequest() {
-        System.out.println("Mostra REQUEST!");
+        System.out.println("Mostra richiesta!");
     }
 
     private void openActionModal(DecisionOption option) {

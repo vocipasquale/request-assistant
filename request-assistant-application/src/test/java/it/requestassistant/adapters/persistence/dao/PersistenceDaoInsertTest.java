@@ -42,7 +42,7 @@ class PersistenceDaoInsertTest {
     private JdbcTemplate jdbcTemplate;
 
     // ──────────────────────────────────────────────────────────────────────────
-    // Fixtures
+    // Dati di test
     // ──────────────────────────────────────────────────────────────────────────
 
     private User buildUser() {
@@ -100,7 +100,7 @@ class PersistenceDaoInsertTest {
     }
 
     // ──────────────────────────────────────────────────────────────────────────
-    // Test
+    // Casi di test
     // ──────────────────────────────────────────────────────────────────────────
 
 
@@ -108,7 +108,7 @@ class PersistenceDaoInsertTest {
     @Test
     @Order(2)
     void insertRequest_inserisceRigaCorrettamente() {
-        // Pre-requisito: user_account presente (inserito dal test precedente)
+        // Prerequisito: user_account presente (inserito dal test precedente)
         long userId = jdbcTemplate.queryForObject(
                 "SELECT id FROM user_account WHERE codice_fiscale = 'RSSMRA80A01H501U'",
                 Long.class

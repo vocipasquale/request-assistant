@@ -40,7 +40,7 @@ public class InProgressPaneController {
         refresh();
     }
 
-    /** Ricarica le card della tab Messages dalla sorgente dati. */
+    /** Ricarica le card della sezione messaggi dalla sorgente dati. */
     @FXML
     public void refresh() {
         refreshPendingDecisionMessages();
