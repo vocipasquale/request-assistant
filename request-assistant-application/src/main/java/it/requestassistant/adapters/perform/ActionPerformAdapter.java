@@ -1,7 +1,9 @@
 package it.requestassistant.adapters.perform;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import it.requestassistant.application.port.out.ActionPerformerPort;
 import it.requestassistant.application.port.out.PersistenceDaoPort;
+import it.requestassistant.application.service.JsonService;
 import it.requestassistant.domain.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +21,11 @@ public class ActionPerformAdapter implements ActionPerformerPort {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final PersistenceDaoPort persistenceDaoPort;
+    private final JsonService jsonService;
 
-    public ActionPerformAdapter(PersistenceDaoPort persistenceDaoPort) {
+    public ActionPerformAdapter(PersistenceDaoPort persistenceDaoPort, JsonService jsonService) {
         this.persistenceDaoPort = persistenceDaoPort;
+        this.jsonService = jsonService;
     }
 
     @Override
@@ -29,22 +33,43 @@ public class ActionPerformAdapter implements ActionPerformerPort {
     public void perform(PendingDecision pendingDecision, DecisionOption decisionOption) throws Exception {
         logger.debug("Esecuzione azioni decision id {}: " + decisionOption.getId());
         Action action = decisionOption.getAction();
+        DataAction dataAction =
+                jsonService.fromJson(action.getAiResponse(), new TypeReference<DataAction>() {});
 
-        logger.info("Azione {}",action.getTitle().getTitle());
+        switch (action.getTitle()){
+            case RISPONDI_A_MAIL -> {
+                    logger.info("Eseguo azione RISPONDI_A_MAIL per la pending decision {} con decision id {}"
+                            , pendingDecision.getId(), decisionOption.getId());
+
+                    if(Objects.isNull(dataAction.message())){
+                        throw new Exception(String.format("Impossibile inviare mail per pending decision %d con decision id %d",
+                                pendingDecision.getId(), decisionOption.getId()));
+                    }
+
+            }
+            case INOLTRA_MAIL -> logger.info("Eseguo azione INOLTRA_MAIL per la pending decision {} con id {}", pendingDecision.getId(), decisionOption.getId());
+            case NUOVA_RICHIESTA -> logger.info("Eseguo azione NUOVA_RICHIESTA per la pending decision {} con id {}", pendingDecision.getId(), decisionOption.getId());
+            case MODIFICA_RICHIESTA -> logger.info("Eseguo azione MODIFICA_RICHIESTA per la pending decision {} con id {}", pendingDecision.getId(), decisionOption.getId());
+            case CHIUDI_RICHIESTA -> logger.info("Eseguo");
+
+
+        }
+
+        dataAction.request();
+        dataAction.message();
 
 
 
-        //per ora lascio questo controllo, poi capirò se toglierlo...
+                //per ora lascio questo controllo, poi capirò se toglierlo...
 //        if (Objects.isNull(pendingDecision.getMessage())) {
 //            logger.error("La pending decision {} non ha un messaggio associato. Impossibile eseguire le azioni!", pendingDecision.getId());
 //            throw new Exception("La pending decision non ha un messaggio associato. Impossibile eseguire le azioni!");
 //        }
 
 
-
-        // Simulo due azioni:
-        // 1. creo una nuova request e le associo il messaggio della pending decision
-        // 2. associo il messaggio della pending decision alla rquest passata e già presente in DB
+                // Simulo due azioni:
+                // 1. creo una nuova request e le associo il messaggio della pending decision
+                // 2. associo il messaggio della pending decision alla rquest passata e già presente in DB
 
         if (Objects.isNull(pendingDecision.getRequest())) {
             logger.info("La pending decision {} non ha una request associata. Creo una nuova request e associo il messaggio.", pendingDecision.getId());
