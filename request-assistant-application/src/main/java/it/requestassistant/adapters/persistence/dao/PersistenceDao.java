@@ -584,7 +584,6 @@ public class PersistenceDao implements PersistenceDaoPort {
         for(DecisionOptionRow decisionOptionRow:decisionOptionList){
             Optional<ActionRow> actionRowOptional = findActionRow(decisionOptionRow.actionId());
             ActionRow actionRow=null;
-            List<ActionStepRow> actionStepRows = null;
 
             if(actionRowOptional.isPresent()){
                 actionRow = actionRowOptional.get();

@@ -8,7 +8,6 @@ import it.requestassistant.adapters.persistence.row.RequestRow;
 import it.requestassistant.adapters.persistence.row.UserAccountRow;
 import it.requestassistant.domain.model.Action;
 import it.requestassistant.adapters.persistence.row.ActionRow;
-import it.requestassistant.adapters.persistence.row.ActionStepRow;
 import it.requestassistant.domain.model.DecisionOption;
 import it.requestassistant.domain.model.Message;
 import it.requestassistant.domain.model.PendingDecision;
@@ -112,9 +111,6 @@ public final class PersistenceDomainMappers {
     }
 
 
-    public static String toDomain(ActionStepRow row){
-        return  row.stepDescription();
-    }
 
     public static PendingDecision toDomain(PendingDecisionRow row, List<DecisionOptionRow> optionRows,
                                            MessageRow messageRow, RequestRow requestRow, List<RequestItemRow> requestItemRowList,
@@ -258,10 +254,4 @@ public final class PersistenceDomainMappers {
         return new ActionRow(0L, action.getTitle().getTitle(), action.getAiResponse());
     }
 
-    public static ActionStepRow toRow(long actionId, String stepDescription) {
-        return new ActionStepRow(
-                actionId,
-                stepDescription
-        );
-    }
 }

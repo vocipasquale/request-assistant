@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -14,8 +16,31 @@
         <Insets top="14.0" right="14.0" bottom="14.0" left="14.0"/>
     </padding>
 
-    <HBox fx:id="bozzaMailBox" spacing="8.0" alignment="CENTER_RIGHT" prefHeight="240.0">
+    <HBox fx:id="bozzaMailBox" spacing="8.0" alignment="CENTER_LEFT">
         <Label text="Bozza mail" styleClass="card-section-label"/>
-
     </HBox>
+
+    <HBox spacing="8.0" alignment="CENTER_LEFT">
+        <Label text="Da:" styleClass="card-field-label" minWidth="80.0"/>
+        <TextField fx:id="mittenteField" promptText="Mittente della mail" styleClass="mail-editable-field" style="-fx-control-inner-background: white; -fx-background-color: white;" HBox.hgrow="ALWAYS"/>
+    </HBox>
+
+    <HBox spacing="8.0" alignment="CENTER_LEFT">
+        <Label text="A:" styleClass="card-field-label" minWidth="80.0"/>
+        <TextField fx:id="destinatarioField" promptText="Destinatario della mail" styleClass="mail-editable-field" style="-fx-control-inner-background: white; -fx-background-color: white;" HBox.hgrow="ALWAYS"/>
+    </HBox>
+
+    <HBox spacing="8.0" alignment="CENTER_LEFT">
+        <Label text="Oggetto:" styleClass="card-field-label" minWidth="80.0"/>
+        <TextField fx:id="oggettoField" promptText="Oggetto della mail" styleClass="mail-editable-field" style="-fx-control-inner-background: white; -fx-background-color: white;" HBox.hgrow="ALWAYS"/>
+    </HBox>
+
+    <Label text="Testo:" styleClass="card-field-label"/>
+    <TextArea fx:id="testoArea"
+              promptText="Scrivi qui il testo della mail"
+              styleClass="mail-editable-field"
+              style="-fx-control-inner-background: white; -fx-background-color: white;"
+              wrapText="true"
+              prefRowCount="12"
+              VBox.vgrow="ALWAYS"/>
 </VBox>
