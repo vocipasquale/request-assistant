@@ -245,6 +245,134 @@ public class MessagePortAdapter implements MessagePort {
 
     }
 
+    @Override
+    public void replyToMessage(Message originalMessage, Message replyMessage) throws Exception {
+        try {
+            checkAndRefreshOutlookConnection();
+
+            logger.debug("Rispondo alla mail con entryId {} che si trova in {}", originalMessage.getEntryId(), inLavorazioneFolderName);
+            Dispatch mailToReply = findMailByEntryId(inLavorazioneFolder, originalMessage.getEntryId());
+
+            if (Objects.isNull(mailToReply)) {
+                throw new Exception("Mail con entryId " + originalMessage.getEntryId() + " non trovata nella cartella " + inLavorazioneFolderName);
+            }
+
+            Dispatch replyMail = Dispatch.call(mailToReply, "Reply").toDispatch();
+            String originalHtmlBody = Dispatch.get(replyMail, "HTMLBody").getString();
+            String replyHtmlBody = buildReplyHtmlBody(replyMessage.getBodyText(), originalHtmlBody);
+            Dispatch.put(replyMail, "HTMLBody", replyHtmlBody);
+            //Dispatch.put(replyMail, "Subject", replyMessage.getSubject());
+            Dispatch.call(replyMail, "Send");
+
+            //lasciare la mail in "inviate"
+
+        } finally {
+            releaseOutlookConnection();
+        }
+    }
+
+    private String buildReplyHtmlBody(String replyBodyText, String originalHtmlBody) {
+        String replyHtml = toHtmlFragment(replyBodyText);
+        String originalContent = extractBodyContent(originalHtmlBody);
+
+        return "<html><body>"
+                + "<div style=\"font-family:Segoe UI,Arial,sans-serif;font-size:11pt;\">"
+                + replyHtml
+                + "</div>"
+//                + "<br/>"
+//                + "<hr style=\"border:none;border-top:1px solid #cccccc;margin:12px 0;\"/>"
+                + "<div>"
+                + originalContent
+                + "</div>"
+                + "</body></html>";
+    }
+
+    private String toHtmlFragment(String text) {
+        if (Objects.isNull(text) || text.isBlank()) {
+            return "";
+        }
+
+        String escaped = text
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\r\n", "\n")
+                .replace("\r", "\n")
+                .replace("\n", "<br/>");
+
+        return escaped;
+    }
+
+    private String extractBodyContent(String htmlBody) {
+        if (Objects.isNull(htmlBody) || htmlBody.isBlank()) {
+            return "";
+        }
+
+        String lowerHtml = htmlBody.toLowerCase();
+        int bodyStart = lowerHtml.indexOf("<body");
+        if (bodyStart < 0) {
+            return htmlBody;
+        }
+
+        int bodyStartClose = lowerHtml.indexOf('>', bodyStart);
+        int bodyEnd = lowerHtml.lastIndexOf("</body>");
+        if (bodyStartClose < 0 || bodyEnd < 0 || bodyEnd <= bodyStartClose) {
+            return htmlBody;
+        }
+
+        return htmlBody.substring(bodyStartClose + 1, bodyEnd);
+    }
+
+    @Override
+    public void forwardMessage(Message message, Message message1) throws Exception {
+        try {
+            checkAndRefreshOutlookConnection();
+
+            logger.debug("Inoltro la mail con entryId {} che si trova in {}", message.getEntryId(), inLavorazioneFolderName);
+            Dispatch mailToForward = findMailByEntryId(inLavorazioneFolder, message.getEntryId());
+
+            if (Objects.isNull(mailToForward)) {
+                throw new Exception("Mail con entryId " + message.getEntryId() + " non trovata nella cartella " + inLavorazioneFolderName);
+            }
+
+            Dispatch forwardMail = Dispatch.call(mailToForward, "Forward").toDispatch();
+            String originalHtmlBody = Dispatch.get(forwardMail, "HTMLBody").getString();
+            String forwardHtmlBody = buildReplyHtmlBody(message1.getBodyText(), originalHtmlBody);
+            Dispatch.put(forwardMail, "HTMLBody", forwardHtmlBody);
+            //Dispatch.put(forwardMail, "Subject", message1.getSubject());
+            Dispatch.put(forwardMail, "To", message1.getTo());
+            Dispatch.call(forwardMail, "Send");
+
+            //lasciare la mail in "inviate"
+
+        } finally {
+            releaseOutlookConnection();
+        }
+    }
+
+    @Override
+    public void sendMessage(Message message) throws Exception {
+        try {
+            checkAndRefreshOutlookConnection();
+
+            logger.debug("Invio la mail con subject {}");
+            Dispatch newMail = Dispatch.call(outlook, "CreateItem", 0).toDispatch();
+            if (!Objects.isNull(message.getSenderAddress()) && !message.getSenderAddress().isBlank()) {
+                Dispatch.put(newMail, "SentOnBehalfOfName", message.getSenderAddress());
+            }
+            Dispatch.put(newMail, "To", message.getTo());
+            Dispatch.put(newMail, "CC", message.getCc());
+            Dispatch.put(newMail, "Subject", message.getSubject());
+            Dispatch.put(newMail, "HTMLBody", toHtmlFragment(message.getBodyText()));
+            Dispatch.call(newMail, "Send");
+
+            //lasciare la mail in "inviate"
+
+        } finally {
+            releaseOutlookConnection();
+        }
+    }
+
 
     /**
      * Converte la "mail" in "message"

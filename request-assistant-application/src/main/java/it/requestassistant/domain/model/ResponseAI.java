@@ -11,4 +11,6 @@ public class ResponseAI {
     public void setOptions(List<DecisionOption> options) {
         this.options = options;
     }
+
+
 }

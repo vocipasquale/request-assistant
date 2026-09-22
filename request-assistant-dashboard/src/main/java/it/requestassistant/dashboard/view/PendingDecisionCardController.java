@@ -1,6 +1,7 @@
 package it.requestassistant.dashboard.view;
 
 import it.requestassistant.dashboard.viewmodel.DashboardShellViewModel;
+import it.requestassistant.domain.model.DataAction;
 import it.requestassistant.domain.model.DecisionOption;
 import it.requestassistant.domain.model.PendingDecision;
 import javafx.beans.property.SimpleStringProperty;
@@ -56,6 +57,7 @@ public class PendingDecisionCardController {
 
     private PendingDecision pendingDecision;
     private Runnable onRefresh;
+    private DataAction dataAction;
 
     public PendingDecisionCardController(DashboardShellViewModel viewModel, FxWeaver fxWeaver) {
         this.viewModel = viewModel;
@@ -171,8 +173,8 @@ public class PendingDecisionCardController {
         scene.getStylesheets().add(stylesheet);
         modalStage.setScene(scene);
 
-        controller.setData(option, pendingDecision.getMessage(), () -> {
-            viewModel.acceptDecisionOption(pendingDecision, option);
+        controller.setData(option, pendingDecision, dataAction, () -> {
+            viewModel.acceptDecisionOption(pendingDecision, option, controller.getDataAction());
             if (onRefresh != null) {
                 onRefresh.run();
             }

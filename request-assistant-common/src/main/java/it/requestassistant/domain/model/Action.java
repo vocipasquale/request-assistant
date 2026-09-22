@@ -24,7 +24,8 @@ public class Action{
 
     public enum Title {
         RISPONDI_A_MAIL("Rispondi a mail"),
-        INOLTRA_MAIL("Inoltra mail"),
+       // INOLTRA_MAIL("Inoltra mail"),
+        INVIA_SOLLECITO("Invia sollecito"),
         NUOVA_RICHIESTA("Nuova richiesta"),
         MODIFICA_RICHIESTA("Modifica richiesta"),
         CHIUDI_RICHIESTA("Chiudi richiesta");
@@ -79,7 +80,7 @@ public class Action{
         return aiResponse;
     }
 
-    public void setAiResponce(String aiResponse) {
+    public void setAiResponse(String aiResponse) {
         this.aiResponse = aiResponse;
     }
 }

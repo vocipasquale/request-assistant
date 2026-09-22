@@ -16,7 +16,7 @@ public class Request {
 
 
     public enum Status {
-        NEW,
+        NEW, //stato presente solo nel JSON
         IN_PROGRESS,
         DONE;
     }

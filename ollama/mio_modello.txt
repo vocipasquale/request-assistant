@@ -2,10 +2,105 @@ permessi
 
 chown -R ollama:ollama /usr/share/ollama/model-definitions/request-assistant/v4
 chmod 750 /usr/share/ollama/model-definitions/request-assistant/v4
-chmod 640 /usr/share/ollama/model-definitions/request-assistant/v4/Modelfile
+chmod 640 /usr/share/ollama/model-definitions/request-assistant/v4/Modelfile-v4.2
 
 
 modello personalizzato
 
-cd /usr/share/ollama/model-definitions/request-assistant/v4
-ollama create qwen3-8b-request-assistant-v4 -f Modelfile
+cd /usr/share/ollama/model-definitions/request-assistant/v1
+ollama create qwen3-8b-request-assistant-v4.2 -f Modelfile-v4.2
+
+
+
+
+curl http://127.0.0.1:11434/api/chat \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "model": "qwen3-8b-request-assistant-v2",
+    "messages": [
+      {
+        "role": "user",
+        "content": "..."
+      }
+    ],
+    "think": true,
+    "stream": true
+  }'
+  
+  
+  
+esempio:
+
+
+#!/bin/bash
+
+time curl -N http://127.0.0.1:11434/api/chat \
+  -H 'Content-Type: application/json' \
+  -d @- <<'EOF'
+{
+  "model": "qwen3-8b-request-assistant-v4.2",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"id\":0,\"subject\":\"richiesta abilitazione db svil e coll\",\"senderAddress\":\"voci.pasquale@gmail.com\",\"receivedAt\":\"2026-09-21T11:34:07.238\",\"to\":\"Voci Pasquale\",\"cc\":\"\",\"bodyText\":\"Ciao,\\nper esigenze di progetto ho bisogno di essere abilitato in lettura ed in scrittura ai DB oracle di sviluppo e collaudo:\\n\\n* nome: Pasquale\\n* cognome: Voci\\n* user: u83172\\n\\nGrazie\\nCiao\\n\",\"entryId\":\"00000000555ED1954FA6CF41A6B4B0950F001347070044095ECA768011449DB7F9A51EBD4A100001E8AEF182000044095ECA768011449DB7F9A51EBD4A100001E8AF4CA80000\",\"conversationId\":\"62C7FAD1FCC7A84195FD0D65E5370839\",\"conversationTopic\":\"richiesta abilitazione db svil e coll\",\"importance\":1,\"hasAttachment\":false,\"category\":\"\"},\"request\":null}",
+      "format": {
+        "type": "object",
+        "properties": {
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "confidence": {
+                  "type": "number"
+                },
+                "reasons": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "enum": [
+                        "RISPONDI_A_MAIL",
+                        "NUOVA_RICHIESTA",
+                        "MODIFICA_RICHIESTA"
+                      ]
+                    },
+                    "aiResponse": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "title"
+                  ]
+                }
+              },
+              "required": [
+                "action",
+                "confidence",
+                "reasons"
+              ]
+            }
+          }
+        },
+        "required": [
+          "options"
+        ]
+      },
+      "think": true,
+      "stream": true
+    }
+  ]
+}
+EOF
+
+
+
+prompt:
+
+{"message":{"id":0,"subject":"richiesta abilitazione db svil e coll","senderAddress":"voci.pasquale@gmail.com","receivedAt":"2026-09-21T11:34:07.238","to":"Voci Pasquale","cc":"","bodyText":"Ciao,\nper esigenze di progetto ho bisogno di essere abilitato in lettura ed in scrittura ai DB oracle di sviluppo e collaudo:\n\n* nome: Pasquale\n* cognome: Voci\n* user: u83172\n\nGrazie\nCiao\n","entryId":"00000000555ED1954FA6CF41A6B4B0950F001347070044095ECA768011449DB7F9A51EBD4A100001E8AEF182000044095ECA768011449DB7F9A51EBD4A100001E8AF4CA80000","conversationId":"62C7FAD1FCC7A84195FD0D65E5370839","conversationTopic":"richiesta abilitazione db svil e coll","importance":1,"hasAttachment":false,"category":""},"request":null}

@@ -1,6 +1,7 @@
 package it.requestassistant.dashboard.viewmodel;
 
 import it.requestassistant.application.port.in.DashboardPort;
+import it.requestassistant.domain.model.DataAction;
 import it.requestassistant.domain.model.DecisionOption;
 import it.requestassistant.domain.model.Message;
 import it.requestassistant.domain.model.PendingDecision;
@@ -75,9 +76,9 @@ public class DashboardShellViewModel {
         dashboardPort.deletePendingDecision(pd);
     }
 
-    public void acceptDecisionOption(PendingDecision pendingDecision, DecisionOption decisionOption) {
+    public void acceptDecisionOption(PendingDecision pendingDecision, DecisionOption decisionOption, DataAction dataAction) {
         logger.info("Azioni accettate dall'operatore.");
-        dashboardPort.acceptDecisionOption(pendingDecision, decisionOption);
+        dashboardPort.acceptDecisionOption(pendingDecision, decisionOption, dataAction);
     }
 
 

@@ -32,7 +32,7 @@ public class PlaygroundProcess {
     }
 
     private void processRequests() {
-        //recuper le richieste in pending...
+        //recuper le richieste da sollecitare o da chiudere...
         List<Request> requests = batchPort.getRequestsToProcess();
 
         if (Objects.isNull(requests) || requests.isEmpty()) {
@@ -42,7 +42,7 @@ public class PlaygroundProcess {
 
         logger.info("Trovate " + requests.size() + " richieste da processare!");
         requests.stream().forEach(request ->{
-            logger.debug("Richiesta id {} in lavorazione..." + request.getId());
+            logger.debug("Richiesta id {} in processamento...", request.getId());
             batchPort.processRequest(request);
         });
     }

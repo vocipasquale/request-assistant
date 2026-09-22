@@ -63,7 +63,7 @@ class JsonServiceTest {
                 }
                 """;
 
-        ResponseAI responseAI = jsonService.fromJson(json, new TypeReference<ResponseAI>() {});
+        ResponseAI responseAI = jsonService.fromJson(json);
 
         assertNotNull(responseAI);
         assertNotNull(responseAI.getOptions());
@@ -81,7 +81,7 @@ class JsonServiceTest {
     void fromJsonShouldThrowJsonProcessingExceptionForMalformedJson() {
         String malformedJson = "{\"options\":[{";
 
-        assertThrows(JsonProcessingException.class, () -> jsonService.fromJson(malformedJson, new TypeReference<ResponseAI>() {}));
+        assertThrows(JsonProcessingException.class, () -> jsonService.fromJson(malformedJson));
     }
 
     private Message buildMessage() {

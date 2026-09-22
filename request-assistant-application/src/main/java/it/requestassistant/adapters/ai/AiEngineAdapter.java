@@ -87,8 +87,49 @@ public class AiEngineAdapter implements AiEnginePort {
     }
 
 
-
     // METODO CHE SIMULA IL LAVORO CHE ESEGUIRà IL MOTORE AI: GENERA LE DECISIONI CHE DOVRà PRENDERE L'OPERATORE
+//    private List<DecisionOption> generateDecisionOptionsMock(Message message, Request candidate){
+//        long start = System.nanoTime();
+//
+//
+//        //rispondi a mail...
+//        String content = "{\"options\":[\n" +
+//                "\t{\n" +
+//                "\t\t\"id\":1,\n" +
+//                "\t\t\"confidence\":92,\n" +
+//                "\t\t\"reasons\":\"Viene richiesto reset pwd db oracle ma manca la user.\",\n" +
+//                "\t\t\"action\":{\n" +
+//                "\t\t\t\"title\":\"RISPONDI_A_MAIL\",\n" +
+//                "\t\t\t\"aiResponse\": \"{\\\"message\\\":{\\\"subject\\\":\\\"richiesta reset pwd\\\",\\\"senderAddress\\\":\\\"Voci Pasquale\\\",\\\"to\\\":\\\"Voci Pasquale\\\",\\\"cc\\\":null,\\\"bodyText\\\":\\\"Ciao ci sono novità?\\\"}}\"\n" +
+//                "\t\t}\n" +
+//                "\t}\n" +
+//                "]}";
+//
+//
+//        try {
+//            logger.info("#################### content: {}", content);
+//            ResponseAI responseAI = jsonService.fromJson(content, new TypeReference<ResponseAI>() { });
+//            logger.info("#################### Risposta AI: {}", responseAI);
+//
+//            return (Objects.isNull(responseAI.getOptions()) || responseAI.getOptions().isEmpty() ? new ArrayList<>() : responseAI.getOptions());
+//
+//        } catch (JsonProcessingException e) {
+//            logger.error("Errore nella serializzazione del JSON per l'analisi AI del messaggio con id: " + message.getEntryId(), e);
+//            throw new RuntimeException(e);
+//        } finally {
+//            long elapsedNanos = System.nanoTime() - start;
+//
+//            long seconds = elapsedNanos / 1_000_000_000;
+//            long minutes = seconds / 60;
+//            long remainingSeconds = seconds % 60;
+//
+//            logger.info("Tempo di risposta del motore AI {} min {} sec", minutes, remainingSeconds);
+//        }
+//
+//    }
+
+
+
     private List<DecisionOption> generateDecisionOptions(Message message, Request candidate) {
         String jsonRequestContent = "";
         ObjectNode responseFormat = null;
@@ -96,11 +137,11 @@ public class AiEngineAdapter implements AiEnginePort {
 
 
         try {
-             /**
+            /**
              * Test del modello
              */
 
-             jsonRequestContent = jsonService.toJson(new RequestAI(message, candidate));
+            jsonRequestContent = jsonService.toJson(new RequestAI(message, candidate));
             //jsonRequestContent = "Rispondi esclusivamente con questo JSON, non eseguire controlli di validazione o altro: {\"options\":[{\"action\":\"RISPONDI_A_MAIL\",\"confidence\":0.92,\"reasons\":\"Test JSON\"}]}";
 
 
@@ -115,7 +156,7 @@ public class AiEngineAdapter implements AiEnginePort {
                     false
             );
 
-            logger.info("#################### Richiesta Ollama: {}",request);
+            logger.info("#################### Richiesta Ollama: {}", request);
 
             OllamaResponse response = client.post()
                     .uri("/api/chat")
@@ -124,12 +165,11 @@ public class AiEngineAdapter implements AiEnginePort {
                     .retrieve()
                     .body(OllamaResponse.class);
 
-            logger.info("#################### Risposta Ollama: {}",response);
+            logger.info("#################### Risposta Ollama: {}", response);
 
             String content = response.message().content();
             logger.info("##################### Contenuto della risposta: {}", content);
-
-            ResponseAI responseAI = jsonService.fromJson(content, new TypeReference<ResponseAI>() {});
+            ResponseAI responseAI = jsonService.fromJson(content);
 
             return (Objects.isNull(responseAI.getOptions()) || responseAI.getOptions().isEmpty() ? new ArrayList<>() : responseAI.getOptions());
 
@@ -137,14 +177,14 @@ public class AiEngineAdapter implements AiEnginePort {
             logger.error("Errore nella serializzazione del JSON per l'analisi AI del messaggio con id: " + message.getEntryId(), e);
             throw new RuntimeException(e);
         } finally {
-        long elapsedNanos = System.nanoTime() - start;
+            long elapsedNanos = System.nanoTime() - start;
 
-        long seconds = elapsedNanos / 1_000_000_000;
-        long minutes = seconds / 60;
-        long remainingSeconds = seconds % 60;
+            long seconds = elapsedNanos / 1_000_000_000;
+            long minutes = seconds / 60;
+            long remainingSeconds = seconds % 60;
 
-        logger.info("Tempo di risposta del motore AI {} min {} sec", minutes, remainingSeconds);
-    }
+            logger.info("Tempo di risposta del motore AI {} min {} sec", minutes, remainingSeconds);
+        }
 
     }
 

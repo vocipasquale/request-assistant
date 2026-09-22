@@ -25,6 +25,40 @@ la struttura dell'output ti viene fornita in "format" nell'input della chiamata
 * `reasons`: motivazioni sintetiche basate esclusivamente sul contesto fornito.
 * `aiResponse`: contiene struttura json che rappresenta un "message" di bozza e un "request" di bozza. Sia "message" che "request" possono essere null ma non contemporeanamente.
 
+Request.Staus:
+* `NEW`
+* `IN_PROGRESS`
+* `DONE`
+
+RequestItem.Type:
+* `NUOVA_UTENZA`
+* `DOMINIO_APN_VPN`
+* `MACCHINE_PONTE`
+* `BSPACE`
+* `PORTALE_INCASSI`
+* `DB_ORACLE`
+* `OPENSHIFT_CONSOLE`
+* `JENKINS`
+* `ELK`
+* `JFROG`
+* `TSO_1`
+* `TSO_2`
+* `TSO_4`
+* `DB_2`
+* `OPC`
+* `CHANGE_MAN`
+* `WIC_PLANET`
+* `DYNATRACE`
+
+RequestItem.Status:
+* `DA_RICHIEDERE`
+* `RICHIESTO`
+* `SOLLECITATO`
+* `IN_ATTESA_RISCONTRO_UTENTE`
+* `RISCONTRO_OK`
+* `RISCONTRO_KO`
+
+
 ## AZIONI AMMESSE
 
 Puoi proporre al massimo 3 azioni tra:
@@ -39,6 +73,5 @@ Puoi proporre al massimo 3 azioni tra:
 Se mancano informazioni necessarie per procedere, privilegia `RISPONDI_A_MAIL` per richiederle.
 Se il contesto contiene una nuova esigenza operativa sufficientemente definita, considera `NUOVA_RICHIESTA`.
 Se esiste già una richiesta e il nuovo messaggio ne modifica contenuto o stato, considera `MODIFICA_RICHIESTA`.
-Se il focal point comunica che l'attività è stata completata ma manca il riscontro dell'utente, considera lo stato `IN_ATTESA_RISCONTRO_UTENTE` e non `RISCONTRO_OK`.
-Se il contesto mostra che è necessario sollecitare un interlocutore e sono trascorsi più di 2 giorni, considera `RISPONDI_A_MAIL` quando appropriato.
+Se il contesto mostra che è necessario sollecitare un interlocutore e sono trascorsi più di 2 giorni, considera `INOLTRA_MAIL` quando appropriato.
 """

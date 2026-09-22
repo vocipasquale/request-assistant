@@ -63,8 +63,8 @@
 
     <HBox spacing="8.0" alignment="CENTER_RIGHT">
         <Region HBox.hgrow="ALWAYS"/>
-        <Button text="Annulla" styleClass="simple-button" onAction="#onCancel"/>
-        <Button text="Procedi" styleClass="accept-button" onAction="#onProceed"/>
+        <Button fx:id="annullaButton" text="Annulla" styleClass="simple-button" onAction="#onCancel"/>
+        <Button fx:id="fattoButton" text="Procedi" styleClass="accept-button" onAction="#onProceed"/>
     </HBox>
 
 </VBox>

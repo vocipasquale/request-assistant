@@ -33,16 +33,19 @@ public class JsonService {
     /**
      * Converte la stringa json in strttura dati di tipo T, utilizzando TypeReference per gestire i tipi generici.
      * Esempio di utilizzo: ResponseAI response = jsonService.fromJson(json, new TypeReference<ResponseAI>() {});
+
+     */
+
+    /**
+     * Converte la stringa json in ResponseAI
      *
      * @param json
-     * @param typeReference
      * @return
      * @throws JsonProcessingException
      */
-    public <T> T fromJson(String json, TypeReference<T> typeReference) throws JsonProcessingException {
-        return objectMapper.readValue(json, typeReference);
+    public ResponseAI fromJson(String json) throws JsonProcessingException {
+        return objectMapper.readValue(json, new TypeReference<ResponseAI>() { });
     }
-
 
 
 
@@ -72,10 +75,8 @@ public class JsonService {
         title.put("type", "string");
         ArrayNode titleValues = title.putArray("enum");
         titleValues.add("RISPONDI_A_MAIL");
-        titleValues.add("INOLTRA_MAIL");
         titleValues.add("NUOVA_RICHIESTA");
         titleValues.add("MODIFICA_RICHIESTA");
-        titleValues.add("CHIUDI_RICHIESTA");
 
         actionProperties.putObject("aiResponse").put("type", "string");
 
