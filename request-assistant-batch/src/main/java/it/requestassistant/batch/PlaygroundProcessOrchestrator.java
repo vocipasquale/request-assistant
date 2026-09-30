@@ -1,5 +1,6 @@
 package it.requestassistant.batch;
 
+import it.requestassistant.application.port.out.PlaygroundProcessControlPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
-public class PlaygroundProcessOrchestrator {
+public class PlaygroundProcessOrchestrator implements PlaygroundProcessControlPort {
 
     private static final long DEFAULT_POLL_INTERVAL_MS = 5000L;
 
@@ -18,6 +19,8 @@ public class PlaygroundProcessOrchestrator {
     private final TaskExecutor taskExecutor;
     private final long pollIntervalMs;
     private final AtomicBoolean running = new AtomicBoolean(false);
+    private final AtomicBoolean stopRequsted = new AtomicBoolean(false);
+
 
     public PlaygroundProcessOrchestrator(
             PlaygroundProcess playgroundProcess,
@@ -29,40 +32,49 @@ public class PlaygroundProcessOrchestrator {
         this.pollIntervalMs = pollIntervalMs;
     }
 
-    public boolean start() {
+    @Override
+    public void start() {
         if (!running.compareAndSet(false, true)) {
             logger.info("PlaygroundProcess già in esecuzione");
-            return false;
+            return;
         }
 
         logger.info("Avvio PlaygroundProcessOrchestrator");
         taskExecutor.execute(() -> {
-            while (running.get()) {
+            while (running.get() && !stopRequsted.get()) {
                 try {
                     playgroundProcess.runOnce();
                     Thread.sleep(pollIntervalMs);
                 } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    running.set(false);
                     logger.warn("PlaygroundProcess interrotto");
-                } catch (Exception e) {
+                    running.set(false);
+                    Thread.currentThread().interrupt();
+                } catch (Throwable e) {
                     logger.error("Errore durante l'esecuzione del PlaygroundProcess", e);
+                    running.set(false);
+                    Thread.currentThread().interrupt();
                 }
             }
-            logger.info("PlaygroundProcessOrchestrator arrestato");
-        });
 
-        return true;
+            if (stopRequsted.compareAndSet(true, false)) {
+                logger.info("PlaygroundProcessOrchestrator arrestato");
+            }
+        });
     }
 
-    public boolean stop() {
+    @Override
+    public void stop() {
         if (!running.compareAndSet(true, false)) {
             logger.info("PlaygroundProcess non in esecuzione");
-            return false;
+            return;
         }
-        return true;
+
+        if (stopRequsted.compareAndSet(false, true)) {
+            logger.info("Richiesto STOP PlaygroundProcess!");
+        }
     }
 
+    @Override
     public boolean isRunning() {
         return running.get();
     }

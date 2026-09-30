@@ -6,19 +6,22 @@ import it.requestassistant.adapters.persistence.row.PendingDecisionRow;
 import it.requestassistant.adapters.persistence.row.RequestItemRow;
 import it.requestassistant.adapters.persistence.row.RequestRow;
 import it.requestassistant.adapters.persistence.row.UserAccountRow;
+import it.requestassistant.domain.model.Action;
+import it.requestassistant.adapters.persistence.row.ActionRow;
 import it.requestassistant.domain.model.DecisionOption;
 import it.requestassistant.domain.model.Message;
 import it.requestassistant.domain.model.PendingDecision;
 import it.requestassistant.domain.model.Request;
 import it.requestassistant.domain.model.RequestItem;
 import it.requestassistant.domain.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 
 public final class PersistenceDomainMappers {
+
+    public static Logger logger = LoggerFactory.getLogger(PersistenceDomainMappers.class);
 
     private PersistenceDomainMappers() {
     }
@@ -69,12 +72,13 @@ public final class PersistenceDomainMappers {
         return item;
     }
 
-    public static Request toDomain(
-            RequestRow requestRow,
-            UserAccountRow userRow,
-            List<RequestItemRow> requestItemRows,
-            List<MessageRow> messageRows
-    ) {
+    public static Request toDomain(RequestRow requestRow, UserAccountRow userRow, List<RequestItemRow> requestItemRows,
+            List<MessageRow> messageRows) {
+
+        if(Objects.isNull(requestRow)){
+            return null;
+        }
+
         Request request = new Request();
         request.setId(requestRow.id());
         request.setCreateAt(requestRow.createAt());
@@ -97,53 +101,78 @@ public final class PersistenceDomainMappers {
         return request;
     }
 
-    public static DecisionOption toDomain(DecisionOptionRow row) {
+    public static DecisionOption toDomain(DecisionOptionRow row, ActionRow actionRow) {
         return new DecisionOption(
-                row.action(),
+                row.id(),
+                PersistenceDomainMappers.toDomain(actionRow),
                 row.confidence() == null ? 0.0d : row.confidence(),
                 row.reasons()
         );
     }
 
-    public static PendingDecision toDomain(PendingDecisionRow row, List<DecisionOptionRow> optionRows) {
-        List<DecisionOption> options = optionRows == null
+
+
+    public static PendingDecision toDomain(PendingDecisionRow row, List<DecisionOptionRow> optionRows,
+                                           MessageRow messageRow, RequestRow requestRow, List<RequestItemRow> requestItemRowList,
+                                           UserAccountRow userAccountRow, List<MessageRow> messagesRequestRowList,
+                                           ActionRow actionRow) {
+
+
+        List<DecisionOption> options = new ArrayList<>(optionRows == null
                 ? Collections.emptyList()
-                : optionRows.stream().map(PersistenceDomainMappers::toDomain).toList();
+                : optionRows.stream()
+                .map(optionRow ->
+                        PersistenceDomainMappers.toDomain(optionRow, actionRow)).toList());
+
+
+        logger.debug("Mapping di PendingDecisionRow verso PendingDecision con {} opzioni", options.size());
+
+        Message message = Objects.isNull(messageRow)
+            ? null
+            : PersistenceDomainMappers.toDomain(messageRow);
+        logger.debug("Mapping del messaggio id {} per la PendingDecision id {}", message.getEntryId(), row.id());
+
+        Request request = Objects.isNull(PersistenceDomainMappers.toDomain(requestRow, userAccountRow, requestItemRowList, messagesRequestRowList))
+                ? null
+                : PersistenceDomainMappers.toDomain(requestRow, userAccountRow, requestItemRowList, messagesRequestRowList);
+        logger.debug("Mapping della request per la PendingDecision id {}", row.id());
 
         return new PendingDecision(
                 row.id(),
                 row.createdAt(),
                 parseEnum(PendingDecision.Type.class, row.type()),
                 row.target(),
-                options
+                options,
+                message,
+                request
         );
     }
 
-    private static <T extends Enum<T>> T parseEnum(Class<T> enumClass, String rawValue) {
+    public static <T extends Enum<T>> T parseEnum(Class<T> enumClass, String rawValue) {
         if (rawValue == null || rawValue.isBlank()) {
             return null;
         }
         return Enum.valueOf(enumClass, rawValue.trim().toUpperCase(Locale.ROOT));
     }
 
-    // ============ Domain -> Row Mapping ============
+    // ============ Mapping Dominio -> Riga ============
 
     public static MessageRow toRow(Message message) {
         return new MessageRow(
-                0L,    // id generato dal DB
-                null,  // requestId da settare se necessario
-                message.subject(),
-                message.senderAddress(),
-                message.receivedAt(),
-                message.to(),
-                message.cc(),
-                message.bodyText(),
-                message.entryId(),
-                message.conversationId(),
-                message.conversationTopic(),
-                message.importance(),
-                message.hasAttachment(),
-                message.category()
+                -1L,    // id generato dal DB
+                -1L,  // requestId da impostare se necessario
+                message.getSubject(),
+                message.getSenderAddress(),
+                message.getReceivedAt(),
+                message.getTo(),
+                message.getCc(),
+                message.getBodyText(),
+                message.getEntryId(),
+                message.getConversationId(),
+                message.getConversationTopic(),
+                message.getImportance(),
+                message.getHasAttachment(),
+                message.getCategory()
         );
     }
 
@@ -167,7 +196,7 @@ public final class PersistenceDomainMappers {
         }
         return new RequestItemRow(
                 0L,    // id generato dal DB
-                null,  // requestId da settare se necessario
+                null,  // requestId da impostare se necessario
                 item.getType() != null ? item.getType().name() : null,
                 item.getCreateAt(),
                 item.getUpdateAt(),
@@ -191,23 +220,38 @@ public final class PersistenceDomainMappers {
         );
     }
 
-    public static DecisionOptionRow toRow(DecisionOption option) {
+    public static DecisionOptionRow toRow(DecisionOption option, long pendingDecisionId, long actionId) {
         return new DecisionOptionRow(
-                0L,    // id generato dal DB
-                null,  // pendingDecisionId da settare se necessario
-                option.action(),
-                option.confidence(),
-                option.reasons()
+                0L,    // id generato dal DB in INSERT
+                pendingDecisionId,
+                actionId,
+                option.getConfidence(),
+                option.getReasons()
         );
     }
 
     public static PendingDecisionRow toRow(PendingDecision pendingDecision) {
+        //usato SOLO dall'INSERT
         return new PendingDecisionRow(
-                pendingDecision.id(),
-                pendingDecision.createdAt(),
-                pendingDecision.type() != null ? pendingDecision.type().name() : null,
-                pendingDecision.target()
+                0L, // id generato dal DB
+                pendingDecision.getCreatedAt(),
+                pendingDecision.getType() != null ? pendingDecision.getType().name() : null,
+                pendingDecision.getTarget(),
+                0L,
+                Objects.isNull(pendingDecision.getRequest())?0:pendingDecision.getRequest().getId()
         );
     }
-}
 
+    public static Action toDomain(ActionRow row) {
+        if (row == null) {
+            return null;
+        }
+
+        return new Action(Action.Title.fromTitle(row.title()), row.aiResponse());
+    }
+
+    public static ActionRow toRow(Action action) {
+        return new ActionRow(0L, action.getTitle().getTitle(), action.getAiResponse());
+    }
+
+}

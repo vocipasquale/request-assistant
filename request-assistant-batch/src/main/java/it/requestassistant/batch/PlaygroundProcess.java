@@ -1,7 +1,6 @@
 package it.requestassistant.batch;
 
 import it.requestassistant.application.port.in.BatchPort;
-import it.requestassistant.domain.model.DecisionOption;
 import it.requestassistant.domain.model.Message;
 import it.requestassistant.domain.model.Request;
 import org.springframework.stereotype.Component;
@@ -22,12 +21,34 @@ public class PlaygroundProcess {
     }
 
 
-    public void runOnce() {
+    public void runOnce() throws Exception {
         logger.info("=================================");
-        logger.info(" Request Assistant - Playground");
+        logger.info(" Assistente Richieste - Playground");
         logger.info("=================================");
 
+        processMessages();
+        processRequests();
 
+    }
+
+    private void processRequests() throws Exception{
+        //recuper le richieste da sollecitare o da chiudere...
+        List<Request> requests = batchPort.getRequestsToProcess();
+
+        if (Objects.isNull(requests) || requests.isEmpty()) {
+            logger.info("Nessuna richiesta pendente");
+            return;
+        }
+
+        logger.info("Trovate " + requests.size() + " richieste da processare!");
+        for (Request request : requests) {
+            logger.debug("Richiesta id {} in processamento...", request.getId());
+            batchPort.processRequest(request);
+        }
+
+    }
+
+    private void processMessages() throws Exception {
         //recupero le nuove mail/messages nella cartella (in arrivo)
         List<Message> messages = batchPort.getMessagesToProcess();
 
@@ -35,31 +56,23 @@ public class PlaygroundProcess {
             logger.info("Nessuna email");
             return;
         }
-
         logger.info("Trovate " + messages.size() + " mail!");
 
-        //ricerca di una probabile pratica in cui inserire ogni messaggio
         for (Message message : messages) {
-            logger.debug("mailID: " + message.entryId());
+            logger.debug("Elaboro il messaggio mailID: " + message.getEntryId());
 
-            //ricerco delle request inerenti al message
-            Request request = batchPort.searchRequestForMessage(message);
-
-            //persisto sul DB il message: da fare dopo batchPort.searchRequestForMessage(message);
-            batchPort.persistMessage(message);
-
-            //sottopongo il risultato della ricerca all'AI
-            List<DecisionOption> options = batchPort.generateProposal(message, request);
-
-            //richiedo la creazione della "decisione" che dovrà prendere l'operatore
-            batchPort.generateDecision(message, request, options);
-
-            //faccio spostare la mail relativa al message corrente in modo che non venga analizzata ancora
-            try {
-                batchPort.moveMessageInProgress(message);
-            } catch (Exception e) {
-                logger.error("Errore spostamento messaggio {}", message.entryId(), e);
+            if (batchPort.processMessage(message)) {//processamento messaggio
+                logger.debug("Messaggio elaborato correttamente, mailID: " + message.getEntryId());
+                moveMessageInProgress(message);
+            } else {
+                logger.debug("Elaborazione del messaggio fallita, mailID: " + message.getEntryId());
             }
         }
+    }
+
+    private void moveMessageInProgress(Message message) throws Exception {
+            logger.debug("Sposto la mail in lavorazione, mailID: " + message.getEntryId());
+            //il message è già persistito sul db
+            batchPort.moveMessageInProgress(message);
     }
 }

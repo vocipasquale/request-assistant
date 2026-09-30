@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class RequestItem {
+    private long id;
     private Type type;
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
@@ -15,7 +16,24 @@ public class RequestItem {
 
     public enum Type {
         NUOVA_UTENZA,
-        DOMINIO_APN_VPN;
+        DOMINIO_APN_VPN,
+        MACCHINE_PONTE,
+        BSPACE,
+        PORTALE_INCASSI,
+        DB_ORACLE,
+        OPENSHIFT_CONSOLE,
+        JENKINS,
+        ELK,
+        JFROG,
+        TSO_1,
+        TSO_2,
+        TSO_4,
+        DB_2,
+        OPC,
+        CHANGE_MAN,
+        WIC_PLANET,
+        DYNATRACE,
+        ALTRO;
     }
 
     public enum Ambiente {
@@ -27,12 +45,21 @@ public class RequestItem {
     }
 
     public enum Status {
-        DA_RICHIEDERE,
+        DA_RICHIEDERE, //stato presente solo nel JSON
         RICHIESTO,
         SOLLECITATO,
         IN_ATTESA_RISCONTRO_UTENTE,
+        SOLLECITATO_RISCONTRO_UTENTE,
         RISCONTRO_OK,
         RISCONTRO_KO;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public Type getType() {
@@ -99,4 +126,16 @@ public class RequestItem {
         this.ticket = ticket;
     }
 
+    @Override
+    public String toString() {
+        return "RequestItem{" +
+                "type=" + type +
+                ", dettaglio='" + dettaglio + '\'' +
+                ", ambiente=" + ambiente +
+                ", nota='" + nota + '\'' +
+                ", ticket='" + ticket + '\'' +
+                ", updateAt=" + updateAt +
+                ", status=" + status +
+                '}';
+    }
 }

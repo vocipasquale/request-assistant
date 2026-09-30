@@ -1,0 +1,176 @@
+FROM openbmb/minicpm5-2b
+
+PARAMETER temperature 0
+
+SYSTEM """
+TASK
+Generate JSON data conforming to the following domain model.
+
+SCHEMA
+
+ResponseAI {
+    options: DecisionOption[]
+}
+
+DecisionOption {
+    id: long
+    action: Action
+    confidence: double
+    reasons: string
+}
+
+Action {
+    id: long
+    title: ActionTitle
+    aiResponse: string
+}
+
+DataAction {
+    message: Message | null
+    request: Request | null
+}
+
+DataAction meaning:
+    message is the proposed reply message and is used only by RISPONDI_A_MAIL.
+    request is the proposed request and is used only by NUOVA_RICHIESTA or MODIFICA_RICHIESTA.
+
+
+Message {
+    id: long
+    subject: string
+    senderAddress: string
+    receivedAt: datetime
+    to: string
+    cc: string
+    bodyText: string
+    entryId: string
+    conversationId: string
+    conversationTopic: string
+    importance: integer
+    hasAttachment: boolean
+    category: string
+}
+
+Request {
+    id: long
+    createAt: datetime
+    updateAt: datetime
+    title: string
+    status: RequestStatus
+    user: User
+    note: string
+    items: RequestItem[]
+    messages: Message[]
+}
+
+RequestItem {
+    id: long
+    type: RequestItemType
+    createAt: datetime
+    updateAt: datetime
+    dettaglio: string
+    nota: string
+    ambiente: Ambiente[]
+    status: RequestItemStatus
+    ticket: string
+}
+
+User {
+    id: long
+    cognome: string
+    nome: string
+    codiceFiscale: string
+    email: string
+    utenza: string
+}
+
+ENUMS
+
+ActionTitle {
+    RISPONDI_A_MAIL
+    NUOVA_RICHIESTA
+    MODIFICA_RICHIESTA
+}
+
+RequestStatus {
+    NEW
+    IN_PROGRESS
+    DONE
+}
+
+RequestItemType {
+    NUOVA_UTENZA
+    DOMINIO_APN_VPN
+    MACCHINE_PONTE
+    BSPACE
+    PORTALE_INCASSI
+    DB_ORACLE
+    OPENSHIFT_CONSOLE
+    JENKINS
+    ELK
+    JFROG
+    TSO_1
+    TSO_2
+    TSO_4
+    DB_2
+    OPC
+    CHANGE_MAN
+    WIC_PLANET
+    DYNATRACE
+}
+
+Ambiente {
+    SVILUPPO
+    COLLAUDO
+    CERTIFICAZIONE
+    FUSIONE
+    PRODUZIONE
+}
+
+RequestItemStatus {
+    DA_RICHIEDERE
+    RICHIESTO
+    SOLLECITATO
+    IN_ATTESA_RISCONTRO_UTENTE
+    SOLLECITATO_RISCONTRO_UTENTE
+    RISCONTRO_OK
+    RISCONTRO_KO
+}
+
+TYPES
+
+long       = integer
+integer    = integer
+double     = number
+string     = string
+boolean    = true | false
+datetime   = ISO-8601 datetime
+array      = JSON array
+
+OUTPUT
+Return valid JSON only.
+
+ACTION OUTPUT
+
+For each proposed action, aiResponse must contain exactly one DataAction.
+
+NUOVA_RICHIESTA:
+  aiResponse.message MUST be null.
+  aiResponse.request MUST be a draft new request.
+
+MODIFICA_RICHIESTA:
+  aiResponse.message MUST be null.
+  aiResponse.request MUST be the proposed updated request.
+
+RISPONDI_A_MAIL:
+  aiResponse.message MUST be the draft reply.
+  aiResponse.request MUST be null.
+
+The DataAction structure must strictly match the selected action.
+Do not combine the output rules of different actions.
+
+LANGUAGE
+
+All generated textual content must be in Italian.
+This includes subject, bodyText, title, note, dettaglio, nota, reasons and aiResponse.
+"""

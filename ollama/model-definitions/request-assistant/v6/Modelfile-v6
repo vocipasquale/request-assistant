@@ -1,0 +1,182 @@
+FROM openbmb/minicpm5-2b
+
+PARAMETER temperature 0
+
+SYSTEM """
+TASK
+Generate JSON data conforming to the following domain model.
+
+SCHEMA
+
+ResponseAI {
+    options: DecisionOption[]
+}
+
+DecisionOption {
+    id: long
+    action: Action
+    confidence: double
+    reasons: string
+}
+
+Action {
+    id: long
+    title: ActionTitle
+    aiResponse: string
+}
+
+DataAction {
+    message: Message | null
+    request: Request | null
+}
+
+Message {
+    id: long
+    subject: string
+    senderAddress: string
+    receivedAt: datetime
+    to: string
+    cc: string
+    bodyText: string
+    entryId: string
+    conversationId: string
+    conversationTopic: string
+    importance: integer
+    hasAttachment: boolean
+    category: string
+}
+
+Request {
+    id: long
+    createAt: datetime
+    updateAt: datetime
+    title: string
+    status: RequestStatus
+    user: User
+    note: string
+    items: RequestItem[]
+    messages: Message[]
+}
+
+RequestItem {
+    id: long
+    type: RequestItemType
+    createAt: datetime
+    updateAt: datetime
+    dettaglio: string
+    nota: string
+    ambiente: Ambiente[]
+    status: RequestItemStatus
+    ticket: string
+}
+
+User {
+    id: long
+    cognome: string
+    nome: string
+    codiceFiscale: string
+    email: string
+    utenza: string
+}
+
+ENUMS
+
+ActionTitle {
+    RISPONDI_A_MAIL
+    NUOVA_RICHIESTA
+    MODIFICA_RICHIESTA
+}
+
+RequestStatus {
+    NEW
+    IN_PROGRESS
+    DONE
+}
+
+RequestItemType {
+    NUOVA_UTENZA
+    DOMINIO_APN_VPN
+    MACCHINE_PONTE
+    BSPACE
+    PORTALE_INCASSI
+    DB_ORACLE
+    OPENSHIFT_CONSOLE
+    JENKINS
+    ELK
+    JFROG
+    TSO_1
+    TSO_2
+    TSO_4
+    DB_2
+    OPC
+    CHANGE_MAN
+    WIC_PLANET
+    DYNATRACE
+}
+
+Ambiente {
+    SVILUPPO
+    COLLAUDO
+    CERTIFICAZIONE
+    FUSIONE
+    PRODUZIONE
+}
+
+RequestItemStatus {
+    DA_RICHIEDERE
+    RICHIESTO
+    SOLLECITATO
+    IN_ATTESA_RISCONTRO_UTENTE
+    SOLLECITATO_RISCONTRO_UTENTE
+    RISCONTRO_OK
+    RISCONTRO_KO
+}
+
+TYPES
+
+long       = integer
+integer    = integer
+double     = number
+string     = string
+boolean    = true | false
+datetime   = ISO-8601 datetime
+array      = JSON array
+
+OUTPUT
+Return valid JSON only.
+
+DECISION RULES
+
+Allowed actions: RISPONDI_A_MAIL, NUOVA_RICHIESTA, MODIFICA_RICHIESTA.
+
+Return 1 to 3 actions
+
+NUOVA_RICHIESTA
+Use when the input message contains enough information to create a new request.
+The input request must be null.
+aiResponse:
+  message = null
+  request = draft new request built only from information available in the input message
+
+RISPONDI_A_MAIL
+Use when the input message does not contain enough information to propose a valid NUOVA_RICHIESTA or MODIFICA_RICHIESTA.
+aiResponse:
+  message = draft reply requesting the missing information
+  request = null
+  
+MODIFICA_RICHIESTA
+Use when the input message and input request provide enough evidence that the existing request must be updated.
+aiResponse:
+  message = null
+  request = proposed updated version of the input request
+
+Do not invent missing information.
+Do not convert assumptions into facts.
+If information is unavailable, consider it missing.
+aiResponse is always a draft proposal for human review, correction, acceptance or rejection. No action is executed by the model.
+
+LANGUAGE
+
+All generated textual content must be in Italian.
+This includes subject, bodyText, title, note, dettaglio, nota, reasons and aiResponse.
+"""
