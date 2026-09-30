@@ -31,7 +31,7 @@ public class PlaygroundProcess {
 
     }
 
-    private void processRequests() {
+    private void processRequests() throws Exception{
         //recuper le richieste da sollecitare o da chiudere...
         List<Request> requests = batchPort.getRequestsToProcess();
 
@@ -41,10 +41,11 @@ public class PlaygroundProcess {
         }
 
         logger.info("Trovate " + requests.size() + " richieste da processare!");
-        requests.stream().forEach(request ->{
+        for (Request request : requests) {
             logger.debug("Richiesta id {} in processamento...", request.getId());
             batchPort.processRequest(request);
-        });
+        }
+
     }
 
     private void processMessages() throws Exception {
@@ -71,6 +72,7 @@ public class PlaygroundProcess {
 
     private void moveMessageInProgress(Message message) throws Exception {
             logger.debug("Sposto la mail in lavorazione, mailID: " + message.getEntryId());
+            //il message è già persistito sul db
             batchPort.moveMessageInProgress(message);
     }
 }

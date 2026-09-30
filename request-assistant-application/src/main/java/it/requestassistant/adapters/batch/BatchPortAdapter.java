@@ -1,11 +1,15 @@
 package it.requestassistant.adapters.batch;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import it.requestassistant.application.port.in.BatchPort;
 import it.requestassistant.application.port.out.AiEnginePort;
 import it.requestassistant.application.port.out.MessagePort;
 import it.requestassistant.application.port.out.PersistenceDaoPort;
 import it.requestassistant.application.port.out.RequestResearchPort;
+import it.requestassistant.application.service.JsonService;
+import it.requestassistant.application.util.MessageHelper;
 import it.requestassistant.domain.model.*;
+import org.apache.logging.log4j.message.StringFormattedMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +40,9 @@ public class BatchPortAdapter implements BatchPort {
 
     @Autowired
     private PersistenceDaoPort persistenceDaoPort;
+
+    @Autowired
+    private JsonService jsonService;
 
     @Value("${email-address.focal-point}")
     private String focalPointEmailAddress;
@@ -81,18 +88,22 @@ public class BatchPortAdapter implements BatchPort {
     }
 
     /**
-     * Crea la PendingDecision relativa alla request in input.
-     * L'applicazione crea la PendingDecision per:
+     * Processa le request IN_PROGRESS che non hanno pending decision associate.
+     * Il metodo crea la PendingDecision in modo che possa essere gestita in dashboard dall'operatore.
+     * Request e Message vengono inserite in DataAction e serializzate in JSON per valorizzare aiResponse.
+     *
+     * Crea la PendingDecision per:
+     * - items da richiedere al focal point
      * - items da sollecitare al focal point
      * - items da sollecitare all'utente per riscontro
      *
-     * Se gli items sono tutti in RISCONTRO_OK, la request viene chiusa
-     * La request verrà analizzata dall'assistente AI, solo in presenza di un nuovo message (ved. processMessage(Message message) )
+     * Se gli items sono tutti in RISCONTRO_OK, la request viene chiusa (direttamente dal metodo)
      *
-     * @param request
+     * @param request: request IN_PROGRESS che non è associata ad alcune PendingDecision
+     *
      */
     @Override
-    public void processRequest(Request request) {
+    public void processRequest(Request request) throws Exception{
         logger.info("Gestione richiesta IN_PROGRESS: {}", request.getTitle());
 
         PendingDecision pendingDecision = null;
@@ -100,7 +111,14 @@ public class BatchPortAdapter implements BatchPort {
 
         switch (situazioneItems.keySet().stream().findFirst().orElse("")) {
             case ITEMS_DA_RICHIEDERE -> {
-
+                 List<RequestItem> items = situazioneItems.get(ITEMS_DA_RICHIEDERE);
+                logger.debug("Richiesta id {} items da richiedere...", request.getId());
+                //1. creare message verso il FP con elenco items da abilitare
+                //2. creare pendingDecision con message (in aiResponse) e request (in pendingDecision) associati
+                //3. persistere su DB pendingDecision
+                pendingDecision = creaRichiestaFocalPoint(request, items, focalPointEmailAddress);
+                long pdId = persistenceDaoPort.insertPendingDecision(pendingDecision);
+                logger.info("Creata PendingDecision id {} per sollecito focal point", pdId);
             }
             case ITEMS_DA_SOLLECITARE_FP -> {
                 //sollecito focal point...
@@ -186,6 +204,51 @@ public class BatchPortAdapter implements BatchPort {
 
     }
 
+    /**
+     * Crea la pendingDecision di richiesta verso il focal point
+     *
+     * @param request
+     * @param items
+     * @param focalPointEmailAddress
+     * @return
+     */
+    private PendingDecision creaRichiestaFocalPoint(Request request, List<RequestItem> items, String focalPointEmailAddress) throws JsonProcessingException {
+        //mail di richiesta da inviare
+        Message message = new Message();
+        message.setSenderAddress(operatoreEmailAddress);
+        message.setTo(focalPointEmailAddress);
+        message.setSubject(request.getTitle());
+
+        String head = """
+                Buongiorno,
+                per il collega %s si richiede:                
+                """.formatted(request.getUser().getCognome()+" "+request.getUser().getNome()+" "+request.getUser().getUtenza());
+        String foot = "\nGrazie\nSaluti.";
+
+        message.setBodyText(MessageHelper.itemsInTable(head, items, foot));
+        message.setImportance(1);
+        message.setHasAttachment(false);
+
+        //decision options: aiResponse contiene il messaggio di bozza da mostrare in dashboard
+        DecisionOption decisionOption = new DecisionOption();
+        decisionOption.setConfidence(100);
+        decisionOption.setReasons("Item in stato "+RequestItem.Status.DA_RICHIEDERE);
+        decisionOption.setAction(new Action(Action.Title.INVIA_RICHIESTA, jsonService.toJson(new DataAction(message, null)) ));
+        List<DecisionOption> options = new ArrayList<>();
+        options.add(decisionOption);
+
+        //type = MESSAGE_CLASSIFICATION, infatti aiResponse = {request:null, message:{...} }
+        PendingDecision result = new PendingDecision(
+                0,
+                LocalDateTime.now(),
+                PendingDecision.Type.MESSAGE_CLASSIFICATION,
+                "Invia mail di richiesta",
+                options,
+                null,
+                request);
+
+        return result;
+    }
 
     /**
      * Crea la pending decision di sollecto che dovrà essere valutata e accettata dall'operatore.
@@ -195,16 +258,16 @@ public class BatchPortAdapter implements BatchPort {
      * @param emailAddress
      * @return
      */
-    private PendingDecision creaSollecito(Request request, List<RequestItem> items, String emailAddress) {
+    private PendingDecision creaSollecito(Request request, List<RequestItem> items, String emailAddress) throws Exception {
         //mail di sollecito da inviare
         Message message = buildMessageSollecito(request, items, emailAddress);
 
         PendingDecision result = new PendingDecision(
                     0,
                     LocalDateTime.now(),
-                    PendingDecision.Type.REQUEST_ANALYSIS,
+                    PendingDecision.Type.MESSAGE_CLASSIFICATION,
                 "SOLLECITO",
-                    buildDecisionOptionSollecito(request),
+                    buildDecisionOptionSollecito(message),
                 message,
                 request);
 
@@ -239,11 +302,11 @@ public class BatchPortAdapter implements BatchPort {
     }
 
 
-    private List<DecisionOption> buildDecisionOptionSollecito(Request request) {
+    private List<DecisionOption> buildDecisionOptionSollecito(Message message) throws Exception {
         DecisionOption decisionOption = new DecisionOption();
         decisionOption.setConfidence(1.0);
         decisionOption.setReasons("Sono trascorsi almeno "+NUM_GG_SOLLECITO+" dall'ultimo riscontro.");
-        decisionOption.setAction(new Action(Action.Title.INVIA_SOLLECITO, "Invia sollecito per " + request.getTitle()));
+        decisionOption.setAction(new Action(Action.Title.INVIA_SOLLECITO, jsonService.toJson(new DataAction(message, null))));
         List<DecisionOption> options = new ArrayList<>();
         options.add(decisionOption);
         return options;

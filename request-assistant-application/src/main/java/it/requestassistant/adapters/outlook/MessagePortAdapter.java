@@ -5,8 +5,6 @@ import com.jacob.com.Dispatch;
 import com.jacob.com.Variant;
 import it.requestassistant.application.port.out.MessagePort;
 import it.requestassistant.domain.model.Message;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +18,9 @@ import java.util.Objects;
 @Component
 public class MessagePortAdapter implements MessagePort {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    private static final long MAIL_SEARCH_TIMEOUT_NANOS = 10L * 60L * 1_000_000_000L;
+    private static final long MAIL_SEARCH_INTERVAL_MILLIS = 5_000L;
 
     @Value("${mail.folder.root}")
     private String rootFolderName; // = "Pa.Voci@almaviva.it";
@@ -158,6 +159,52 @@ public class MessagePortAdapter implements MessagePort {
         return null;
     }
 
+    private Dispatch findMailBySubject(Dispatch sourceFolder, String subject)
+            throws InterruptedException {
+        long deadline = System.nanoTime() + MAIL_SEARCH_TIMEOUT_NANOS;
+
+        do {
+            Dispatch mail = findMailBySubjectOnce(sourceFolder, subject);
+            if (mail != null) {
+                return mail;
+            }
+
+            long remainingNanos = deadline - System.nanoTime();
+            if (remainingNanos <= 0) {
+                break;
+            }
+
+            long sleepMillis = Math.min(
+                    MAIL_SEARCH_INTERVAL_MILLIS,
+                    Math.max(1L, remainingNanos / 1_000_000L)
+            );
+            Thread.sleep(sleepMillis);
+        } while (System.nanoTime() < deadline);
+
+        logger.warn("Mail con subject '{}' non trovata dopo 10 minuti nella cartella {}",
+                subject, Dispatch.get(sourceFolder, "Name").getString());
+
+        throw new RuntimeException("Mail con subject '"+subject+"' non trovata dopo 10 minuti nella cartella "+Dispatch.get(sourceFolder, "Name").getString());
+
+    }
+
+    private Dispatch findMailBySubjectOnce(Dispatch sourceFolder, String subject) {
+        Dispatch items = Dispatch.get(sourceFolder, "Items").toDispatch();
+        int count = Dispatch.get(items, "Count").getInt();
+
+        for (int i = 1; i <= count; i++) {
+            Dispatch mail = Dispatch.call(items, "Item", new Variant(i)).toDispatch();
+            String currentSubject = Dispatch.get(mail, "Subject").getString();
+
+            if (subject.equals(currentSubject)) {
+                logger.debug("Mail con subject '{}' trovata.", subject);
+                return mail;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Sposta il message da inArrivoFolder a inLavorazioneFolder
      *
@@ -292,15 +339,27 @@ public class MessagePortAdapter implements MessagePort {
             return "";
         }
 
-        String escaped = text
-                .replace("&", "&amp;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
+        return escapeHtml(text)
                 .replace("\r\n", "\n")
                 .replace("\r", "\n")
                 .replace("\n", "<br/>");
+    }
 
-        return escaped;
+    private String toPreformattedHtmlFragment(String text) {
+        if (Objects.isNull(text) || text.isBlank()) {
+            return "";
+        }
+
+        return "<pre style=\"margin:0;font-family:inherit;white-space:pre-wrap;\">"
+                + escapeHtml(text)
+                + "</pre>";
+    }
+
+    private String escapeHtml(String text) {
+        return text
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
     }
 
     private String extractBodyContent(String htmlBody) {
@@ -350,24 +409,53 @@ public class MessagePortAdapter implements MessagePort {
         }
     }
 
+    /**
+     * Crea una mail da message e la invia.
+     *
+     * @param message
+     * @param moveInLavorazione: se true la mail viene spostata in "RichiesteAbilitazioni\in_lavorazione" dopo l'invio
+     * @return
+     * @throws Exception
+     */
     @Override
-    public void sendMessage(Message message) throws Exception {
+    public Message sendMessage(Message message, boolean moveInLavorazione, Long requestId) throws Exception {
         try {
             checkAndRefreshOutlookConnection();
 
-            logger.debug("Invio la mail con subject {}");
             Dispatch newMail = Dispatch.call(outlook, "CreateItem", 0).toDispatch();
             if (!Objects.isNull(message.getSenderAddress()) && !message.getSenderAddress().isBlank()) {
                 Dispatch.put(newMail, "SentOnBehalfOfName", message.getSenderAddress());
             }
             Dispatch.put(newMail, "To", message.getTo());
             Dispatch.put(newMail, "CC", message.getCc());
-            Dispatch.put(newMail, "Subject", message.getSubject());
-            Dispatch.put(newMail, "HTMLBody", toHtmlFragment(message.getBodyText()));
+
+            String subject = message.getSubject() +
+                    (Objects.isNull(requestId)
+                            ? ""
+                            : " [requestId: "+requestId+"]");
+            Dispatch.put(newMail, "Subject", subject);
+            Dispatch.put(newMail, "HTMLBody", toPreformattedHtmlFragment(message.getBodyText()));
+
             Dispatch.call(newMail, "Send");
 
-            //lasciare la mail in "inviate"
+            //cerco la mail appena inviata per spostarla in in_lavorazione...
+            Dispatch mailInviata =
+                    findMailBySubject(findFolder(rootFolder, "Posta inviata"), subject);
+            Message messageFrommailInviata = null;
+            if(moveInLavorazione ){
+                logger.info("Sposto mail in {}", inLavorazioneFolderName );
+                Dispatch movedMail = Dispatch.call(mailInviata, "Move", inLavorazioneFolder).getDispatch();
+                messageFrommailInviata = mailToMessage(mailInviata);
+                if(movedMail != null){
+                    //la mail inviata è stata spostata in in_lavorazione
+                    //aggiorno l'entryID...
+                    messageFrommailInviata = mailToMessage(mailInviata);
+                    messageFrommailInviata.setEntryId(Dispatch.get(movedMail, "EntryID").getString());
+                    return messageFrommailInviata;
+                }
+            }
 
+            return messageFrommailInviata;
         } finally {
             releaseOutlookConnection();
         }

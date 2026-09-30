@@ -32,7 +32,8 @@ public class RequestItem {
         OPC,
         CHANGE_MAN,
         WIC_PLANET,
-        DYNATRACE;
+        DYNATRACE,
+        ALTRO;
     }
 
     public enum Ambiente {

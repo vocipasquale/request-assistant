@@ -25,6 +25,10 @@ public class JsonService {
         return objectMapper.writeValueAsString(requestAI);
     }
 
+    public String toJson(DataAction dataAction) throws JsonProcessingException {
+        return objectMapper.writeValueAsString(dataAction);
+    }
+
 //    public ResponseAI fromJson(String json) throws JsonProcessingException {
 //        TypeReference<ResponseAI> typeReference = new TypeReference<>() {};
 //        return objectMapper.readValue(json, typeReference);

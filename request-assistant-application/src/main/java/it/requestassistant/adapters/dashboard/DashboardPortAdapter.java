@@ -17,10 +17,10 @@ public class DashboardPortAdapter implements DashboardPort {
 	private final PlaygroundProcessControlPort playgroundProcessControlPort;
 	private final PersistenceDaoPort persistenceDaoPort;
 	private final MessagePort messagePort;
-	private final AiActionPerformerPort actionPerformerPort;
+	private final ActionPerformerPort actionPerformerPort;
 
 	public DashboardPortAdapter(PlaygroundProcessControlPort playgroundProcessControlPort,
-                                PersistenceDaoPort persistenceDaoPort, MessagePort messagePort, AiActionPerformerPort actionPerformerPort) {
+                                PersistenceDaoPort persistenceDaoPort, MessagePort messagePort, ActionPerformerPort actionPerformerPort) {
 		this.playgroundProcessControlPort = playgroundProcessControlPort;
 		this.persistenceDaoPort = persistenceDaoPort;
         this.messagePort = messagePort;
@@ -44,7 +44,8 @@ public class DashboardPortAdapter implements DashboardPort {
 
 	@Override
 	public List<PendingDecision> getMessagePendingDecisions() {
-		return persistenceDaoPort.findPendingDecisionsByType(PendingDecision.Type.MESSAGE_CLASSIFICATION);
+		//return persistenceDaoPort.findPendingDecisionsByType(PendingDecision.Type.MESSAGE_CLASSIFICATION);
+		return persistenceDaoPort.findAllPendingDecisions();
 	}
 
 	@Override
@@ -52,13 +53,12 @@ public class DashboardPortAdapter implements DashboardPort {
 		if(!Objects.isNull(pd.getMessage())){//prima sposta la mail in "scartate"
             try {
                 messagePort.moveMessageInDiscarded(pd.getMessage());
-				//poi ripulisco il DB
-		//		persistenceDaoPort.deletePendingDecision(pd);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
-
+		//poi ripulisco il DB
+		persistenceDaoPort.deletePendingDecision(pd);
 	}
 
 
@@ -67,7 +67,7 @@ public class DashboardPortAdapter implements DashboardPort {
         try {
 			actionPerformerPort.perform(pendingDecision, decisionOption, dataAction);
 			//dopo aver eseguito le azioni, elimino la pending decision dal DB
-		//	persistenceDaoPort.deletePendingDecision(pendingDecision);
+			persistenceDaoPort.deletePendingDecision(pendingDecision);
 		} catch (Exception e) {
             throw new RuntimeException(e);
         }

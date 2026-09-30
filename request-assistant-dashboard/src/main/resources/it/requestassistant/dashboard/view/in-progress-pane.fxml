@@ -20,7 +20,6 @@
                 <VBox spacing="10.0" styleClass="cards-container" >
                     <Button fx:id="refreshMessagesButton" text="Refresh" onAction="#onRefresh" styleClass="refresh-button"/>
                     <Separator styleClass="separator"/>
-
                     <ScrollPane fitToWidth="true" styleClass="content-scroll" prefHeight="620" VBox.vgrow="ALWAYS">
                         <content>
                             <!--
@@ -33,10 +32,7 @@
                                   styleClass="cards-container"/>
                         </content>
                     </ScrollPane>
-
-
                 </VBox>
-
             </content>
         </Tab>
 
@@ -50,9 +46,9 @@
                                 Il controller creerà un nodo "pending-decision-card.fxml"
                                 per ogni PendingDecision e lo aggiungerà qui.
                         -->
-                        <VBox fx:id="pendingDecisionRequestsContainer"
-                              spacing="10.0"
-                              styleClass="cards-container"/>
+<!--                        <VBox fx:id="pendingDecisionRequestsContainer"-->
+<!--                              spacing="10.0"-->
+<!--                              styleClass="cards-container"/>-->
                     </content>
                 </ScrollPane>
             </content>

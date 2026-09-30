@@ -53,6 +53,7 @@ public class AiEngineAdapter implements AiEnginePort {
     @Override
     public PendingDecision analyzeMessage(Message message, Request candidate) {
         logger.info("AI: analisi messaggio...");
+
         List<DecisionOption> options = generateDecisionOptions(message, candidate);
 
         logger.debug("costruisco pending decision...");
@@ -88,11 +89,11 @@ public class AiEngineAdapter implements AiEnginePort {
 
 
     // METODO CHE SIMULA IL LAVORO CHE ESEGUIRà IL MOTORE AI: GENERA LE DECISIONI CHE DOVRà PRENDERE L'OPERATORE
-//    private List<DecisionOption> generateDecisionOptionsMock(Message message, Request candidate){
-//        long start = System.nanoTime();
-//
-//
-//        //rispondi a mail...
+    private List<DecisionOption> generateDecisionOptionsMock(Message message, Request candidate){
+        long start = System.nanoTime();
+
+
+        //rispondi a mail...
 //        String content = "{\"options\":[\n" +
 //                "\t{\n" +
 //                "\t\t\"id\":1,\n" +
@@ -104,29 +105,42 @@ public class AiEngineAdapter implements AiEnginePort {
 //                "\t\t}\n" +
 //                "\t}\n" +
 //                "]}";
-//
-//
-//        try {
-//            logger.info("#################### content: {}", content);
-//            ResponseAI responseAI = jsonService.fromJson(content, new TypeReference<ResponseAI>() { });
-//            logger.info("#################### Risposta AI: {}", responseAI);
-//
-//            return (Objects.isNull(responseAI.getOptions()) || responseAI.getOptions().isEmpty() ? new ArrayList<>() : responseAI.getOptions());
-//
-//        } catch (JsonProcessingException e) {
-//            logger.error("Errore nella serializzazione del JSON per l'analisi AI del messaggio con id: " + message.getEntryId(), e);
-//            throw new RuntimeException(e);
-//        } finally {
-//            long elapsedNanos = System.nanoTime() - start;
-//
-//            long seconds = elapsedNanos / 1_000_000_000;
-//            long minutes = seconds / 60;
-//            long remainingSeconds = seconds % 60;
-//
-//            logger.info("Tempo di risposta del motore AI {} min {} sec", minutes, remainingSeconds);
-//        }
-//
-//    }
+
+        //nuova request
+        String content = "{\"options\":[\n" +
+                "\t{\n" +
+                "\t\t\"id\":1,\n" +
+                "\t\t\"confidence\":100,\n" +
+                "\t\t\"reasons\":\"Messaggio contiene tutti i dati necessari per creare una nuova richiesta (informazioni utente, motivo, tipo di richiesta). Nessuna richiesta esistente da modificare.\",\n" +
+                "\t\t\"action\":{\n" +
+                "\t\t\t\"title\":\"NUOVA_RICHIESTA\",\n" +
+                "\t\t\t\"aiResponse\": \"{\\\"message\\\":null, \\\"request\\\":{\\\"title\\\":\\\"Richiesta accesso Oracle\\\",\\\"status\\\":\\\"NEW\\\",\\\"items\\\":[{\\\"type\\\":\\\"DB_ORACLE\\\",\\\"status\\\":\\\"DA_RICHIEDERE\\\",\\\"dettaglio\\\":\\\"abilitazione in lettura ed in scrittura ai DB oracle di sviluppo e collaudo\\\"}],\\\"user\\\":{\\\"nome\\\":\\\"Pasquale\\\",\\\"cognome\\\":\\\"Voci\\\",\\\"utenza\\\":\\\"u83172\\\"},\\\"messages\\\":[]}}\"\n" +
+                "\t\t}\n" +
+                "\t}\n" +
+                "]}";
+
+
+        try {
+            logger.info("#################### content: {}", content);
+            ResponseAI responseAI = jsonService.fromJson(content);
+            logger.info("#################### Risposta AI: {}", responseAI);
+
+            return (Objects.isNull(responseAI.getOptions()) || responseAI.getOptions().isEmpty() ? new ArrayList<>() : responseAI.getOptions());
+
+        } catch (JsonProcessingException e) {
+            logger.error("Errore nella serializzazione del JSON per l'analisi AI del messaggio con id: " + message.getEntryId(), e);
+            throw new RuntimeException(e);
+        } finally {
+            long elapsedNanos = System.nanoTime() - start;
+
+            long seconds = elapsedNanos / 1_000_000_000;
+            long minutes = seconds / 60;
+            long remainingSeconds = seconds % 60;
+
+            logger.info("Tempo di risposta del motore AI {} min {} sec", minutes, remainingSeconds);
+        }
+
+    }
 
 
 

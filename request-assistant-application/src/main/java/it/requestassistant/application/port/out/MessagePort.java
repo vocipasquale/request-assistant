@@ -13,5 +13,5 @@ public interface MessagePort {
     void displayMessage(Message message);
     void replyToMessage(Message originalMessage, Message replyMessage) throws Exception;
     void forwardMessage(Message message, Message message1) throws Exception;
-    void sendMessage(Message message) throws Exception;
+    Message sendMessage(Message message, boolean moveInProgress, Long requestId) throws Exception;
 }

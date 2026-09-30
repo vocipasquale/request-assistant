@@ -5,6 +5,7 @@ import it.requestassistant.adapters.persistence.mapper.PersistenceRowMappers;
 import it.requestassistant.adapters.persistence.row.*;
 import it.requestassistant.application.port.out.PersistenceDaoPort;
 import it.requestassistant.domain.model.*;
+import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -13,6 +14,8 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Statement;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static it.requestassistant.adapters.persistence.mapper.PersistenceDomainMappers.parseEnum;
@@ -131,9 +134,23 @@ public class PersistenceDao implements PersistenceDaoPort {
         return PersistenceDomainMappers.toDomain(requestRow, userRow, requestItemRows, requestMessageRows);
     }
 
+    /**
+     * SOLO PER UN TEST MOMENTANEO
+     * @TODO
+     *
+     * @param tk
+     * @return
+     */
     @Override
     public Request findRequestByTk(String tk) {
-        return null;
+        //@TODO
+        //da cambiare
+        String query = """
+                select * from request
+                where id = 1
+                """;
+
+         return null;
     }
 
     @Override
@@ -220,6 +237,88 @@ public class PersistenceDao implements PersistenceDaoPort {
     }
 
     @Override
+    public List<PendingDecision> findAllPendingDecisions() {
+        List<PendingDecision> result = new ArrayList<>();
+        List<PendingDecisionRow> pendingDecisionsRow = null;
+
+        String queryPd = """
+                SELECT pd.*
+                FROM pending_decision pd
+                ORDER BY created_at DESC
+                """;
+
+        //recupero le pending decision...
+        pendingDecisionsRow = jdbcTemplate.query(
+                queryPd,
+                PersistenceRowMappers.PENDING_DECISION);
+        logger.debug("Trovate {} pending decision", pendingDecisionsRow.size());
+
+        //relazioni...
+        pendingDecisionsRow.forEach(pdRow -> {;
+            MessageRow messageRow = null; //message della pending decision...
+            RequestRow requestRow = null; //request
+            List<RequestItemRow> requestItemRowList = null; //items della request...
+            List<MessageRow> messagesRequestRowList =null; //messages della request...
+            UserAccountRow userAccountRow = null; //user della request...
+
+            //messaggio della pending decision...
+            Optional<MessageRow> messageRowOptional = findMessageById(pdRow.messageId());
+            if(messageRowOptional.isPresent()) {
+                messageRow = messageRowOptional.get();
+                logger.debug("Trovato il messaggio id {} della pending decision id {}", messageRow.id(), pdRow.id());
+            }else {
+                logger.debug("La pending decision id {} non ha messaggio.");
+            }
+
+            ///////////////////////////////////////////////////////////////////////////////////////////
+            //request...
+            Optional<RequestRow> requestRowOptional = findRequestById(pdRow.requestId());
+            if(requestRowOptional.isPresent()){
+                requestRow = requestRowOptional.get();
+                logger.debug("Trovata la request id {} della pending decision id {}", requestRow.id(), pdRow.id());
+
+                //request item..
+                requestItemRowList = findRequestItemByRequestId(requestRow.id());
+                logger.debug("Trovati {} elementi della request id {}", requestItemRowList.size(), requestRow.id());
+
+                //messaggi della request...
+                messagesRequestRowList = findMessagesByRequestId(requestRow.id());
+                logger.debug("Trovati {} messaggi della request id {}", messagesRequestRowList.size(), requestRow.id());
+
+                //user..
+                Optional<UserAccountRow> userAccountRowOptional = findUserAccountById(requestRow.userId());
+                if (userAccountRowOptional.isPresent()){
+                    userAccountRow = userAccountRowOptional.get();
+                    logger.debug("Trovato l'utente id {} della request id {}", userAccountRow.id(), requestRow.id());
+                }else{
+                    logger.debug("La request id {} non ha utente. ", requestRow.id());
+                }
+            }else {
+                logger.debug("La pending decision id {} non ha request. ", pdRow.id());
+            }
+            ///////////////////////////////////////////////////////////////////////////////////////////////
+
+            ///////////////////////////////////////////////////////////////////////////////////////////////
+            //decision option...
+            List<DecisionOption> decisionOption = findDecisionOptionsByPendingDecisionId(pdRow.id());
+            logger.debug("Trovate {} decision option per la pending decision id {}", decisionOption.size(), pdRow.id());
+            ///////////////////////////////////////////////////////////////////////////////////////////////
+
+            result.add(new PendingDecision(
+                    pdRow.id(),
+                    pdRow.createdAt(),
+                    parseEnum(PendingDecision.Type.class, pdRow.type()),
+                    pdRow.target(),
+                    decisionOption,
+                    messageRow == null ? null : PersistenceDomainMappers.toDomain(messageRow),
+                    PersistenceDomainMappers.toDomain(requestRow, userAccountRow, requestItemRowList, messagesRequestRowList)
+            ));
+        });
+
+        return result;
+    }
+
+    @Override
     @Transactional
     public void deletePendingDecision(PendingDecision pendingDecision) {
         //delete action e action steps...
@@ -229,7 +328,7 @@ public class PersistenceDao implements PersistenceDaoPort {
         deleteDecisionOptionByPendingDecisionId(pendingDecision.getId());
 
         //delete message
-        deleteMessageById(pendingDecision.getId());
+        deleteMessageByIdOnlyNotReferenced(pendingDecision.getId());
 
         //delete pending decision
         logger.debug("Elimino la pending decision con id:{}",pendingDecision.getId());
@@ -281,7 +380,6 @@ public class PersistenceDao implements PersistenceDaoPort {
 
         //update message of request...
         existingRequest.getMessages().forEach(message -> {
-
             updateRequestIdOfMessage(message, existingRequest.getId());
         });
 
@@ -375,8 +473,13 @@ public class PersistenceDao implements PersistenceDaoPort {
 
         String queryPd = "";
 
-        //persisto il messaggio
-        long messageId = insertMessage(pendingDecision.getMessage());
+        long messageId;
+        //persisto il messaggio se esiste
+        if(pendingDecision.getMessage() != null){
+            messageId = insertMessage(pendingDecision.getMessage());
+        } else {
+            messageId = -1;
+        }
 
         //la request NON va salvata/aggiornata ora...
         if(Objects.isNull(pendingDecision.getRequest())){
@@ -400,13 +503,13 @@ public class PersistenceDao implements PersistenceDaoPort {
 
         String finalQueryPd = queryPd;
         jdbcTemplate.update(con -> {
-            var ps = con.prepareStatement(finalQueryPd, java.sql.Statement.RETURN_GENERATED_KEYS);
+            var ps = con.prepareStatement(finalQueryPd, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, pendingDecisionRow.createdAt() != null ? pendingDecisionRow.createdAt().toString() : null);
             ps.setString(2, pendingDecisionRow.type());
             ps.setString(3, pendingDecisionRow.target());
             ps.setLong(4, messageId);
             if(!Objects.isNull(pendingDecision.getRequest())){//ATTENZIONE!!!
-                ps.setLong(5, pendingDecision.getId());
+                ps.setLong(5, pendingDecision.getRequest().getId());
             }
             return ps;
         }, keyHolder);
@@ -424,6 +527,9 @@ public class PersistenceDao implements PersistenceDaoPort {
     @Override
     @Transactional
     public long insertRequest(Request request) {
+        //utente
+        long userId = insertUserAccount(request.getUser());
+
         String query = """
                 INSERT INTO request (create_at, update_at, title, status, note, user_id)
                 VALUES (?, ?, ?, ?, ?, ?)
@@ -432,20 +538,19 @@ public class PersistenceDao implements PersistenceDaoPort {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(con -> {
-            var ps = con.prepareStatement(query, java.sql.Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, requestRow.createAt() != null ? requestRow.createAt().toString() : null);
-            ps.setString(2, requestRow.updateAt() != null ? requestRow.updateAt().toString() : null);
+            var ps = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, requestRow.createAt() != null ? requestRow.createAt().toString() : LocalDateTime.now().toString());
+            ps.setString(2, requestRow.updateAt() != null ? requestRow.updateAt().toString() : LocalDateTime.now().toString());
             ps.setString(3, requestRow.title());
             ps.setString(4, requestRow.status());
             ps.setString(5, requestRow.note());
-            ps.setLong(6, requestRow.userId());
+            ps.setLong(6, userId);
 
             return ps;
         }, keyHolder);
 
         long requestId = keyHolder.getKey().longValue();
         logger.debug("Richiesta salvata con id:{}", requestId);
-
 
         //inserisco gli elementi...
         request.getItems().forEach(item -> {
@@ -454,12 +559,8 @@ public class PersistenceDao implements PersistenceDaoPort {
 
         //associo i messaggi alla request...
         request.getMessages().forEach(message -> {
-
             updateRequestIdOfMessage(message, requestId);
         });
-
-        //utente
-        insertUserAccount(request.getUser());
 
         return requestId;
     }
@@ -491,7 +592,7 @@ public class PersistenceDao implements PersistenceDaoPort {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(con -> {
-            var ps = con.prepareStatement(queryAct, java.sql.Statement.RETURN_GENERATED_KEYS);
+            var ps = con.prepareStatement(queryAct, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, actionRow.title());
             ps.setString(2, actionRow.aiResponse());
             return ps;
@@ -510,7 +611,7 @@ public class PersistenceDao implements PersistenceDaoPort {
         RequestItemRow requestItemRow = PersistenceDomainMappers.toRow(requestItem);
 
         jdbcTemplate.update(query,
-                requestItemRow.requestId(),
+                requestId,
                 requestItemRow.type(),
                 requestItemRow.createAt() != null ? requestItemRow.createAt().toString() : null,
                 requestItemRow.updateAt() != null ? requestItemRow.updateAt().toString() : null,
@@ -522,7 +623,8 @@ public class PersistenceDao implements PersistenceDaoPort {
         );
     }
 
-    private long insertMessage(Message message) {
+    @Override
+    public long insertMessage(Message message) {
         String query = """
                 INSERT INTO message (request_id, subject, sender_address, received_at, to_address, cc_address, body_text, entry_id, conversation_id, conversation_topic, importance, has_attachment, category)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -531,7 +633,7 @@ public class PersistenceDao implements PersistenceDaoPort {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(con -> {
-            var ps = con.prepareStatement(query, java.sql.Statement.RETURN_GENERATED_KEYS);
+            var ps = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             ps.setLong(1, messageRow.requestId());
             ps.setString(2, messageRow.subject());
             ps.setString(3, messageRow.senderAddress());
@@ -554,20 +656,59 @@ public class PersistenceDao implements PersistenceDaoPort {
         return messageId;
     }
 
-    private void insertUserAccount(User user) {
-        String query = """
+    private long insertUserAccount(User user) {
+        //ricerca se l'utente esiste già
+        Optional<UserAccountRow> userTrovato = findExistsUserAccount(user);
+
+        if(!userTrovato.isPresent()){
+            //inserisce l'utente
+            logger.info("Utente non trovato, inserisco nuovo utente: {}", user.getCognome()+ " "+user.getNome());
+
+            String query = """
                 INSERT INTO user_account (cognome, nome, codice_fiscale, email, utenza)
                 VALUES (?, ?, ?, ?, ?)
                 """;
-        UserAccountRow userAccountRow = PersistenceDomainMappers.toRow(user);
+            UserAccountRow userAccountRow = PersistenceDomainMappers.toRow(user);
+            KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(query,
-                userAccountRow.cognome(),
-                userAccountRow.nome(),
-                userAccountRow.codiceFiscale(),
-                userAccountRow.email(),
-                userAccountRow.utenza()
-        );
+            jdbcTemplate.update(con -> {
+                var ps = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+                ps.setString(1, userAccountRow.cognome());
+                ps.setString(2, userAccountRow.nome());
+                ps.setString(3, userAccountRow.codiceFiscale());
+                ps.setString(4, userAccountRow.email());
+                ps.setString(5, userAccountRow.utenza());
+
+                return ps;
+            }, keyHolder);
+
+            long userId = keyHolder.getKey().longValue();
+            logger.info("UserAccount salvato con id:{}", userId);
+            return userId;
+        }else{
+            //merge dei dati
+            logger.info("Utente già esistente, aggiorno i dati dell'utente: {}", user.getCognome()+ " "+user.getNome());
+
+            String utenza = Strings.isNotEmpty(user.getUtenza()) ? user.getUtenza().toUpperCase() : userTrovato.get().utenza();
+            String cf = Strings.isNotEmpty(user.getCodiceFiscale()) ? user.getCodiceFiscale().toUpperCase() : userTrovato.get().codiceFiscale();
+            String email = Strings.isNotEmpty(user.getEmail()) ? user.getEmail() : userTrovato.get().email();
+
+            //nuovo UserAccountRow con i dati mergiati...
+            updateUserAccount(new UserAccountRow(
+                    userTrovato.get().id(),
+                    user.getCognome(),
+                    user.getNome(),
+                    cf,
+                    email,
+                    utenza
+            ));
+
+            return userTrovato.get().id();
+        }
+
+
+
+
     }
 
     private List<DecisionOption> findDecisionOptionsByPendingDecisionId(long pendingDecisionId){
@@ -665,11 +806,18 @@ public class PersistenceDao implements PersistenceDaoPort {
         logger.info("Eliminate {} opzioni decisionali per la pending decision id:{}",deleted, pendingDecisionId);
     }
 
-    private void deleteMessageById(long id){
+    /**
+     * Elimina il message con id in input solo se il messaggio
+     * non è associato ad una request
+     *
+     * @param id
+     */
+    private void deleteMessageByIdOnlyNotReferenced(long id){
         logger.debug("Elimino il messaggio con id:{}", id);
         String query = """
                 DELETE FROM message
                 WHERE id = ?
+                AND NOT EXISTS (SELECT 1 FROM request WHERE id = request_id)
                 """;
         int deleted = jdbcTemplate.update(query, id);
         logger.info("Eliminati {} messaggi con id:{}",deleted, id);
@@ -698,16 +846,63 @@ public class PersistenceDao implements PersistenceDaoPort {
     }
 
     private void updateRequestIdOfMessage(Message message, long requestId) {
+        logger.debug("Aggiorno il request_id del messaggio con id: {} al valore {}", message.getId(), requestId);
         String queryM = """
                 UPDATE message
                   set request_id = ?
                 where id = ?                
                 """;
-        MessageRow messageRow = PersistenceDomainMappers.toRow(message);
+//        MessageRow messageRow = PersistenceDomainMappers.toRow(message);
 
         jdbcTemplate.update(queryM,
-                messageRow.requestId(),
-                messageRow.id()
+                requestId,
+                message.getId()
         );
+    }
+
+    /**
+     * Ricerca prima per nome e cognome
+     *
+     * @param user
+     * @return
+     */
+    private Optional<UserAccountRow> findExistsUserAccount(User user){
+        logger.info("Ricera user per Cognome e Nome: {} {}", user.getCognome(), user.getNome());
+
+        String query = "SELECT u.* FROM user_account u WHERE u.cognome = ? AND u.nome = ?";
+//        query += Strings.isEmpty(user.getUtenza()) ? "" : " AND u.utenza = '"+user.getUtenza()+"'";
+//        query += Strings.isEmpty(user.getCodiceFiscale()) ? "" : " AND UPPER(u.codice_fiscale) = '"+user.getCodiceFiscale().toUpperCase()+"'";
+//        query += Strings.isEmpty(user.getEmail()) ? "" : " AND UPPER(u.email) = '"+user.getEmail().toUpperCase()+"'";
+
+        logger.debug("query finale {}", query);
+
+        UserAccountRow userAccountRow = PersistenceDomainMappers.toRow(user);
+        return jdbcTemplate.query(query, PersistenceRowMappers.USER_ACCOUNT, userAccountRow.cognome(), userAccountRow.nome())
+                .stream()
+                .findFirst();
+    }
+
+    private void updateUserAccount(UserAccountRow userAccountRow){
+        String query = """
+                UPDATE user_account
+                  set cognome = ?,
+                      nome = ?,
+                      codice_fiscale = ?,
+                      email = ?,
+                      utenza = ?
+                where id = ?                
+                """;
+
+        jdbcTemplate.update(query,
+                userAccountRow.cognome(),
+                userAccountRow.nome(),
+                userAccountRow.codiceFiscale(),
+                userAccountRow.email(),
+                userAccountRow.utenza(),
+                userAccountRow.id()
+        );
+
+        logger.info("UserAccount aggiornato con id: {}", userAccountRow.id());
+
     }
 }

@@ -1,14 +1,14 @@
 permessi
 
-chown -R ollama:ollama /usr/share/ollama/model-definitions/request-assistant/v4
-chmod 750 /usr/share/ollama/model-definitions/request-assistant/v4
-chmod 640 /usr/share/ollama/model-definitions/request-assistant/v4/Modelfile-v4.2
+chown -R ollama:ollama /usr/share/ollama/model-definitions/request-assistant/v6
+chmod 750 /usr/share/ollama/model-definitions/request-assistant/v6
+chmod 640 /usr/share/ollama/model-definitions/request-assistant/v6/Modelfile-v6.6
 
 
 modello personalizzato
 
-cd /usr/share/ollama/model-definitions/request-assistant/v1
-ollama create qwen3-8b-request-assistant-v4.2 -f Modelfile-v4.2
+cd /usr/share/ollama/model-definitions/request-assistant/v6
+ollama create minicpm5-2b-request-assistant-v6.6 -f Modelfile-v6.6
 
 
 
@@ -38,7 +38,7 @@ time curl -N http://127.0.0.1:11434/api/chat \
   -H 'Content-Type: application/json' \
   -d @- <<'EOF'
 {
-  "model": "qwen3-8b-request-assistant-v4.2",
+  "model": "minicpm5-2b-request-assistant-v5",
   "messages": [
     {
       "role": "user",

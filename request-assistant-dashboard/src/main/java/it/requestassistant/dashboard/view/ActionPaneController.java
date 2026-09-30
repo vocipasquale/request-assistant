@@ -49,8 +49,9 @@ public class ActionPaneController {
     private Runnable onProceed;
     private Stage stage;
     private PendingDecision pendingDecision;
+    private DecisionOption chosenOption;
     private DataAction dataAction;
-    private Action.Title currentActionTitle;
+   // private Action.Title currentActionTitle;
 
     private TextField mittenteField;
     private TextField destinatarioField;
@@ -73,11 +74,11 @@ public class ActionPaneController {
         this.viewModel = viewModel;
     }
 
-    public void setData(DecisionOption option, PendingDecision pendingDecision, DataAction dataAction, Runnable onProceed, Stage stage) {
+    public void setData(DecisionOption option, PendingDecision pendingDecision, Runnable onProceed, Stage stage) throws Exception {
         this.onProceed = onProceed;
         this.stage = stage;
         this.pendingDecision = pendingDecision;
-        this.dataAction = dataAction;
+        this.chosenOption = option;
         resetDraftControlReferences();
 
         logger.debug("Inizializzazione modale azione per pending decision {} e opzione {}",
@@ -88,7 +89,7 @@ public class ActionPaneController {
         reasonsLabel.setText(option.getReasons() != null ? option.getReasons() : "-");
 
         Action action = option.getAction();
-        currentActionTitle = action != null ? action.getTitle() : null;
+        //currentActionTitle = action != null ? action.getTitle() : null;
         if (action == null || action.getTitle() == null) {
             logger.warn("Azione non disponibile per la pending decision {}",
                     pendingDecision != null ? pendingDecision.getId() : null);
@@ -108,30 +109,42 @@ public class ActionPaneController {
         return dataAction;
     }
 
-    private Node loadContentFor(Action action) {
-        Action.Title title = action.getTitle();
-        String resourcePath = switch (title) {
-            case RISPONDI_A_MAIL -> "/it/requestassistant/dashboard/view/bozza-mail-pane.fxml";
-            case NUOVA_RICHIESTA, MODIFICA_RICHIESTA -> "/it/requestassistant/dashboard/view/bozza-richiesta-pane.fxml";
-            default -> throw new IllegalStateException("Unexpected value: " + title);
-        };
 
-        URL resource = Objects.requireNonNull(
-                getClass().getResource(resourcePath),
-                "Vista " + resourcePath + " non trovata");
+    private Node loadContentFor(Action action) throws IOException {
+        String resourcePath = "";
 
-        try {
-            FXMLLoader loader = new FXMLLoader(resource);
-            Node content = loader.load();
-            if (title == Action.Title.RISPONDI_A_MAIL) {
-                populateMailDraftFields(loader, action.getAiResponse());
-            } else {
-                populateRequestDraftFields(loader, action.getAiResponse());
+        switch (action.getTitle()) {
+            case RISPONDI_A_MAIL, INVIA_RICHIESTA, INVIA_SOLLECITO -> {
+                resourcePath = "/it/requestassistant/dashboard/view/bozza-mail-pane.fxml";
+
+                URL resource = Objects.requireNonNull(
+                        getClass().getResource(resourcePath),
+                        "Vista " + resourcePath + " non trovata");
+
+                    FXMLLoader loader = new FXMLLoader(resource);
+                    Node content = loader.load();
+                    populateMailDraftFields(loader, action.getAiResponse());
+                    return content;
             }
-            return content;
-        } catch (IOException e) {
-            throw new IllegalStateException("Impossibile caricare la vista " + resourcePath, e);
+            case NUOVA_RICHIESTA, MODIFICA_RICHIESTA -> {
+                resourcePath = "/it/requestassistant/dashboard/view/bozza-richiesta-pane.fxml";
+
+                URL resource = Objects.requireNonNull(
+                        getClass().getResource(resourcePath),
+                        "Vista " + resourcePath + " non trovata");
+
+                    FXMLLoader loader = new FXMLLoader(resource);
+                    Node content = loader.load();
+                        populateRequestDraftFields(loader, action.getAiResponse());
+                    return content;
+            }
+            default -> {
+                logger.warn("Azione {} non gestita", action.getTitle());
+                return new Label("Azione non gestita: " + action.getTitle());
+            }
         }
+
+
     }
 
     private void populateMailDraftFields(FXMLLoader loader, String aiResponse) {
@@ -498,19 +511,17 @@ public class ActionPaneController {
      * prima di inviare al BE la pending decision da
      */
     private void aggiornaPendingPecision() throws Exception {
-        if (currentActionTitle == null) {
-            logger.warn("Impossibile aggiornare il draft: titolo azione non disponibile");
+        if (chosenOption == null) {
+            logger.warn("Impossibile aggiornare la bozza!");
             return;
         }
 
-        logger.debug("Aggiornamento DataAction dalla dashboard per azione {}", currentActionTitle.name());
+        logger.debug("Aggiornamento DataAction dalla dashboard per {}", chosenOption.getAction().getTitle());
 
-        switch (currentActionTitle) {
-            case RISPONDI_A_MAIL -> aggiornaDataActionMail();
+        switch (chosenOption.getAction().getTitle()) {
+            case RISPONDI_A_MAIL, INVIA_RICHIESTA, INVIA_SOLLECITO -> aggiornaDataActionMail();
             case NUOVA_RICHIESTA, MODIFICA_RICHIESTA -> aggiornaDataActionRichiesta();
-            default -> {
-                throw new Exception("Tipo di azione non gestito: " + currentActionTitle.getTitle());
-            }
+            default -> logger.warn("Azione {} non gestita per l'aggiornamento della bozza", chosenOption.getAction().getTitle());
         }
     }
 

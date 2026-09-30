@@ -24,11 +24,11 @@ public class Action{
 
     public enum Title {
         RISPONDI_A_MAIL("Rispondi a mail"),
-       // INOLTRA_MAIL("Inoltra mail"),
         INVIA_SOLLECITO("Invia sollecito"),
         NUOVA_RICHIESTA("Nuova richiesta"),
         MODIFICA_RICHIESTA("Modifica richiesta"),
-        CHIUDI_RICHIESTA("Chiudi richiesta");
+        CHIUDI_RICHIESTA("Chiudi richiesta"),
+        INVIA_RICHIESTA("Invia mail di richiesta");
 
         private final String title;
 

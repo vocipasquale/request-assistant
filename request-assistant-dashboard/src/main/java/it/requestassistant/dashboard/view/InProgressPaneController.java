@@ -22,7 +22,7 @@ public class InProgressPaneController {
     private final FxWeaver fxWeaver;
 
     @FXML private VBox pendingDecisionMessagesContainer;
-    @FXML private VBox pendingDecisionRequestsContainer;
+   // @FXML private VBox pendingDecisionRequestsContainer;
     @FXML private Button refreshMessagesButton;
 
     public InProgressPaneController(DashboardShellViewModel viewModel, FxWeaver fxWeaver) {
@@ -44,29 +44,29 @@ public class InProgressPaneController {
     @FXML
     public void refresh() {
         refreshPendingDecisionMessages();
-        refreshPendingDecisionRequests();
+  //      refreshPendingDecisionRequests();
     }
 
-    private void refreshPendingDecisionRequests() {
-        pendingDecisionRequestsContainer.getChildren().clear();
-
-        List<PendingDecision> pendingDecisions = viewModel.getRequestPendingDecisions();
-
-        if (pendingDecisions.isEmpty()) {
-            Label emptyLabel = new Label("Nessuna decisione pendente.");
-            emptyLabel.getStyleClass().add("panel-label");
-            pendingDecisionRequestsContainer.getChildren().add(emptyLabel);
-            return;
-        }
-
-        for (PendingDecision pd : pendingDecisions) {
-            FxControllerAndView<PendingDecisionCardController, Node> cardWrapper =
-                    fxWeaver.load(PendingDecisionCardController.class);
-            cardWrapper.getController().setData(pd, this::refresh);
-            cardWrapper.getView().ifPresent(
-                    view -> pendingDecisionRequestsContainer.getChildren().add(view));
-        }
-    }
+//    private void refreshPendingDecisionRequests() {
+//        pendingDecisionRequestsContainer.getChildren().clear();
+//
+//        List<PendingDecision> pendingDecisions = viewModel.getRequestPendingDecisions();
+//
+//        if (pendingDecisions.isEmpty()) {
+//            Label emptyLabel = new Label("Nessuna decisione pendente.");
+//            emptyLabel.getStyleClass().add("panel-label");
+//            pendingDecisionRequestsContainer.getChildren().add(emptyLabel);
+//            return;
+//        }
+//
+//        for (PendingDecision pd : pendingDecisions) {
+//            FxControllerAndView<PendingDecisionCardController, Node> cardWrapper =
+//                    fxWeaver.load(PendingDecisionCardController.class);
+//            cardWrapper.getController().setData(pd, this::refresh);
+//            cardWrapper.getView().ifPresent(
+//                    view -> pendingDecisionRequestsContainer.getChildren().add(view));
+//        }
+//    }
 
     private void refreshPendingDecisionMessages() {
         pendingDecisionMessagesContainer.getChildren().clear();

@@ -77,7 +77,7 @@ public class DashboardShellViewModel {
     }
 
     public void acceptDecisionOption(PendingDecision pendingDecision, DecisionOption decisionOption, DataAction dataAction) {
-        logger.info("Azioni accettate dall'operatore.");
+        logger.info("Azione {} accettata dall'operatore.", decisionOption.getAction().getTitle());
         dashboardPort.acceptDecisionOption(pendingDecision, decisionOption, dataAction);
     }
 

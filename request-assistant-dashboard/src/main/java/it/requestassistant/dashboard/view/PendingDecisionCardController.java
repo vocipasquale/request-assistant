@@ -80,7 +80,11 @@ public class PendingDecisionCardController {
                 btn.getStyleClass().add("accept-button");
                 btn.setOnAction(e -> {
                     DecisionOption option = getTableView().getItems().get(getIndex());
-                    openActionModal(option);
+                    try {
+                        openActionModal(option);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
                 });
             }
             @Override
@@ -150,7 +154,7 @@ public class PendingDecisionCardController {
         System.out.println("Mostra richiesta!");
     }
 
-    private void openActionModal(DecisionOption option) {
+    private void openActionModal(DecisionOption option) throws Exception {
         FxControllerAndView<ActionPaneController, Node> wrapper = fxWeaver.load(ActionPaneController.class);
         ActionPaneController controller = wrapper.getController();
         Parent modalRoot = (Parent) wrapper.getView().orElseThrow(
@@ -173,7 +177,7 @@ public class PendingDecisionCardController {
         scene.getStylesheets().add(stylesheet);
         modalStage.setScene(scene);
 
-        controller.setData(option, pendingDecision, dataAction, () -> {
+        controller.setData(option, pendingDecision, () -> {
             viewModel.acceptDecisionOption(pendingDecision, option, controller.getDataAction());
             if (onRefresh != null) {
                 onRefresh.run();
