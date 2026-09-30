@@ -1,12 +1,21 @@
 package it.requestassistant.adapters.ai;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import it.requestassistant.application.port.out.AiEnginePort;
 import it.requestassistant.application.port.out.PersistenceDaoPort;
+import it.requestassistant.application.service.JsonService;
 import it.requestassistant.domain.model.*;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClient;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,16 +27,33 @@ import java.util.Random;
 public class AiEngineAdapter implements AiEnginePort {
     public Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private final PersistenceDaoPort persistenceDaoPort;
+    @Autowired
+    private PersistenceDaoPort persistenceDaoPort;
 
-    public AiEngineAdapter(PersistenceDaoPort persistenceDaoPort) {
-        this.persistenceDaoPort = persistenceDaoPort;
+    @Autowired
+    private JsonService jsonService;
+
+    @Value("${ai.api.base-url}")
+    private String aiBaseUrl;
+
+    @Value("${ai.api.model}")
+    private String model;
+
+    private RestClient client;
+
+
+    @PostConstruct
+    private void buildRestClient() {
+        client = RestClient.builder()
+                .baseUrl(aiBaseUrl)
+                .build();
     }
 
 
     @Override
     public PendingDecision analyzeMessage(Message message, Request candidate) {
         logger.info("AI: analisi messaggio...");
+
         List<DecisionOption> options = generateDecisionOptions(message, candidate);
 
         logger.debug("costruisco pending decision...");
@@ -63,43 +89,117 @@ public class AiEngineAdapter implements AiEnginePort {
 
 
     // METODO CHE SIMULA IL LAVORO CHE ESEGUIRà IL MOTORE AI: GENERA LE DECISIONI CHE DOVRà PRENDERE L'OPERATORE
-    private List<DecisionOption> generateDecisionOptions(Message message, Request candidate) {
-        List<DecisionOption> options = new ArrayList<>();
-
-        if (Objects.isNull(candidate)) {
-            //la request candidata è null: non è stata trovata per conversatioId o per tk
-            logger.debug("AI: No request found in the database for message with id: " + message.getEntryId());
-
-            List<String> steps = new ArrayList<>();
-            steps.add("Crea una nuova Request e persistila nel database");
-            steps.add("Titolo proposto per la nuova Request: Reset pwd dominio esterni");
-            steps.add("User proposto per la nuova Request: u00000 Mario Rossi");
-            steps.add("Status per la nuova Request: IN_PROGRES");
-            //...
-            steps.add("Associa Message Id relativo alla mail corrente alla nuova request");
-            steps.add("Creare nuova Mail con oggetto: Reset pwd dominio esterni per Mario Rossi u00000");
-            steps.add("Contenuto della nuova Mail: Si richiede reset pwd dominio esterni per Mario Rossi u00000.");
-            //.... ALLEGATI ????   To, Cc, ...
-            steps.add("Invia la mail");
-            steps.add("Sposta la mail inviata in in progress folder...");
+    private List<DecisionOption> generateDecisionOptionsMock(Message message, Request candidate){
+        long start = System.nanoTime();
 
 
-            Action action = new Action(Action.Title.NUOVA_RICHIESTA, steps);
+        //rispondi a mail...
+//        String content = "{\"options\":[\n" +
+//                "\t{\n" +
+//                "\t\t\"id\":1,\n" +
+//                "\t\t\"confidence\":92,\n" +
+//                "\t\t\"reasons\":\"Viene richiesto reset pwd db oracle ma manca la user.\",\n" +
+//                "\t\t\"action\":{\n" +
+//                "\t\t\t\"title\":\"RISPONDI_A_MAIL\",\n" +
+//                "\t\t\t\"aiResponse\": \"{\\\"message\\\":{\\\"subject\\\":\\\"richiesta reset pwd\\\",\\\"senderAddress\\\":\\\"Voci Pasquale\\\",\\\"to\\\":\\\"Voci Pasquale\\\",\\\"cc\\\":null,\\\"bodyText\\\":\\\"Ciao ci sono novità?\\\"}}\"\n" +
+//                "\t\t}\n" +
+//                "\t}\n" +
+//                "]}";
 
-            options.add(new DecisionOption(0L, action, 90.00, "Nessuna richiesta trovata nel database attinente al messaggio."));
-        } else {
-            //la request candidata non è null: è stata trovata per conversatioId o per tk
-            logger.debug("AI: Request found in the database with id: " + candidate.getId() + " for message with id: " + message.getEntryId());
+        //nuova request
+        String content = "{\"options\":[\n" +
+                "\t{\n" +
+                "\t\t\"id\":1,\n" +
+                "\t\t\"confidence\":100,\n" +
+                "\t\t\"reasons\":\"Messaggio contiene tutti i dati necessari per creare una nuova richiesta (informazioni utente, motivo, tipo di richiesta). Nessuna richiesta esistente da modificare.\",\n" +
+                "\t\t\"action\":{\n" +
+                "\t\t\t\"title\":\"NUOVA_RICHIESTA\",\n" +
+                "\t\t\t\"aiResponse\": \"{\\\"message\\\":null, \\\"request\\\":{\\\"title\\\":\\\"Richiesta accesso Oracle\\\",\\\"status\\\":\\\"NEW\\\",\\\"items\\\":[{\\\"type\\\":\\\"DB_ORACLE\\\",\\\"status\\\":\\\"DA_RICHIEDERE\\\",\\\"dettaglio\\\":\\\"abilitazione in lettura ed in scrittura ai DB oracle di sviluppo e collaudo\\\"}],\\\"user\\\":{\\\"nome\\\":\\\"Pasquale\\\",\\\"cognome\\\":\\\"Voci\\\",\\\"utenza\\\":\\\"u83172\\\"},\\\"messages\\\":[]}}\"\n" +
+                "\t\t}\n" +
+                "\t}\n" +
+                "]}";
 
-            List<String> steps = new ArrayList<>();
-            steps.add("Aggiungi (update) il Message alla richiesta id:" + candidate.getId());
-            steps.add("Sposta la mail corrente in in progress folder...");
 
-            Action action = new Action(Action.Title.MODIFICA_RICHIESTA, steps);
-            options.add(new DecisionOption(0L, action, 10.00, "Trovata richiesta id " + candidate.getId() + " attinente al messaggio."));
+        try {
+            logger.info("#################### content: {}", content);
+            ResponseAI responseAI = jsonService.fromJson(content);
+            logger.info("#################### Risposta AI: {}", responseAI);
+
+            return (Objects.isNull(responseAI.getOptions()) || responseAI.getOptions().isEmpty() ? new ArrayList<>() : responseAI.getOptions());
+
+        } catch (JsonProcessingException e) {
+            logger.error("Errore nella serializzazione del JSON per l'analisi AI del messaggio con id: " + message.getEntryId(), e);
+            throw new RuntimeException(e);
+        } finally {
+            long elapsedNanos = System.nanoTime() - start;
+
+            long seconds = elapsedNanos / 1_000_000_000;
+            long minutes = seconds / 60;
+            long remainingSeconds = seconds % 60;
+
+            logger.info("Tempo di risposta del motore AI {} min {} sec", minutes, remainingSeconds);
         }
 
-        return options;
+    }
+
+
+
+    private List<DecisionOption> generateDecisionOptions(Message message, Request candidate) {
+        String jsonRequestContent = "";
+        ObjectNode responseFormat = null;
+        long start = System.nanoTime();
+
+
+        try {
+            /**
+             * Test del modello
+             */
+
+            jsonRequestContent = jsonService.toJson(new RequestAI(message, candidate));
+            //jsonRequestContent = "Rispondi esclusivamente con questo JSON, non eseguire controlli di validazione o altro: {\"options\":[{\"action\":\"RISPONDI_A_MAIL\",\"confidence\":0.92,\"reasons\":\"Test JSON\"}]}";
+
+
+            logger.info("AI: richiesta JSON per il messaggio id {}: {}", message.getEntryId(), jsonRequestContent);
+
+            responseFormat = jsonService.formatResponse();
+
+            OllamaRequest request = new OllamaRequest(
+                    model,
+                    List.of(new OllamaMessage("user", jsonRequestContent)),
+                    responseFormat,
+                    false
+            );
+
+            logger.info("#################### Richiesta Ollama: {}", request);
+
+            OllamaResponse response = client.post()
+                    .uri("/api/chat")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(request)
+                    .retrieve()
+                    .body(OllamaResponse.class);
+
+            logger.info("#################### Risposta Ollama: {}", response);
+
+            String content = response.message().content();
+            logger.info("##################### Contenuto della risposta: {}", content);
+            ResponseAI responseAI = jsonService.fromJson(content);
+
+            return (Objects.isNull(responseAI.getOptions()) || responseAI.getOptions().isEmpty() ? new ArrayList<>() : responseAI.getOptions());
+
+        } catch (JsonProcessingException e) {
+            logger.error("Errore nella serializzazione del JSON per l'analisi AI del messaggio con id: " + message.getEntryId(), e);
+            throw new RuntimeException(e);
+        } finally {
+            long elapsedNanos = System.nanoTime() - start;
+
+            long seconds = elapsedNanos / 1_000_000_000;
+            long minutes = seconds / 60;
+            long remainingSeconds = seconds % 60;
+
+            logger.info("Tempo di risposta del motore AI {} min {} sec", minutes, remainingSeconds);
+        }
+
     }
 
 
@@ -107,19 +207,25 @@ public class AiEngineAdapter implements AiEnginePort {
     private List<DecisionOption> generateDecisionOptions(Request request) {
         List<DecisionOption> options = new ArrayList<>();
 
-        if (Objects.isNull(request)) {
-            logger.warn("AI: nessuna richiesta da analizzare!");
-            return options;
-        }
+        /**
+         * costruzione del JSON per API REST e decodifica della response....
+         *
+         * */
 
-        List<String> steps = new ArrayList<>();
-        steps.add("Invia una mail di sollecito al cliente per tk {}:" + request.getItems().stream().findFirst().map(RequestItem::getTicket).orElse("N/A"));
 
-        Action action = new Action(Action.Title.INVIA_MAIL, steps);
-        options.add(new DecisionOption(0L, action, 90.00,
-                String.format("Nessuna risposta da parte del cliente alla mail (id {}) per richiesta {}",
-                        request.getMessages().stream().findFirst().map(Message::getEntryId).orElse("N/A"),
-                        request.getItems().stream().findFirst().map(RequestItem::getDettaglio).orElse("N/A"))));
+//        if (Objects.isNull(request)) {
+//            logger.warn("AI: nessuna richiesta da analizzare!");
+//            return options;
+//        }
+//
+//        List<String> steps = new ArrayList<>();
+//        steps.add("Invia una mail di sollecito al cliente per tk {}:" + request.getItems().stream().findFirst().map(RequestItem::getTicket).orElse("N/A"));
+//
+//        Action action = new Action(Action.Title.INVIA_MAIL, steps);
+//        options.add(new DecisionOption(0L, action, 90.00,
+//                String.format("Nessuna risposta da parte del cliente alla mail (id {}) per richiesta {}",
+//                        request.getMessages().stream().findFirst().map(Message::getEntryId).orElse("N/A"),
+//                        request.getItems().stream().findFirst().map(RequestItem::getDettaglio).orElse("N/A"))));
 
         return options;
     }

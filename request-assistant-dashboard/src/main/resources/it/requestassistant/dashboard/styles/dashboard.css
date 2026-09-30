@@ -333,3 +333,12 @@
     -fx-text-fill: #1A237E;
 }
 
+/* ================================================================
+   Campi editabili bozza mail
+   ================================================================ */
+
+.mail-editable-field {
+    -fx-control-inner-background: #FFFFFF;
+    -fx-background-color: #FFFFFF;
+}
+

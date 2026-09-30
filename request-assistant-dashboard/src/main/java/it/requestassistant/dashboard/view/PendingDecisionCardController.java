@@ -1,6 +1,7 @@
 package it.requestassistant.dashboard.view;
 
 import it.requestassistant.dashboard.viewmodel.DashboardShellViewModel;
+import it.requestassistant.domain.model.DataAction;
 import it.requestassistant.domain.model.DecisionOption;
 import it.requestassistant.domain.model.PendingDecision;
 import javafx.beans.property.SimpleStringProperty;
@@ -56,6 +57,7 @@ public class PendingDecisionCardController {
 
     private PendingDecision pendingDecision;
     private Runnable onRefresh;
+    private DataAction dataAction;
 
     public PendingDecisionCardController(DashboardShellViewModel viewModel, FxWeaver fxWeaver) {
         this.viewModel = viewModel;
@@ -78,7 +80,11 @@ public class PendingDecisionCardController {
                 btn.getStyleClass().add("accept-button");
                 btn.setOnAction(e -> {
                     DecisionOption option = getTableView().getItems().get(getIndex());
-                    openActionModal(option);
+                    try {
+                        openActionModal(option);
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
                 });
             }
             @Override
@@ -97,7 +103,7 @@ public class PendingDecisionCardController {
      * Popola la card con i dati di una PendingDecision.
      *
      * @param decision  la PendingDecision da mostrare
-     * @param onRefresh callback richiamato dopo accept/delete per aggiornare la lista
+     * @param onRefresh richiamata dopo accettazione/eliminazione per aggiornare la lista
      */
     public void setData(PendingDecision decision, Runnable onRefresh) {
         this.pendingDecision = decision;
@@ -145,10 +151,10 @@ public class PendingDecisionCardController {
 
     @FXML
     void onViewRequest() {
-        System.out.println("Mostra REQUEST!");
+        System.out.println("Mostra richiesta!");
     }
 
-    private void openActionModal(DecisionOption option) {
+    private void openActionModal(DecisionOption option) throws Exception {
         FxControllerAndView<ActionPaneController, Node> wrapper = fxWeaver.load(ActionPaneController.class);
         ActionPaneController controller = wrapper.getController();
         Parent modalRoot = (Parent) wrapper.getView().orElseThrow(
@@ -171,8 +177,8 @@ public class PendingDecisionCardController {
         scene.getStylesheets().add(stylesheet);
         modalStage.setScene(scene);
 
-        controller.setData(option, pendingDecision.getMessage(), () -> {
-            viewModel.acceptDecisionOption(pendingDecision, option);
+        controller.setData(option, pendingDecision, () -> {
+            viewModel.acceptDecisionOption(pendingDecision, option, controller.getDataAction());
             if (onRefresh != null) {
                 onRefresh.run();
             }

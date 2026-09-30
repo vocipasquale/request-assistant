@@ -15,5 +15,5 @@ public interface BatchPort {
 
     List<Request> getRequestsToProcess();
 
-    void processRequest(Request request);
+    void processRequest(Request request) throws Exception, Exception;
 }

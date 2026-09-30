@@ -16,8 +16,9 @@ public class Request {
 
 
     public enum Status {
+        NEW, //stato presente solo nel JSON
         IN_PROGRESS,
-        COMPLETE;
+        DONE;
     }
 
     public long getId() {

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- Bozza richiesta -->
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml"
+      spacing="10.0" prefWidth="680.0" prefHeight="520.0" styleClass="pending-decision-card">
+
+    <padding>
+        <Insets top="14.0" right="14.0" bottom="14.0" left="14.0"/>
+    </padding>
+
+    <HBox fx:id="bozzaRichiestaBox" spacing="8.0" alignment="CENTER_LEFT">
+        <Label text="Bozza richiesta" styleClass="card-section-label"/>
+    </HBox>
+
+    <HBox spacing="12.0" alignment="TOP_LEFT">
+        <TitledPane text="Richiesta" collapsible="false" expanded="true" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <content>
+                <VBox spacing="10.0">
+                    <padding>
+                        <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
+                    </padding>
+
+                    <HBox spacing="8.0" alignment="CENTER_LEFT">
+                        <Label text="Titolo:" styleClass="card-field-label" minWidth="80.0"/>
+                        <TextField fx:id="titoloField" promptText="Titolo della richiesta" styleClass="mail-editable-field" style="-fx-control-inner-background: white; -fx-background-color: white;" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+
+                    <HBox spacing="8.0" alignment="CENTER_LEFT">
+                        <Label text="Stato:" styleClass="card-field-label" minWidth="80.0"/>
+                        <TextField fx:id="statoField" promptText="Stato della richiesta" styleClass="mail-editable-field" style="-fx-control-inner-background: white; -fx-background-color: white;" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+
+                    <Label text="Note" styleClass="card-field-label"/>
+                    <TextArea fx:id="noteArea"
+                              promptText="Eventuali note della richiesta"
+                              styleClass="mail-editable-field"
+                              style="-fx-control-inner-background: white; -fx-background-color: white;"
+                              wrapText="true"
+                              prefRowCount="6"
+                              VBox.vgrow="ALWAYS"/>
+                </VBox>
+            </content>
+        </TitledPane>
+
+        <TitledPane text="Utente" collapsible="false" expanded="true" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <content>
+                <VBox spacing="10.0">
+                    <padding>
+                        <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
+                    </padding>
+                    <HBox spacing="8.0" alignment="CENTER_LEFT">
+                        <Label text="Cognome:" styleClass="card-field-label" minWidth="110.0"/>
+                        <TextField fx:id="cognomeField" promptText="Cognome utente" styleClass="mail-editable-field" style="-fx-control-inner-background: white; -fx-background-color: white;" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+
+                    <HBox spacing="8.0" alignment="CENTER_LEFT">
+                        <Label text="Nome:" styleClass="card-field-label" minWidth="110.0"/>
+                        <TextField fx:id="nomeField" promptText="Nome utente" styleClass="mail-editable-field" style="-fx-control-inner-background: white; -fx-background-color: white;" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+
+                    <HBox spacing="8.0" alignment="CENTER_LEFT">
+                        <Label text="Codice fiscale:" styleClass="card-field-label" minWidth="110.0"/>
+                        <TextField fx:id="codiceFiscaleField" promptText="Codice fiscale utente" styleClass="mail-editable-field" style="-fx-control-inner-background: white; -fx-background-color: white;" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+
+                    <HBox spacing="8.0" alignment="CENTER_LEFT">
+                        <Label text="Email:" styleClass="card-field-label" minWidth="110.0"/>
+                        <TextField fx:id="emailField" promptText="Email utente" styleClass="mail-editable-field" style="-fx-control-inner-background: white; -fx-background-color: white;" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+
+                    <HBox spacing="8.0" alignment="CENTER_LEFT">
+                        <Label text="Utenza:" styleClass="card-field-label" minWidth="110.0"/>
+                        <TextField fx:id="utenzaField" promptText="Utenza utente" styleClass="mail-editable-field" style="-fx-control-inner-background: white; -fx-background-color: white;" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+                </VBox>
+            </content>
+        </TitledPane>
+    </HBox>
+
+    <Label text="Request items" styleClass="card-field-label"/>
+    <ScrollPane prefHeight="240.0" fitToHeight="true" VBox.vgrow="ALWAYS">
+        <content>
+            <GridPane fx:id="requestItemsGrid" hgap="8.0" vgap="8.0" gridLinesVisible="true">
+                <padding>
+                    <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
+                </padding>
+            </GridPane>
+        </content>
+    </ScrollPane>
+
+    <Label text="Messages" styleClass="card-field-label"/>
+    <ScrollPane prefHeight="240.0" fitToHeight="true" VBox.vgrow="ALWAYS">
+        <content>
+            <GridPane fx:id="messagesGrid" hgap="8.0" vgap="8.0" gridLinesVisible="true">
+                <padding>
+                    <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
+                </padding>
+            </GridPane>
+        </content>
+    </ScrollPane>
+</VBox>

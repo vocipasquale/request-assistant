@@ -75,11 +75,8 @@ public final class PersistenceRowMappers {
 
     public static final RowMapper<ActionRow> ACTION = (rs, n) -> new ActionRow(
             rs.getLong("id"),
-            rs.getString("title")
+            rs.getString("title"),
+            rs.getString("ai_response")
     );
 
-    public static final RowMapper<ActionStepRow> ACTION_STEP = (rs, n) -> new ActionStepRow(
-            rs.getLong("action_id"),
-            rs.getString("step_description")
-    );
 }

@@ -33,7 +33,7 @@ public class RequestAssistantApplication extends Application {
         Parent root = fxWeaver.loadView(DashboardShellController.class);
         Scene scene = new Scene(root, 960, 640);
 
-        stage.setTitle("Request Assistant");
+        stage.setTitle("Assistente Richieste");
         stage.setScene(scene);
         stage.show();
     }

@@ -9,6 +9,7 @@ public interface PersistenceDaoPort {
     Request findRequestByConversationId(String conversationId);
     Request findRequestByTk(String tk);
     List<PendingDecision> findPendingDecisionsByType(PendingDecision.Type type);
+    List<PendingDecision> findAllPendingDecisions();
     long insertRequest(Request request);
     long insertPendingDecision(PendingDecision pendingDecision);
     void deletePendingDecision(PendingDecision pendingDecision);
@@ -19,4 +20,6 @@ public interface PersistenceDaoPort {
     void updateRequest(Request existingRequest);
 
     List<Request> findRequestsToProcess();
+
+    long insertMessage(Message message);
 }

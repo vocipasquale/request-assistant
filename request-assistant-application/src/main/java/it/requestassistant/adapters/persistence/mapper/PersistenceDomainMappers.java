@@ -8,7 +8,6 @@ import it.requestassistant.adapters.persistence.row.RequestRow;
 import it.requestassistant.adapters.persistence.row.UserAccountRow;
 import it.requestassistant.domain.model.Action;
 import it.requestassistant.adapters.persistence.row.ActionRow;
-import it.requestassistant.adapters.persistence.row.ActionStepRow;
 import it.requestassistant.domain.model.DecisionOption;
 import it.requestassistant.domain.model.Message;
 import it.requestassistant.domain.model.PendingDecision;
@@ -102,47 +101,41 @@ public final class PersistenceDomainMappers {
         return request;
     }
 
-    public static DecisionOption toDomain(DecisionOptionRow row, ActionRow actionRow, List<ActionStepRow> actionStepRows) {
+    public static DecisionOption toDomain(DecisionOptionRow row, ActionRow actionRow) {
         return new DecisionOption(
                 row.id(),
-                PersistenceDomainMappers.toDomain(actionRow, actionStepRows),
+                PersistenceDomainMappers.toDomain(actionRow),
                 row.confidence() == null ? 0.0d : row.confidence(),
                 row.reasons()
         );
     }
 
-    public static Action toDaman(ActionRow row, List<String> steps){
-        return new Action(Action.Title.fromTitle(row.title()), steps);
-    }
 
-    public static String toDomain(ActionStepRow row){
-        return  row.stepDescription();
-    }
 
     public static PendingDecision toDomain(PendingDecisionRow row, List<DecisionOptionRow> optionRows,
                                            MessageRow messageRow, RequestRow requestRow, List<RequestItemRow> requestItemRowList,
                                            UserAccountRow userAccountRow, List<MessageRow> messagesRequestRowList,
-                                           ActionRow actionRow, List<ActionStepRow> actionStepRows) {
+                                           ActionRow actionRow) {
 
 
         List<DecisionOption> options = new ArrayList<>(optionRows == null
                 ? Collections.emptyList()
                 : optionRows.stream()
                 .map(optionRow ->
-                        PersistenceDomainMappers.toDomain(optionRow, actionRow, actionStepRows)).toList());
+                        PersistenceDomainMappers.toDomain(optionRow, actionRow)).toList());
 
 
-        logger.debug("Mapping PendingDecisionRow to PendingDecision with {} options", options.size());
+        logger.debug("Mapping di PendingDecisionRow verso PendingDecision con {} opzioni", options.size());
 
         Message message = Objects.isNull(messageRow)
             ? null
             : PersistenceDomainMappers.toDomain(messageRow);
-        logger.debug("Mapping message id {} for  PendingDecision id {}", message.getEntryId(), row.id());
+        logger.debug("Mapping del messaggio id {} per la PendingDecision id {}", message.getEntryId(), row.id());
 
         Request request = Objects.isNull(PersistenceDomainMappers.toDomain(requestRow, userAccountRow, requestItemRowList, messagesRequestRowList))
                 ? null
                 : PersistenceDomainMappers.toDomain(requestRow, userAccountRow, requestItemRowList, messagesRequestRowList);
-        logger.debug("Mapping request for  PendingDecision id {}", row.id());
+        logger.debug("Mapping della request per la PendingDecision id {}", row.id());
 
         return new PendingDecision(
                 row.id(),
@@ -162,12 +155,12 @@ public final class PersistenceDomainMappers {
         return Enum.valueOf(enumClass, rawValue.trim().toUpperCase(Locale.ROOT));
     }
 
-    // ============ Domain -> Row Mapping ============
+    // ============ Mapping Dominio -> Riga ============
 
     public static MessageRow toRow(Message message) {
         return new MessageRow(
                 -1L,    // id generato dal DB
-                -1L,  // requestId da settare se necessario
+                -1L,  // requestId da impostare se necessario
                 message.getSubject(),
                 message.getSenderAddress(),
                 message.getReceivedAt(),
@@ -203,7 +196,7 @@ public final class PersistenceDomainMappers {
         }
         return new RequestItemRow(
                 0L,    // id generato dal DB
-                null,  // requestId da settare se necessario
+                null,  // requestId da impostare se necessario
                 item.getType() != null ? item.getType().name() : null,
                 item.getCreateAt(),
                 item.getUpdateAt(),
@@ -238,7 +231,7 @@ public final class PersistenceDomainMappers {
     }
 
     public static PendingDecisionRow toRow(PendingDecision pendingDecision) {
-        //usato SOLO dalla INSERT
+        //usato SOLO dall'INSERT
         return new PendingDecisionRow(
                 0L, // id generato dal DB
                 pendingDecision.getCreatedAt(),
@@ -249,24 +242,16 @@ public final class PersistenceDomainMappers {
         );
     }
 
-    public static Action toDomain(ActionRow row, List<ActionStepRow> stepRows) {
+    public static Action toDomain(ActionRow row) {
         if (row == null) {
             return null;
         }
-        List<String> steps = stepRows == null
-                ? Collections.emptyList()
-                : stepRows.stream().map(ActionStepRow::stepDescription).toList();
-        return new Action(Action.Title.fromTitle(row.title()), steps);
+
+        return new Action(Action.Title.fromTitle(row.title()), row.aiResponse());
     }
 
     public static ActionRow toRow(Action action) {
-        return new ActionRow(0L, action.getTitle().getTitle());
+        return new ActionRow(0L, action.getTitle().getTitle(), action.getAiResponse());
     }
 
-    public static ActionStepRow toRow(long actionId, String stepDescription) {
-        return new ActionStepRow(
-                actionId,
-                stepDescription
-        );
-    }
 }

@@ -1,6 +1,7 @@
 package it.requestassistant.adapters.perform;
 
 import it.requestassistant.application.port.out.ActionPerformerPort;
+import it.requestassistant.application.port.out.MessagePort;
 import it.requestassistant.application.port.out.PersistenceDaoPort;
 import it.requestassistant.domain.model.*;
 import org.slf4j.Logger;
@@ -12,100 +13,164 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
 @Component
 public class ActionPerformAdapter implements ActionPerformerPort {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    private final MessagePort messagePort;
     private final PersistenceDaoPort persistenceDaoPort;
 
-    public ActionPerformAdapter(PersistenceDaoPort persistenceDaoPort) {
+    public ActionPerformAdapter(MessagePort messagePort, PersistenceDaoPort persistenceDaoPort) {
+        this.messagePort = messagePort;
         this.persistenceDaoPort = persistenceDaoPort;
     }
 
-    @Override
-    @Transactional
-    public void perform(PendingDecision pendingDecision, DecisionOption decisionOption) throws Exception {
-        logger.info("Performing actions for decision option: " + decisionOption.getId());
-        Action action = decisionOption.getAction();
-        List<String> steps = action.getSteps();
-
-        //per ora lascio questo controllo, poi capirò se toglierlo...
-        if (Objects.isNull(pendingDecision.getMessage())) {
-            logger.error("Pending decision {} has no associated message. Cannot perform actions!", pendingDecision.getId());
-            throw new Exception("Pending decision has no associated message. Cannot perform actions!");
-        }
-
-        for (String step : steps) {
-            logger.info("Executing step: " + step);
-            //....
-
-
-        }
-
-        // Simulo due azioni:
-        // 1. creo una nuova request e le associo il messaggio della pending decision
-        // 2. associo il messaggio della pending decision alla rquest passata e già presente in DB
-
-        if (Objects.isNull(pendingDecision.getRequest())) {
-            logger.info("Pending decision {} has no associated request. Creating a new request and associating the message.", pendingDecision.getId());
-            // Simulate creating a new request and associating the message
-            Request newRequest = new Request();
-            newRequest.setId(0L); // Simulate generated ID
-            newRequest.setTitle(decisionOption.getAction().getTitle().getTitle());
-            newRequest.setStatus(Request.Status.IN_PROGRESS);
-            newRequest.setCreateAt(LocalDateTime.now());
-            newRequest.setUpdateAt(newRequest.getCreateAt());
-            newRequest.setMessages(List.of(pendingDecision.getMessage()));
-            newRequest.setItems(List.of(getRequestItem("step")));
-            newRequest.setNote("test manuale");
-            newRequest.setUser(getUser(pendingDecision, decisionOption));
-            persistenceDaoPort.insertRequest(newRequest);
-        } else {
-            logger.info("Pending decision {} has an associated request with ID {}. Associating the message to this request.", pendingDecision.getId(), pendingDecision.getRequest().getId());
-            // Simulate associating the message to the existing request
-            Request existingRequest = pendingDecision.getRequest();
-            List<Message> updatedMessages = new ArrayList<>(existingRequest.getMessages());
-            updatedMessages.add(pendingDecision.getMessage());
-            existingRequest.setMessages(updatedMessages);
-            existingRequest.setUpdateAt(LocalDateTime.now());
-            persistenceDaoPort.updateRequest(existingRequest);
-        }
-
-        logger.info("AI: completed actions for decision option: " + decisionOption.getId());
-    }
-
     /**
-     * genera un RequestItem generico, in futuro dovrà essere
-     * generato in base alle informazioni degli steps
+     * Esegue le azioni validate dall'operatore. Le "bozze" di message e request validate dall'operatore si trovano in aiResponse,
+     * mentre message e request originari si trovano in pendingDecision.
      *
-     */
-    private RequestItem getRequestItem(String step) {
-        RequestItem result = new RequestItem();
-        result.setType(RequestItem.Type.DOMINIO_APN_VPN);
-        result.setCreateAt(LocalDateTime.now());
-        result.setUpdateAt(result.getCreateAt());
-        result.setDettaglio("Dettaglio generico");
-        result.setAmbiente(List.of(RequestItem.Ambiente.SVILUPPO, RequestItem.Ambiente.COLLAUDO));
-        result.setNota("test manuale");
-        result.setStatus(RequestItem.Status.DA_RICHIEDERE);
-
-        return result;
-    }
-
-    /**
-     * Stabilisce se si tratta di user già censito nel db e lo restituisce altrimenti
-     * lo crea, lo salva nel db e poi lo restituisce.
+     * - RISPONDI_A_MAIL: invia la mail di risposta al mittente (maggiori informazioni o riscontro su avanzamento richiesta)
+     * - INVIA_RICHIESTA: invia mail di richiesta al focal point
+     * - INVIA_SOLLECITO: invia mail di sollecito al focal point o all'utente
+     * - NUOVA_RICHIESTA: crea una nuova richiesta
+     * - MODIFICA_RICHIESTA: modifica una richiesta esistente
      *
      * @param pendingDecision
      * @param decisionOption
-     * @return
+     * @param dataAction
+     * @throws Exception
      */
-    private User getUser(PendingDecision pendingDecision, DecisionOption decisionOption) {
-        Random random = new Random();
-        String matricola = String.format("%06d", random.nextInt(1_000_000));
+    @Override
+    @Transactional
+    public void perform(PendingDecision pendingDecision, DecisionOption decisionOption, DataAction dataAction) throws Exception {
+        Action action = decisionOption.getAction();
+        logger.debug("Esecuzione azione {}: ", action.getTitle());
 
-        return new User(-1L, "Rossi", "Mario", "U" + matricola);
+        switch (action.getTitle()) {
+            case RISPONDI_A_MAIL -> {
+                /**
+                 * aiResponse:
+                 * * "message": una bozza per ottenere le informazioni mancanti
+                 * * "reuest": null
+                 */
+                logger.info("Eseguo azione RISPONDI_A_MAIL per la pending decision {} con decision id {}"
+                        , pendingDecision.getId(), decisionOption.getId());
+
+                if (Objects.isNull(pendingDecision.getMessage())) {
+                    throw new Exception(String.format("Impossibile inviare mail per pending decision %d con decision id %d",
+                            pendingDecision.getId(), decisionOption.getId()));
+                }
+
+                logger.debug("Invio mail per pending decision {} con decision id {}. Contenuto mail: {}",
+                        pendingDecision.getId(), decisionOption.getId(), pendingDecision.getMessage().getBodyText());
+                messagePort.replyToMessage(pendingDecision.getMessage(), dataAction.message());
+                messagePort.moveMessageInDone(pendingDecision.getMessage());
+                //break;
+            }
+            case INVIA_RICHIESTA -> {
+                /**
+                 * aiResponse:
+                 * * "message": mail corretta/accettata dall'operatore
+                 * * "reuest": null
+                 *
+                 *  la request originaria è in pendingDecision !
+                 */
+                logger.info("Eseguo azione INVIA_RICHIESTA per la pending decision {} con id {}",
+                        pendingDecision.getId(), decisionOption.getId());
+
+                //ilvia la mail e la sposta in in_lavorazione
+                Message sendedMessage =
+                        messagePort.sendMessage(dataAction.message(), true, pendingDecision.getRequest().getId());
+
+                //dopa aver inviato la mail, aggiorno la request
+                if(pendingDecision.getRequest() != null){
+                    logger.debug("Aggiorno request {} della pending decision {}",
+                            pendingDecision.getRequest().getId(), pendingDecision.getId());
+                    LocalDateTime now = LocalDateTime.now();
+                    pendingDecision.getRequest().setUpdateAt(now);
+                    //pendingDecision.getRequest().getMessages().add(messageSended);
+                    //non posso associare la mail appena inviata
+                    pendingDecision.getRequest().getItems().forEach(item -> {
+                        item.setUpdateAt(now);
+                        item.setStatus(RequestItem.Status.RICHIESTO);
+                    });
+
+                    //associo il messaggio inviato alla request...
+                    if(sendedMessage != null){
+                        //prima lo salvo sul db (entryId aggiornato dopo eventuale spostamento in in_lavorazione
+                        persistenceDaoPort.insertMessage(sendedMessage);
+                        ArrayList<Message> messages = new ArrayList<>();
+                        if(pendingDecision.getRequest().getMessages() != null){
+                            messages.addAll(pendingDecision.getRequest().getMessages());
+                        }
+                        messages.add(sendedMessage);
+                        //poi lo associo alla request
+                        pendingDecision.getRequest().setMessages(messages);
+                    }
+
+                    persistenceDaoPort.updateRequest(pendingDecision.getRequest());
+                    logger.debug("Request {} aggiornata", pendingDecision.getRequest().getId());
+                }
+                //break;
+            }
+            case INVIA_SOLLECITO -> {
+                /**
+                 * direttamente dal batch...
+                 */
+                logger.info("Eseguo azione INVIA_SOLLECITO per la pending decision {} con id {}",
+                        pendingDecision.getId(), decisionOption.getId());
+                messagePort.sendMessage(pendingDecision.getMessage(), false, null); //la mail rimane in"inviate"
+            }
+            case NUOVA_RICHIESTA -> {
+                /**
+                 * aiResponse:
+                 * * "message": null
+                 * * "request": una bozza con tutti i dati prelevati dal contesto di "message"
+                 */
+                logger.info("Eseguo azione NUOVA_RICHIESTA per la pending decision {} con id {}", pendingDecision.getId(), decisionOption.getId());
+
+                //creo Request in stato NEW con items in stato DA_RICHIEDERE:
+                dataAction.request().setStatus(Request.Status.IN_PROGRESS);
+                dataAction.request().setCreateAt(LocalDateTime.now());
+                dataAction.request().setUpdateAt(LocalDateTime.now());
+                dataAction.request().getItems().forEach(item -> {
+                    item.setStatus(RequestItem.Status.DA_RICHIEDERE);
+                    item.setCreateAt(LocalDateTime.now());
+                    item.setUpdateAt(LocalDateTime.now());
+                });
+                //non sostituire con lista immutabile List.of()
+//                ArrayList<Message> messages = new ArrayList<>();
+//                messages.add(pendingDecision.getMessage());
+//                dataAction.request().setMessages(messages);//messaggio originario
+//
+//                dataAction.request().getMessages().forEach(message -> {
+//                    logger.debug("Associo messaggio {} alla nuova request id {}",
+//                            message.getEntryId(), dataAction.request().getId());
+//                });
+
+                //il messaggio originario deve essere inserito in bozza request dall'operatore
+                //se la bozza request contiene il messaggio nel db bisogna aggiungere il riferimento
+                //in message.requestId @TODO
+
+                long newRequestId = persistenceDaoPort.insertRequest(dataAction.request());
+                logger.info("Salvata nuova richiesta id {}:", newRequestId);
+        }
+            case MODIFICA_RICHIESTA -> {
+                /**
+                 * aiResponse:
+                 * * "message": null
+                 * * "request": la "request" ricevuta in input con i dati modificati (per es. RquestItem.Status)
+                 */
+                logger.info("Eseguo azione MODIFICA_RICHIESTA per la pending decision {} con id {}", pendingDecision.getId(), decisionOption.getId());
+                /**
+                 * 1. mergiare i dati di dataAction.request in pendingDecision.getRequest...
+                 * 2. associare pendingDecision.getMessage a pendingDecision.getRequest
+                 * 3. eseguire update di pendingDecision.getRequest
+                 * 4. spostare pendingDecision.getMessage in "done"
+                 */
+
+            }
+        }
     }
 }

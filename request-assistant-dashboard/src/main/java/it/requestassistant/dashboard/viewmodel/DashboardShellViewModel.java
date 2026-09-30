@@ -1,6 +1,7 @@
 package it.requestassistant.dashboard.viewmodel;
 
 import it.requestassistant.application.port.in.DashboardPort;
+import it.requestassistant.domain.model.DataAction;
 import it.requestassistant.domain.model.DecisionOption;
 import it.requestassistant.domain.model.Message;
 import it.requestassistant.domain.model.PendingDecision;
@@ -26,7 +27,7 @@ public class DashboardShellViewModel {
     private final DashboardPort dashboardPort;
     private final ObjectProperty<DashboardSection> selectedSection = new SimpleObjectProperty<>(DashboardSection.IN_PROGRESS);
     private final BooleanProperty batchRunning = new SimpleBooleanProperty(false);
-    private final StringProperty batchStatusText = new SimpleStringProperty("Batch: STOPPED");
+    private final StringProperty batchStatusText = new SimpleStringProperty("Batch: FERMO");
     private final StringProperty batchToggleText = new SimpleStringProperty("Avvia batch");
 
     public DashboardShellViewModel(DashboardPort dashboardPort) {
@@ -40,7 +41,7 @@ public class DashboardShellViewModel {
 
     @PreDestroy
     void shutdown() {
-        logger.debug("#########################  shutdown");
+        logger.debug("#########################  arresto");
         dashboardPort.stopPlaygroundProcess();
     }
 
@@ -63,8 +64,8 @@ public class DashboardShellViewModel {
     public void refreshBatchState() {
         boolean running = dashboardPort.isPlaygroundProcessRunning();
         batchRunning.set(running);
-        batchStatusText.set(running ? "Batch: RUNNING" : "Batch: STOPPED");
-        batchToggleText.set(running ? "Stop batch" : "Avvia batch");
+        batchStatusText.set(running ? "Batch: IN ESECUZIONE" : "Batch: FERMO");
+        batchToggleText.set(running ? "Ferma batch" : "Avvia batch");
     }
 
     public List<PendingDecision> getMessagePendingDecisions() {
@@ -75,9 +76,9 @@ public class DashboardShellViewModel {
         dashboardPort.deletePendingDecision(pd);
     }
 
-    public void acceptDecisionOption(PendingDecision pendingDecision, DecisionOption decisionOption) {
-        logger.info("Azioni accettate dall'operatore.");
-        dashboardPort.acceptDecisionOption(pendingDecision, decisionOption);
+    public void acceptDecisionOption(PendingDecision pendingDecision, DecisionOption decisionOption, DataAction dataAction) {
+        logger.info("Azione {} accettata dall'operatore.", decisionOption.getAction().getTitle());
+        dashboardPort.acceptDecisionOption(pendingDecision, decisionOption, dataAction);
     }
 
 
@@ -98,7 +99,7 @@ public class DashboardShellViewModel {
     }
 
     public void showMessage(Message message) {
-        logger.debug("Message display id:{}",message.getEntryId());
+        logger.debug("Visualizzazione messaggio id:{}",message.getEntryId());
         dashboardPort.showMessage(message);
     }
 
