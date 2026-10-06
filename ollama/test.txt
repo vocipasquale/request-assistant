@@ -1,11 +1,777 @@
-{
-  "model": "minicpm5-2b-request-assistant-v6.5",
+CLASSIFICATORE
+
+
+1. NUOVA_RICHIESTA
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
   "messages": [
     {
       "role": "user",
-      "content": "{\"message\":{\"id\":0,\"subject\":\"richiesta abilitazione db svil e coll\",\"senderAddress\":\"rossi.mario@gmail.com\",\"receivedAt\":\"2026-09-21T11:34:07.238\",\"to\":\"Voci Pasquale\",\"cc\":\"\",\"bodyText\":\"Ciao,\\nper esigenze di progetto ho bisogno di essere abilitato in lettura ed in scrittura ai DB oracle di sviluppo e collaudo:\\n\\n* nome: Mario\\n* cognome: Rossi\\n* user: u83172\\n\\nGrazie\\nCiao\\n\",\"entryId\":\"00000000555ED1954FA6CF41A6B4B0950F001347070044095ECA768011449DB7F9A51EBD4A100001E8AEF182000044095ECA768011449DB7F9A51EBD4A100001E8AF4CA80000\",\"conversationId\":\"62C7FAD1FCC7A84195FD0D65E5370839\",\"conversationTopic\":\"richiesta abilitazione db svil e coll\",\"importance\":1,\"hasAttachment\":false,\"category\":\"\"},\"request\":null}"
+      "content": "{\"message\":{\"subject\":\"richiesta abilitazione db svil e coll\",\"bodyText\":\"Ciao, per esigenze di progetto ho bisogno di essere abilitato in lettura ed in scrittura ai DB oracle di sviluppo e collaudo. Nome: Mario. Cognome: Rossi. User: u83172\"},\"request\":null,\"attachmentContext\":null}"
     }
   ],
   "think": false,
   "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-09-30T14:39:00.198391802Z","message":{"role":"assistant","content":"{\n  \"action\": \"NUOVA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio richiede l'abilitazione ai DB oracle di sviluppo e collaudo, indicando nome, cognome e user.\"\n}"},"done":true,"done_reason":"stop","total_duration":245560969124,"load_duration":3864568050,"prompt_eval_count":733,"prompt_eval_cached_count":0,"prompt_eval_duration":215225552000,"eval_count":63,"eval_duration":26456426000}
+
+
+2. RISPONDI_A_MAIL
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Richiesta informazioni\",\"bodyText\":\"Buongiorno, avete novità sulla mia richiesta?\"},\"request\":null,\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-09-30T14:42:06.854464349Z","message":{"role":"assistant","content":"{\n  \"action\": \"RISPONDI_A_MAIL\",\n  \"confidence\": 80,\n  \"reasons\": \"Non è presente una richiesta esistente e il messaggio non contiene informazioni sufficienti per creare una nuova richiesta.\"\n}"},"done":true,"done_reason":"stop","total_duration":36857105944,"load_duration":3935128,"prompt_eval_count":682,"prompt_eval_cached_count":638,"prompt_eval_duration":14224181000,"eval_count":56,"eval_duration":22618141000}
+
+
+3. MODIFICA_RICHIESTA
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: richiesta abilitazione DB\",\"bodyText\":\"Ho effettuato il test di accesso ai DB di sviluppo e ora funziona.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"SVILUPPO\"],\"status\":\"IN_ATTESA_RISCONTRO_UTENTE\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-09-30T14:44:26.198473264Z","message":{"role":"assistant","content":"{\n  \"action\": \"MODIFICA_RICHIESTA\",\n  \"confidence\": 90,\n  \"reasons\": \"Il messaggio conferma che il test di accesso ai DB di sviluppo è stato completato e funziona, indicando un aggiornamento dello stato della richiesta esistente.\"\n}"},"done":true,"done_reason":"stop","total_duration":62456575144,"load_duration":3940331,"prompt_eval_count":742,"prompt_eval_cached_count":638,"prompt_eval_duration":31414693000,"eval_count":73,"eval_duration":31024945000}
+
+
+4. NUOVA_RICHIESTA per errore accesso DB
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Errore accesso DB Oracle\",\"bodyText\":\"Buongiorno, quando provo ad accedere al DB Oracle di produzione ricevo un errore di autenticazione. Sono Mario Rossi, user u83172. Potete verificare?\"},\"request\":null,\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-09-30T14:49:33.053343767Z","message":{"role":"assistant","content":"{\n  \"action\": \"NUOVA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio descrive un errore di accesso al DB Oracle e richiede assistenza per verificare l'autenticazione.\"\n}"},"done":true,"done_reason":"stop","total_duration":49071936510,"load_duration":3130731,"prompt_eval_count":717,"prompt_eval_cached_count":638,"prompt_eval_duration":24218696000,"eval_count":60,"eval_duration":24837336000}
+
+
+5. RISPONDI_A_MAIL: Richiesta di abilitazione senza user
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Richiesta abilitazione DB\",\"bodyText\":\"Buongiorno, avrei bisogno della abilitazione in lettura e scrittura ai DB Oracle di sviluppo e collaudo.\"},\"request\":null,\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-10-01T07:08:09.181692179Z","message":{"role":"assistant","content":"{\n  \"action\": \"NUOVA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"La mail richiede l'abilitazione in lettura e scrittura sui DB Oracle di sviluppo e collaudo.\"\n}"},"done":true,"done_reason":"stop","total_duration":287543366603,"load_duration":55650458063,"prompt_eval_count":705,"prompt_eval_cached_count":0,"prompt_eval_duration":207280501000,"eval_count":60,"eval_duration":24568333000}
+
+
+6. RISPONDI_A_MAIL: Request esistente, ma messaggio non modifica nulla
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: richiesta DB\",\"bodyText\":\"Buongiorno, volevo sapere se ci sono aggiornamenti sulla richiesta.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"SVILUPPO\"],\"status\":\"IN_ATTESA_RISCONTRO_UTENTE\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-09-30T15:03:33.330638141Z","message":{"role":"assistant","content":"{\n  \"action\": \"RISPONDI_A_MAIL\",\n  \"confidence\": 85,\n  \"reasons\": \"La mail richiede un aggiornamento sulla richiesta esistente, ma non contiene informazioni nuove o modifiche per aggiornare la richiesta.\"\n}"},"done":true,"done_reason":"stop","total_duration":93618252560,"load_duration":4096080,"prompt_eval_count":736,"prompt_eval_cached_count":512,"prompt_eval_duration":67030448000,"eval_count":63,"eval_duration":26570074000}
+
+
+
+7. MODIFICA_RICHIESTA: Modifica esplicita di una richiesta
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: richiesta DB\",\"bodyText\":\"Il test sui DB di sviluppo è positivo. Potete considerare completata la richiesta per l ambiente di sviluppo.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"SVILUPPO\"],\"status\":\"IN_ATTESA_RISCONTRO_UTENTE\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-10-01T07:35:06.002098329Z","message":{"role":"assistant","content":"{\n  \"action\": \"MODIFICA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio indica che la richiesta per l ambiente di sviluppo è considerata completata.\"\n}"},"done":true,"done_reason":"stop","total_duration":245730229654,"load_duration":3690224556,"prompt_eval_count":747,"prompt_eval_cached_count":0,"prompt_eval_duration":219564171000,"eval_count":53,"eval_duration":22463153000}
+
+
+8. NUOVA_RICHIESTA: Nuova richiesta molto generica ma con problema identificabile
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Problema accesso Jenkins\",\"bodyText\":\"Buongiorno, non riesco più ad accedere alla console Jenkins del progetto ABC. Potete verificare? Nome: Mario Rossi, user: u83172.\"},\"request\":null,\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-10-01T07:38:02.659047969Z","message":{"role":"assistant","content":"{\n  \"action\": \"NUOVA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio indica un problema di accesso a Jenkins per il progetto ABC, richiedendo verifiche.\"\n}"},"done":true,"done_reason":"stop","total_duration":45047785735,"load_duration":3296040,"prompt_eval_count":711,"prompt_eval_cached_count":638,"prompt_eval_duration":22454406000,"eval_count":55,"eval_duration":22579198000}
+
+
+
+9. RISPONDI_A_MAIL: Mail senza contenuto operativo
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Grazie\",\"bodyText\":\"Grazie mille per il supporto.\"},\"request\":null,\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-10-01T07:39:22.476749334Z","message":{"role":"assistant","content":"{\n  \"action\": \"RISPONDI_A_MAIL\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio contiene un ringraziamento senza richiesta di supporto o informazioni necessarie per creare una nuova richiesta.\"\n}"}
+
+
+10. MODIFICA_RICHIESTA: modifica negata
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: richiesta DB Oracle\",\"bodyText\":\"Il focal point ci ha comunicato che non è possibile concedere l accesso ai DB di produzione richiesto.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"PRODUZIONE\"],\"status\":\"RICHIESTO\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-10-01T07:52:52.458091128Z","message":{"role":"assistant","content":"{\n  \"action\": \"MODIFICA_RICHIESTA\",\n  \"confidence\": 85,\n  \"reasons\": \"La mail riguarda una richiesta esistente e comunica un aggiornamento sullo stato dell'accesso ai DB Oracle in produzione.\"\n}"}
+
+
+11. RISPONDI_A_MAIL: abilitazione + user, ma servizio non specificato
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Richiesta abilitazione\",\"bodyText\":\"Buongiorno, avrei bisogno di essere abilitato. Nome: Mario Rossi, user: u83172.\"},\"request\":null,\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-10-01T08:02:08.493687814Z","message":{"role":"assistant","content":"{\n  \"action\": \"NUOVA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio richiede l'abilitazione di un utente specificando nome e user.\"\n}"},"done":true,"done_reason":"stop","total_duration":229409088538,"load_duration":3682766855,"prompt_eval_count":700,"prompt_eval_cached_count":0,"prompt_eval_duration":204948595000,"eval_count":51,"eval_duration":20762907000}
+
+
+12. RISPONDI_A_MAIL: errore senza servizio
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Errore\",\"bodyText\":\"Buongiorno, non riesco ad accedere. Potete verificare? Nome: Mario Rossi, user: u83172.\"},\"request\":null,\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-10-01T08:14:58.083564952Z","message":{"role":"assistant","content":"{\n  \"action\": \"NUOVA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio indica un problema di accesso con nome utente e dettagli dell'utente, richiedendo assistenza.\"\n}"},"done":true,"done_reason":"stop","total_duration":232582037796,"load_duration":3698338307,"prompt_eval_count":699,"prompt_eval_cached_count":0,"prompt_eval_duration":204832462000,"eval_count":59,"eval_duration":24037492000}
+
+
+13. RISPONDI_A_MAIL: abilitazione servizio, ma senza user
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Abilitazione Jenkins\",\"bodyText\":\"Buongiorno, avrei bisogno dell abilitazione alla console Jenkins del progetto ABC.\"},\"request\":null,\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-10-01T08:25:45.340670125Z","message":{"role":"assistant","content":"{\n  \"action\": \"NUOVA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"La mail richiede l'abilitazione alla console Jenkins per il progetto ABC.\"\n}"},"done":true,"done_reason":"stop","total_duration":226173173407,"load_duration":3677420482,"prompt_eval_count":691,"prompt_eval_cached_count":0,"prompt_eval_duration":202668322000,"eval_count":49,"eval_duration":19813021000}
+
+
+14. RISPONDI_A_MAIL: errore + servizio, ma senza user
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Errore Jenkins\",\"bodyText\":\"Buongiorno, non riesco più ad accedere alla console Jenkins del progetto ABC. Potete verificare?\"},\"request\":null,\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-10-01T08:58:20.865337689Z","message":{"role":"assistant","content":"{\n  \"action\": \"NUOVA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"L'utente segnala un problema di accesso alla console Jenkins del progetto ABC e richiede assistenza.\"\n}"},"done":true,"done_reason":"stop","total_duration":230557668343,"load_duration":3693779692,"prompt_eval_count":694,"prompt_eval_cached_count":0,"prompt_eval_duration":203667665000,"eval_count":57,"eval_duration":23182241000}
+
+
+15. MODIFICA_RICHIESTA — completamento di informazione mancante
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: richiesta DB Oracle\",\"bodyText\":\"Vi comunico il mio user ID, che mancava nella richiesta: u83172.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"SVILUPPO\"],\"status\":\"RICHIESTO\",\"ticket\":\"TCK-12345\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-10-01T09:00:54.400283276Z","message":{"role":"assistant","content":"{\n  \"action\": \"MODIFICA_RICHIESTA\",\n  \"confidence\": 90,\n  \"reasons\": \"Il messaggio contiene informazioni aggiuntive relative alla richiesta esistente, specificamente l'ID utente mancante.\"\n}"},"done":true,"done_reason":"stop","total_duration":57279654759,"load_duration":3540968,"prompt_eval_count":745,"prompt_eval_cached_count":638,"prompt_eval_duration":32253212000,"eval_count":59,"eval_duration":25009498000}
+
+
+16. RISPONDI_A_MAIL — request esistente, informazione irrilevante
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: richiesta DB Oracle\",\"bodyText\":\"Buongiorno, oggi sono in ufficio. Volevo solo informarvi.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"SVILUPPO\"],\"status\":\"RICHIESTO\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-10-01T09:02:42.809643144Z","message":{"role":"assistant","content":"{\n  \"action\": \"RISPONDI_A_MAIL\",\n  \"confidence\": 90,\n  \"reasons\": \"Il messaggio non contiene informazioni nuove o modifiche alla richiesta esistente, ma una semplice informazione di stato.\"\n}"},"done":true,"done_reason":"stop","total_duration":49265441199,"load_duration":3752609,"prompt_eval_count":731,"prompt_eval_cached_count":648,"prompt_eval_duration":25423208000,"eval_count":57,"eval_duration":23825292000}
+
+
+17. MODIFICA_RICHIESTA — focal point comunica un diniego
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: abilitazione DB produzione\",\"bodyText\":\"Il focal point ha verificato la richiesta e comunica che l accesso al database di produzione non può essere autorizzato.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"PRODUZIONE\"],\"status\":\"RICHIESTO\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-10-01T09:05:06.61405793Z","message":{"role":"assistant","content":"{\n  \"action\": \"RISPONDI_A_MAIL\",\n  \"confidence\": 90,\n  \"reasons\": \"La richiesta esistente non è stata modificata e la risposta al messaggio richiede un'intervento di tipo informativo.\"\n}"},"done":true,"done_reason":"stop","total_duration":55784541249,"load_duration":4602366,"prompt_eval_count":742,"prompt_eval_cached_count":640,"prompt_eval_duration":30841830000,"eval_count":59,"eval_duration":24924681000}
+
+
+18. NUOVA_RICHIESTA — informazione proveniente dall'allegato
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Problema accesso\",\"bodyText\":\"Buongiorno, non riesco ad accedere. Potete verificare? Nome: Mario Rossi, user: u83172.\"},\"request\":null,\"attachmentContext\":\"Screenshot allegato: la schermata mostra un errore di autenticazione Oracle ORA-01017 durante il tentativo di connessione al database Oracle di produzione.\"}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-10-01T09:07:26.928944272Z","message":{"role":"assistant","content":"{\n  \"action\": \"NUOVA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"L'utente segnala un problema di accesso con un errore specifico ORA-01017 durante la connessione al database Oracle, indicando la necessità di assistenza.\"\n}"},"done":true,"done_reason":"stop","total_duration":62716702851,"load_duration":1913938,"prompt_eval_count":741,"prompt_eval_cached_count":638,"prompt_eval_duration":31168964000,"eval_count":74,"eval_duration":31535300000}
+
+
+Test 19 — Cambio ambiente → MODIFICA_RICHIESTA
+
+ curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: richiesta DB Oracle\",\"bodyText\":\"Per la richiesta precedente, mi sono accorto che mi serve anche l accesso all ambiente di collaudo.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"SVILUPPO\"],\"status\":\"RICHIESTO\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-10-01T09:21:01.471313262Z","message":{"role":"assistant","content":"{\n  \"action\": \"MODIFICA_RICHIESTA\",\n  \"confidence\": 90,\n  \"reasons\": \"La richiesta esistente include un ambiente di sviluppo, ma il messaggio indica la necessità di un ambiente di collaudo.\"\n}"},"done":true,"done_reason":"stop","total_duration":245959609439,"load_duration":3670573495,"prompt_eval_count":737,"prompt_eval_cached_count":0,"prompt_eval_duration":216625701000,"eval_count":61,"eval_duration":25650509000}
+
+
+Test 20 — Cambio autorizzazione → MODIFICA_RICHIESTA
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: richiesta DB Oracle\",\"bodyText\":\"Per la stessa richiesta avrei bisogno anche dei permessi di scrittura.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"SVILUPPO\"],\"dettaglio\":\"Accesso in lettura\",\"status\":\"RICHIESTO\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-10-01T09:24:43.59749503Z","message":{"role":"assistant","content":"{\n  \"action\": \"MODIFICA_RICHIESTA\",\n  \"confidence\": 90,\n  \"reasons\": \"La richiesta esistente include un item con accesso in lettura, mentre il messaggio chiede permessi di scrittura, indicando una modifica necessaria.\"\n}"},"done":true,"done_reason":"stop","total_duration":57709804728,"load_duration":1882114,"prompt_eval_count":742,"prompt_eval_cached_count":650,"prompt_eval_duration":28007986000,"eval_count":70,"eval_duration":29686843000}
+
+
+Test 21 — Esito negativo del test → MODIFICA_RICHIESTA
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: richiesta DB Oracle\",\"bodyText\":\"Ho effettuato il test ma continuo a ricevere un errore di accesso ai DB di sviluppo.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"SVILUPPO\"],\"status\":\"IN_ATTESA_RISCONTRO_UTENTE\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-10-01T09:26:47.994261672Z","message":{"role":"assistant","content":"{\n  \"action\": \"MODIFICA_RICHIESTA\",\n  \"confidence\": 90,\n  \"reasons\": \"Il messaggio indica un errore di accesso ai DB di sviluppo, che riguarda una richiesta esistente in stato IN_ATTESA_RISCONTRO_UTENTE.\"\n}"},"done":true,"done_reason":"stop","total_duration":59745876768,"load_duration":3289943,"prompt_eval_count":744,"prompt_eval_cached_count":648,"prompt_eval_duration":29131759000,"eval_count":72,"eval_duration":30600708000}
+
+
+Test 22 — Comunicazione informativa → RISPONDI_A_MAIL
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: richiesta DB Oracle\",\"bodyText\":\"Grazie per l aggiornamento. Rimango in attesa.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"SVILUPPO\"],\"status\":\"RICHIESTO\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v5","created_at":"2026-10-01T09:28:30.828796081Z","message":{"role":"assistant","content":"{\n  \"action\": \"MODIFICA_RICHIESTA\",\n  \"confidence\": 85,\n  \"reasons\": \"Il messaggio indica un aggiornamento sulla richiesta esistente e conferma l'attesa di ulteriori informazioni.\"\n}"},"done":true,"done_reason":"stop","total_duration":48500035838,"load_duration":3363971,"prompt_eval_count":726,"prompt_eval_cached_count":648,"prompt_eval_duration":23939375000,"eval_count":59,"eval_duration":24546440000}
+
+Modelfile-v6
+
+5. RISPONDI_A_MAIL: Richiesta di abilitazione senza user
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v6",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Richiesta abilitazione DB\",\"bodyText\":\"Buongiorno, avrei bisogno della abilitazione in lettura e scrittura ai DB Oracle di sviluppo e collaudo.\"},\"request\":null,\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v6","created_at":"2026-10-01T09:47:04.353095487Z","message":{"role":"assistant","content":"{\n  \"action\": \"NUOVA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"La mail richiede l'abilitazione in lettura e scrittura ai DB Oracle di sviluppo e collaudo, con informazioni sufficienti per identificare la richiesta.\"\n}"},"done":true,"done_reason":"stop","total_duration":265652921219,"load_duration":3847088225,"prompt_eval_count":781,"prompt_eval_cached_count":0,"prompt_eval_duration":230117776000,"eval_count":73,"eval_duration":31672576000}
+
+
+11. RISPONDI_A_MAIL: abilitazione + user, ma servizio non specificato
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v6",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Richiesta abilitazione\",\"bodyText\":\"Buongiorno, avrei bisogno di essere abilitato. Nome: Mario Rossi, user: u83172.\"},\"request\":null,\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v6","created_at":"2026-10-01T09:49:16.251699439Z","message":{"role":"assistant","content":"{\n  \"action\": \"NUOVA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio contiene una richiesta di abilitazione con informazioni essenziali come nome utente e nome.\"\n}"},"done":true,"done_reason":"stop","total_duration":43414078607,"load_duration":3439730,"prompt_eval_count":776,"prompt_eval_cached_count":719,"prompt_eval_duration":19658202000,"eval_count":55,"eval_duration":23737878000}
+
+
+12. RISPONDI_A_MAIL: errore senza servizio
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v6",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Errore\",\"bodyText\":\"Buongiorno, non riesco ad accedere. Potete verificare? Nome: Mario Rossi, user: u83172.\"},\"request\":null,\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v6","created_at":"2026-10-01T09:51:26.088520028Z","message":{"role":"assistant","content":"{\n  \"action\": \"NUOVA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio indica un problema di accesso con dettagli dell'utente, necessari per identificare e gestire la richiesta.\"\n}"},"done":true,"done_reason":"stop","total_duration":47775770816,"load_duration":2149253,"prompt_eval_count":775,"prompt_eval_cached_count":714,"prompt_eval_duration":20937850000,"eval_count":62,"eval_duration":26823927000}
+
+
+17. MODIFICA_RICHIESTA — focal point comunica un diniego
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v6",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: abilitazione DB produzione\",\"bodyText\":\"Il focal point ha verificato la richiesta e comunica che l accesso al database di produzione non può essere autorizzato.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"PRODUZIONE\"],\"status\":\"RICHIESTO\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+resposta:
+{"model":"request-assistant-classificatore-v6","created_at":"2026-10-01T09:53:30.034553687Z","message":{"role":"assistant","content":"{\n  \"action\": \"RISPONDI_A_MAIL\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio rappresenta una comunicazione di rifiuto di una richiesta esistente senza nuove informazioni o modifiche.\"\n}"},"done":true,"done_reason":"stop","total_duration":56769720415,"load_duration":3526087,"prompt_eval_count":818,"prompt_eval_cached_count":714,"prompt_eval_duration":31608461000,"eval_count":58,"eval_duration":25146184000}
+
+
+Test 22 — Comunicazione informativa → RISPONDI_A_MAIL
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v6",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: richiesta DB Oracle\",\"bodyText\":\"Grazie per l aggiornamento. Rimango in attesa.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"SVILUPPO\"],\"status\":\"RICHIESTO\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v6","created_at":"2026-10-01T09:55:28.270388773Z","message":{"role":"assistant","content":"{\n  \"action\": \"RISPONDI_A_MAIL\",\n  \"confidence\": 95,\n  \"reasons\": \"Messaggio di ringraziamento e attesa senza nuove informazioni o modifiche alla richiesta.\"\n}"},"done":true,"done_reason":"stop","total_duration":48417053156,"load_duration":4177968,"prompt_eval_count":802,"prompt_eval_cached_count":716,"prompt_eval_duration":26404173000,"eval_count":51,"eval_duration":21994606000}
+
+
+Test 23 — modifica esplicita dello stato --> MODIFICA_RICHIESTA
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v6",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: richiesta DB Oracle\",\"bodyText\":\"Il focal point ha verificato la richiesta. L accesso al database di produzione è stato rifiutato.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"PRODUZIONE\"],\"status\":\"RICHIESTO\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v6","created_at":"2026-10-01T10:05:10.965190545Z","message":{"role":"assistant","content":"{\n  \"action\": \"MODIFICA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio indica che l'accesso al database di produzione è stato rifiutato, modificando lo stato della richiesta esistente.\"\n}"},"done":true,"done_reason":"stop","total_duration":270728323661,"load_duration":3728143457,"prompt_eval_count":814,"prompt_eval_cached_count":0,"prompt_eval_duration":239727465000,"eval_count":63,"eval_duration":27256403000}
+
+
+Test 24 — modifica diretta dello stato --> MODIFICA_RICHIESTA
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v6",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: richiesta DB Oracle\",\"bodyText\":\"Il focal point ha verificato la richiesta. L accesso richiesto non può essere autorizzato.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"PRODUZIONE\"],\"status\":\"RICHIESTO\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v6","created_at":"2026-10-01T10:07:39.704182469Z","message":{"role":"assistant","content":"{\n  \"action\": \"RISPONDI_A_MAIL\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio rappresenta una comunicazione di stato relativa a una richiesta esistente, senza nuove informazioni o modifiche che richiedono un aggiornamento della richiesta.\"\n}"},"done":true,"done_reason":"stop","total_duration":52968318621,"load_duration":2272483,"prompt_eval_count":811,"prompt_eval_cached_count":738,"prompt_eval_duration":22668052000,"eval_count":70,"eval_duration":30286391000}
+
+
+
+Modelfile-v7
+
+1. NUOVA_RICHIESTA
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v7",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"richiesta abilitazione db svil e coll\",\"bodyText\":\"Ciao, per esigenze di progetto ho bisogno di essere abilitato in lettura ed in scrittura ai DB oracle di sviluppo e collaudo. Nome: Mario. Cognome: Rossi. User: u83172\"},\"request\":null,\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v7","created_at":"2026-10-01T10:34:38.791539305Z","message":{"role":"assistant","content":"{\n  \"action\": \"NUOVA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio contiene informazioni complete per definire una richiesta: anagrafica utente, user, servizio oggetto della richiesta (abilitazione ai DB oracle).\"\n}"},"done":true,"done_reason":"stop","total_duration":302362733387,"load_duration":3836350197,"prompt_eval_count":904,"prompt_eval_cached_count":0,"prompt_eval_duration":267127381000,"eval_count":69,"eval_duration":31383263000}
+
+
+5. RISPONDI_A_MAIL: Richiesta di abilitazione senza user
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v7",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Richiesta abilitazione DB\",\"bodyText\":\"Buongiorno, avrei bisogno della abilitazione in lettura e scrittura ai DB Oracle di sviluppo e collaudo.\"},\"request\":null,\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v7","created_at":"2026-10-01T10:36:56.428776733Z","message":{"role":"assistant","content":"{\n  \"action\": \"NUOVA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"La mail richiede l'abilitazione ai DB Oracle di sviluppo e collaudo, indicando chiaramente il servizio oggetto della richiesta.\"\n}"},"done":true,"done_reason":"stop","total_duration":50644297501,"load_duration":5418799,"prompt_eval_count":876,"prompt_eval_cached_count":809,"prompt_eval_duration":21052161000,"eval_count":67,"eval_duration":29573950000}
+
+
+11. RISPONDI_A_MAIL: abilitazione + user, ma servizio non specificato
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v7",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Richiesta abilitazione\",\"bodyText\":\"Buongiorno, avrei bisogno di essere abilitato. Nome: Mario Rossi, user: u83172.\"},\"request\":null,\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v7","created_at":"2026-10-01T10:40:05.946786736Z","message":{"role":"assistant","content":"{\n  \"action\": \"NUOVA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio contiene informazioni sufficienti per definire una richiesta: anagrafica utente, user e richiesta di abilitazione.\"\n}"},"done":true,"done_reason":"stop","total_duration":48006895633,"load_duration":2123305,"prompt_eval_count":871,"prompt_eval_cached_count":814,"prompt_eval_duration":20800435000,"eval_count":62,"eval_duration":27195367000}
+
+
+12. RISPONDI_A_MAIL: errore senza servizio
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v7",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Errore\",\"bodyText\":\"Buongiorno, non riesco ad accedere. Potete verificare? Nome: Mario Rossi, user: u83172.\"},\"request\":null,\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v7","created_at":"2026-10-01T10:42:20.648991048Z","message":{"role":"assistant","content":"{\n  \"action\": \"NUOVA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio contiene informazioni sull'utente, il servizio oggetto della richiesta e un problema di accesso.\"\n}"},"done":true,"done_reason":"stop","total_duration":47499546864,"load_duration":4270814,"prompt_eval_count":870,"prompt_eval_cached_count":809,"prompt_eval_duration":22179499000,"eval_count":58,"eval_duration":25300588000}
+
+
+6. RISPONDI_A_MAIL: Request esistente, ma messaggio non modifica nulla
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v7",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: richiesta DB\",\"bodyText\":\"Buongiorno, volevo sapere se ci sono aggiornamenti sulla richiesta.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"SVILUPPO\"],\"status\":\"IN_ATTESA_RISCONTRO_UTENTE\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v7","created_at":"2026-10-01T10:46:59.241428442Z","message":{"role":"assistant","content":"{\n  \"action\": \"RISPONDI_A_MAIL\",\n  \"confidence\": 95,\n  \"reasons\": \"Messaggio di seguito richiesta esistente senza informazioni di modifica o aggiornamento.\"\n}"},"done":true,"done_reason":"stop","total_duration":52612588525,"load_duration":3583375,"prompt_eval_count":907,"prompt_eval_cached_count":809,"prompt_eval_duration":30102311000,"eval_count":50,"eval_duration":22491146000}
+
+
+16. RISPONDI_A_MAIL — request esistente, informazione irrilevante
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v7",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: richiesta DB Oracle\",\"bodyText\":\"Buongiorno, oggi sono in ufficio. Volevo solo informarvi.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"SVILUPPO\"],\"status\":\"RICHIESTO\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v7","created_at":"2026-10-01T11:26:46.08257694Z","message":{"role":"assistant","content":"{\n  \"action\": \"RISPONDI_A_MAIL\",\n  \"confidence\": 95,\n  \"reasons\": \"La mail rappresenta una semplice informazione senza modifiche o aggiornamenti della richiesta esistente.\"\n}"},"done":true,"done_reason":"stop","total_duration":294198740381,"load_duration":3686718664,"prompt_eval_count":902,"prompt_eval_cached_count":0,"prompt_eval_duration":266576376999,"eval_count":53,"eval_duration":23920330000}
+
+
+Test 22 — Comunicazione informativa → RISPONDI_A_MAIL
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v7",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: richiesta DB Oracle\",\"bodyText\":\"Grazie per l aggiornamento. Rimango in attesa.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"SVILUPPO\"],\"status\":\"RICHIESTO\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v7","created_at":"2026-10-01T12:08:15.196033579Z","message":{"role":"assistant","content":"{\n  \"action\": \"RISPONDI_A_MAIL\",\n  \"confidence\": 95,\n  \"reasons\": \"Messaggio di conferma e attesa senza informazioni nuove o modifiche alla richiesta esistente.\"\n}"},"done":true,"done_reason":"stop","total_duration":292321071623,"load_duration":3694067113,"prompt_eval_count":897,"prompt_eval_cached_count":0,"prompt_eval_duration":265328329000,"eval_count":52,"eval_duration":23282209000}
+
+
+Test 19 — Cambio ambiente → MODIFICA_RICHIESTA
+
+ curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v7",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: richiesta DB Oracle\",\"bodyText\":\"Per la richiesta precedente, mi sono accorto che mi serve anche l accesso all ambiente di collaudo.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"SVILUPPO\"],\"status\":\"RICHIESTO\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v7","created_at":"2026-10-01T12:10:23.578647384Z","message":{"role":"assistant","content":"{\n  \"action\": \"MODIFICA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio indica una modifica alla richiesta esistente aggiungendo la necessità dell'accesso all'ambiente di collaudo.\"\n}"},"done":true,"done_reason":"stop","total_duration":55822036732,"load_duration":6620776,"prompt_eval_count":908,"prompt_eval_cached_count":819,"prompt_eval_duration":27454835000,"eval_count":62,"eval_duration":28343386000}
+
+
+Test 20 — Cambio autorizzazione → MODIFICA_RICHIESTA
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v7",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: richiesta DB Oracle\",\"bodyText\":\"Per la stessa richiesta avrei bisogno anche dei permessi di scrittura.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"SVILUPPO\"],\"dettaglio\":\"Accesso in lettura\",\"status\":\"RICHIESTO\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v7","created_at":"2026-10-01T12:12:58.354024022Z","message":{"role":"assistant","content":"{\n  \"action\": \"MODIFICA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"La mail richiede l'aggiunta di permessi di scrittura alla richiesta esistente.\"\n}"},"done":true,"done_reason":"stop","total_duration":53513088989,"load_duration":3376770,"prompt_eval_count":913,"prompt_eval_cached_count":821,"prompt_eval_duration":28319092000,"eval_count":55,"eval_duration":25178377000}
+
+
+Test 21 — Esito negativo del test → MODIFICA_RICHIESTA
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v7",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: richiesta DB Oracle\",\"bodyText\":\"Ho effettuato il test ma continuo a ricevere un errore di accesso ai DB di sviluppo.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"SVILUPPO\"],\"status\":\"IN_ATTESA_RISCONTRO_UTENTE\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v7","created_at":"2026-10-01T12:16:34.841702593Z","message":{"role":"assistant","content":"{\n  \"action\": \"MODIFICA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio contiene informazioni aggiornative relative a una richiesta esistente, specificando un errore di accesso ai DB di sviluppo.\"\n}"},"done":true,"done_reason":"stop","total_duration":59461212784,"load_duration":3646900,"prompt_eval_count":915,"prompt_eval_cached_count":819,"prompt_eval_duration":29483938000,"eval_count":65,"eval_duration":29958217000}
+
+
+Test 23 — modifica esplicita dello stato --> MODIFICA_RICHIESTA
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v7",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: richiesta DB Oracle\",\"bodyText\":\"Il focal point ha verificato la richiesta. L accesso al database di produzione è stato rifiutato.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"PRODUZIONE\"],\"status\":\"RICHIESTO\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v7","created_at":"2026-10-01T12:18:42.621425906Z","message":{"role":"assistant","content":"{\n  \"action\": \"MODIFICA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio indica un aggiornamento dello stato della richiesta esistente, specificando che l'accesso al database di produzione è stato rifiutato.\"\n}"},"done":true,"done_reason":"stop","total_duration":58560355095,"load_duration":3817368,"prompt_eval_count":909,"prompt_eval_cached_count":819,"prompt_eval_duration":27785823000,"eval_count":67,"eval_duration":30754609000}
+
+
+Test 24 — modifica diretta dello stato --> MODIFICA_RICHIESTA
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v7",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Re: richiesta DB Oracle\",\"bodyText\":\"Il focal point ha verificato la richiesta. L accesso richiesto non può essere autorizzato.\"},\"request\":{\"id\":123,\"status\":\"IN_PROGRESS\",\"items\":[{\"id\":456,\"type\":\"DB_ORACLE\",\"ambiente\":[\"PRODUZIONE\"],\"status\":\"RICHIESTO\"}]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta:
+{"model":"request-assistant-classificatore-v7","created_at":"2026-10-01T12:19:52.841785827Z","message":{"role":"assistant","content":"{\n  \"action\": \"MODIFICA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio comunica un aggiornamento dello stato della richiesta esistente.\"\n}"},"done":true,"done_reason":"stop","total_duration":45081992407,"load_duration":3678455,"prompt_eval_count":906,"prompt_eval_cached_count":833,"prompt_eval_duration":22945032000,"eval_count":49,"eval_duration":22120549000}
+
+
+
+TEST ESTRATTORE
+
+
+
+IMG=$(base64 -w 0 /tmp/imagetest/certificatoScaduto_1.png)
+
+cat > /tmp/imagetest/qwen-request.json <<EOF
+{
+  "model": "request-assistant-vision-v1",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Analizza l'immagine.",
+      "images": [
+        "$IMG"
+      ]
+    }
+  ],
+  "think": false,
+  "stream": false,
+  "options": {
+    "temperature": 0,
+    "top_k": 20,
+    "top_p": 0.9
+  }
 }
+EOF
+
+
+python3 -m json.tool /tmp/imagetest/qwen-request.json > /dev/null && echo "JSON OK"
+
+curl -s http://127.0.0.1:11434/api/chat \
+  -H "Content-Type: application/json" \
+  --data-binary @/tmp/imagetest/qwen-request.json

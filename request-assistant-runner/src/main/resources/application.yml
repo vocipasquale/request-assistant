@@ -21,7 +21,7 @@ ai:
   api:
     #key: ${AI_API_KEY}
     model: qwen3-8b-request-assistant-v4.2
-    base-url: http://192.168.1.9:11434
+    base-url: http://192.168.1.5:11434
 
 email-address:
   focal-point: 'monica.pensotti@bper.it; ivan.dellepulle@bper.it; ian.daprada@bper.it'

@@ -13,13 +13,8 @@ public interface PersistenceDaoPort {
     long insertRequest(Request request);
     long insertPendingDecision(PendingDecision pendingDecision);
     void deletePendingDecision(PendingDecision pendingDecision);
-    void deleteDecisionOption(long id);
-
-    void refreshEntryIdMessage(String s, String string);
-
+    boolean refreshEntryIdMessage(String s, String string);
     void updateRequest(Request existingRequest);
-
     List<Request> findRequestsToProcess();
-
     long insertMessage(Message message);
 }
