@@ -741,11 +741,10 @@ risposta:
 
 
 
-TEST ESTRATTORE
+TEST VISUAL
 
 
-
-IMG=$(base64 -w 0 /tmp/imagetest/certificatoScaduto_1.png)
+IMG=$(base64 -w 0 /tmp/imagetest/certificatoScaduto_2.png)
 
 cat > /tmp/imagetest/qwen-request.json <<EOF
 {
