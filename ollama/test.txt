@@ -740,6 +740,40 @@ risposta:
 {"model":"request-assistant-classificatore-v7","created_at":"2026-10-01T12:19:52.841785827Z","message":{"role":"assistant","content":"{\n  \"action\": \"MODIFICA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio comunica un aggiornamento dello stato della richiesta esistente.\"\n}"},"done":true,"done_reason":"stop","total_duration":45081992407,"load_duration":3678455,"prompt_eval_count":906,"prompt_eval_cached_count":833,"prompt_eval_duration":22945032000,"eval_count":49,"eval_duration":22120549000}
 
 
+Test 25 - semplice mail con contextAttachment --> RISPONDI_A_MAIL
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v7",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Problema accesso\",\"bodyText\":\"Buongiorno, riscontro un problema durante l accesso.\"},\"request\":null,\"attachmentContext\":\"Utente: non presente\\nNome e cognome: non presente\\nServizio o sistema: intrawseal.gbbper.priv\\nAmbiente: non presente\\nOperazione richiesta o tentata: accesso alla pagina\\nErrore: Account bloccato\\nCodice errore: ERROR_CODE=Account+bloccato\\nInformazioni tecniche: 172.28.144.120\\nInformazioni non presenti o non leggibili: utente, nome e cognome, ambiente\"}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta: {"model":"request-assistant-classificatore-v7","created_at":"2026-10-06T13:57:04.887280011Z","message":{"role":"assistant","content":"{\n  \"action\": \"NUOVA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio indica un problema durante l'accesso a un sistema specifico, con dettagli sull'errore e informazioni tecniche necessarie per definire la richiesta.\"\n}"},"done":true,"done_reason":"stop","total_duration":374684672267,"load_duration":54900719061,"prompt_eval_count":965,"prompt_eval_cached_count":0,"prompt_eval_duration":285698011000,"eval_count":72,"eval_duration":34043451999}
+
+
+Test 26 - semplice mail con utente in contextAttachment --> NUOVA_RICHIESTA
+
+curl http://127.0.0.1:11434/api/chat -d '{
+  "model": "request-assistant-classificatore-v7",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"message\":{\"subject\":\"Problema accesso\",\"bodyText\":\"Buongiorno, riscontro un problema durante l accesso.\"},\"request\":null,\"attachmentContext\":\"Utente: u83172\\nNome e cognome: Mario Rossi\\nServizio o sistema: intrawseal.gbbper.priv\\nAmbiente: non presente\\nOperazione richiesta o tentata: accesso alla pagina\\nErrore: Account bloccato\\nCodice errore: ERROR_CODE=Account+bloccato\\nInformazioni tecniche: 172.28.144.120\\nInformazioni non presenti o non leggibili: ambiente\"}"
+    }
+  ],
+  "think": false,
+  "stream": false
+}'
+
+risposta: {"model":"request-assistant-classificatore-v7","created_at":"2026-10-06T14:03:02.778979462Z","message":{"role":"assistant","content":"{\n  \"action\": \"NUOVA_RICHIESTA\",\n  \"confidence\": 95,\n  \"reasons\": \"Il messaggio contiene informazioni complete come anagrafica utente, utenza, servizio oggetto della richiesta e dettagli dell'errore.\"\n}"},"done":true,"done_reason":"stop","total_duration":66786103889,"load_duration":2933608,"prompt_eval_count":961,"prompt_eval_cached_count":843,"prompt_eval_duration":35934760000,"eval_count":65,"eval_duration":30834693000}
+
+
 
 TEST VISUAL
 
@@ -774,3 +808,540 @@ python3 -m json.tool /tmp/imagetest/qwen-request.json > /dev/null && echo "JSON 
 curl -s http://127.0.0.1:11434/api/chat \
   -H "Content-Type: application/json" \
   --data-binary @/tmp/imagetest/qwen-request.json
+  
+  
+  
+  
+
+TEST GENERATORE
+
+
+cat > /usr/share/ollama/test/generator-test.json <<EOF
+{
+  "model": "request-assistant-generatore-v2",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"action\":\"NUOVA_RICHIESTA\",\"message\":{\"id\":126,\"subject\":\"Richiesta accesso DB Oracle\",\"senderAddress\":\"mario.rossi@example.it\",\"receivedAt\":\"2026-10-07T10:00:00\",\"to\":\"support@example.it\",\"cc\":null,\"bodyText\":\"Buongiorno, sono Mario Rossi. Avrei bisogno di un accesso al DB Oracle in ambiente di sviluppo. Grazie.\",\"entryId\":\"ABC126\",\"conversationId\":\"CONV101\",\"conversationTopic\":\"Richiesta accesso DB Oracle\",\"importance\":1,\"hasAttachment\":false,\"category\":null},\"request\":null,\"attachmentContext\":[]}"
+    }
+  ],
+  "think": false,
+  "stream": false,
+  "keep_alive": "30m",
+  "format": {
+    "type": "object",
+    "properties": {
+      "message": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "subject": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "senderAddress": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "to": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "cc": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "bodyText": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "subject",
+          "senderAddress",
+          "to",
+          "cc",
+          "bodyText"
+        ],
+        "additionalProperties": false
+      },
+      "request": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "createAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "updateAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "NEW",
+              "IN_PROGRESS",
+              null
+            ]
+          },
+          "user": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "cognome": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "nome": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "codiceFiscale": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "email": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "utenza": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "cognome",
+              "nome",
+              "codiceFiscale",
+              "email",
+              "utenza"
+            ],
+            "additionalProperties": false
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "type": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "enum": [
+                    "NUOVA_UTENZA",
+                    "DOMINIO_APN_VPN",
+                    "MACCHINE_PONTE",
+                    "BSPACE",
+                    "PORTALE_INCASSI",
+                    "DB_ORACLE",
+                    "OPENSHIFT_CONSOLE",
+                    "JENKINS",
+                    "ELK",
+                    "JFROG",
+                    "TSO_1",
+                    "TSO_2",
+                    "TSO_4",
+                    "DB_2",
+                    "OPC",
+                    "CHANGE_MAN",
+                    "WIC_PLANET",
+                    "DYNATRACE",
+                    "ALTRO",
+                    null
+                  ]
+                },
+                "createAt": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "updateAt": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "dettaglio": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "nota": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "ambiente": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "SVILUPPO",
+                      "COLLAUDO",
+                      "CERTIFICAZIONE",
+                      "FUSIONE",
+                      "PRODUZIONE"
+                    ]
+                  }
+                },
+                "status": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "enum": [
+                    "DA_RICHIEDERE",
+                    "RICHIESTO",
+                    "SOLLECITATO",
+                    "IN_ATTESA_RISCONTRO_UTENTE",
+                    "SOLLECITATO_RISCONTRO_UTENTE",
+                    "RISCONTRO_OK",
+                    "RISCONTRO_KO",
+                    null
+                  ]
+                },
+                "ticket": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "type",
+                "createAt",
+                "updateAt",
+                "dettaglio",
+                "nota",
+                "ambiente",
+                "status",
+                "ticket"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "subject": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "senderAddress": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "receivedAt": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "to": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "cc": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "bodyText": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "entryId": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "conversationId": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "conversationTopic": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "importance": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "hasAttachment": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "category": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "subject",
+                "senderAddress",
+                "receivedAt",
+                "to",
+                "cc",
+                "bodyText",
+                "entryId",
+                "conversationId",
+                "conversationTopic",
+                "importance",
+                "hasAttachment",
+                "category"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "createAt",
+          "updateAt",
+          "title",
+          "status",
+          "user",
+          "note",
+          "items",
+          "messages"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "required": [
+      "message",
+      "request"
+    ],
+    "additionalProperties": false
+  }
+}
+EOF
+
+
+python3 -m json.tool /usr/share/ollama/test/generator-test.json > /dev/null && echo "JSON OK"
+
+curl -s http://127.0.0.1:11434/api/chat \
+  -H "Content-Type: application/json" \
+  --data-binary @/usr/share/ollama/test/generator-test.json
+  
+
+
+
+
+Test 1 — RISPONDI_A_MAIL  
+
+{
+  "model": "request-assistant-generatore-v2",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"action\":\"RISPONDI_A_MAIL\",\"message\":{\"id\":125,\"subject\":\"Richiesta informazioni\",\"senderAddress\":\"mario.rossi@example.it\",\"receivedAt\":\"2026-10-07T09:15:00\",\"to\":\"support@example.it\",\"cc\":null,\"bodyText\":\"Buongiorno, vorrei sapere se ci sono novità sulla mia richiesta.\",\"entryId\":\"ABC125\",\"conversationId\":\"CONV100\",\"conversationTopic\":\"Richiesta informazioni\",\"importance\":1,\"hasAttachment\":false,\"category\":null},\"request\":null,\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false,
+  "keep_alive": "30m"
+}  
+  
+risposta:
+{"model":"request-assistant-generatore-v1","created_at":"2026-10-07T09:53:57.164648843Z","message":{"role":"assistant","content":"{\n  \"message\": {\n    \"id\": 0,\n    \"subject\": \"Risposta alla tua richiesta\",\n    \"senderAddress\": \"support@example.it\",\n    \"receivedAt\": null,\n    \"to\": \"mario.rossi@example.it\",\n    \"cc\": null,\n    \"bodyText\": \"Gentile Mario, le informazioni richieste saranno disponibili entro il prossimo aggiornamento. Restiamo a disposizione per ulteriori chiarimenti.\",\n    \"entryId\": \"RESP125\",\n    \"conversationId\": \"CONV100\",\n    \"conversationTopic\": \"Richiesta informazioni\",\n    \"importance\": 1,\n    \"hasAttachment\": false,\n    \"category\": null\n  },\n  \"request\": null\n}"},"done":true,"done_reason":"stop","total_duration":466463727626,"load_duration":54856581336,"prompt_eval_count":1102,"prompt_eval_cached_count":0,"prompt_eval_duration":327130245000,"eval_count":170,"eval_duration":84429355000}
+
+{"model":"request-assistant-generatore-v2","created_at":"2026-10-07T14:38:12.653500972Z","message":{"role":"assistant","content":"{\n  \"message\": null,\n  \"request\": {\n    \"id\": 0,\n    \"createAt\": \"2026-10-07T09:15:00\",\n    \"updateAt\": \"2026-10-07T09:15:00\",\n    \"title\": \"Richiesta informazioni\",\n    \"status\": \"NEW\",\n    \"user\": {\n      \"id\": 0,\n      \"cognome\": \"Rossi\",\n      \"nome\": \"Mario\",\n      \"codiceFiscale\": \"\",\n      \"email\": \"mario.rossi@example.it\",\n      \"utenza\": \"\"\n    },\n    \"note\": \"\",\n    \"items\": [],\n    \"messages\": [\n      {\n        \"id\": 125,\n        \"subject\": \"Richiesta informazioni\",\n        \"senderAddress\": \"mario.rossi@example.it\",\n        \"receivedAt\": \"2026-10-07T09:15:00\",\n        \"to\": \"support@example.it\",\n        \"cc\": null,\n        \"bodyText\": \"Buongiorno, vorrei sapere se ci sono novità sulla mia richiesta.\",\n        \"entryId\": \"ABC125\",\n        \"conversationId\": \"CONV100\",\n        \"conversationTopic\": \"Richiesta informazioni\",\n        \"importance\": 1,\n        \"hasAttachment\": false,\n        \"category\": null\n      }\n    ]\n  }\n}"},"done":true,"done_reason":"stop","total_duration":210558848464,"load_duration":3357697,"prompt_eval_count":1057,"prompt_eval_cached_count":909,"prompt_eval_duration":45729274000,"eval_count":325,"eval_duration":164806116000}
+
+{"model":"request-assistant-generatore-v2","created_at":"2026-10-07T14:53:40.209950572Z","message":{"role":"assistant","content":"{\n  \"message\": {\n    \"id\": 0,\n    \"subject\": \"Risposta alla tua richiesta\",\n    \"senderAddress\": \"support@example.it\",\n    \"receivedAt\": \"2026-10-07T09:30:00\",\n    \"to\": \"mario.rossi@example.it\",\n    \"cc\": null,\n    \"bodyText\": \"Gentile Mario,\\n\\nGrazie per il tuo messaggio. Al momento non sono disponibili ulteriori informazioni sulla tua richiesta. Ti contatteremo non appena avremo novità.\\n\\nCordiali saluti,\\nTeam Supporto\",\n    \"entryId\": \"RESP125\",\n    \"conversationId\": \"CONV100\",\n    \"conversationTopic\": \"Richiesta informazioni\",\n    \"importance\": 1,\n    \"hasAttachment\": false,\n    \"category\": null\n  },\n  \"request\": null\n}"},"done":true,"done_reason":"stop","total_duration":102935077808,"load_duration":3235847,"prompt_eval_count":1057,"prompt_eval_cached_count":1056,"prompt_eval_duration":466063000,"eval_count":209,"eval_duration":102440971000}
+
+Test 2 — NUOVA_RICHIESTA
+
+{
+  "model": "request-assistant-generatore-v1",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"action\":\"NUOVA_RICHIESTA\",\"message\":{\"id\":126,\"subject\":\"Accesso DB Oracle\",\"senderAddress\":\"mario.rossi@example.it\",\"receivedAt\":\"2026-10-07T09:30:00\",\"to\":\"support@example.it\",\"cc\":null,\"bodyText\":\"Buongiorno, sono Mario Rossi, utenza u83172. Avrei bisogno dell'accesso al DB Oracle in ambiente di sviluppo.\",\"entryId\":\"ABC126\",\"conversationId\":\"CONV101\",\"conversationTopic\":\"Accesso DB Oracle\",\"importance\":1,\"hasAttachment\":false,\"category\":null},\"request\":null,\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false,
+  "keep_alive": "30m"
+}
+
+risposta:
+{"model":"request-assistant-generatore-v1","created_at":"2026-10-07T10:04:54.216457846Z","message":{"role":"assistant","content":"{\n  \"message\": {\n    \"id\": 126,\n    \"subject\": \"Accesso DB Oracle\",\n    \"senderAddress\": \"mario.rossi@example.it\",\n    \"receivedAt\": \"2026-10-07T09:30:00\",\n    \"to\": \"support@example.it\",\n    \"cc\": null,\n    \"bodyText\": \"Buongiorno, sono Mario Rossi, utenza u83172. Avrei bisogno dell'accesso al DB Oracle in ambiente di sviluppo.\",\n    \"entryId\": \"ABC126\",\n    \"conversationId\": \"CONV101\",\n    \"conversationTopic\": \"Accesso DB Oracle\",\n    \"importance\": 1,\n    \"hasAttachment\": false,\n    \"category\": null\n  },\n  \"request\": {\n    \"id\": 0,\n    \"createAt\": null,\n    \"updateAt\": null,\n    \"title\": \"Accesso DB Oracle\",\n    \"status\": \"NEW\",\n    \"user\": {\n      \"id\": 0,\n      \"cognome\": \"Rossi\",\n      \"nome\": \"Mario\",\n      \"codiceFiscale\": null,\n      \"email\": \"mario.rossi@example.it\",\n      \"utenza\": \"u83172\"\n    },\n    \"note\": null,\n    \"items\": [\n      {\n        \"id\": 0,\n        \"type\": \"DB_ORACLE\",\n        \"createAt\": null,\n        \"updateAt\": null,\n        \"dettaglio\": \"Accesso al DB Oracle in ambiente di sviluppo\",\n        \"nota\": null,\n        \"ambiente\": \"SVILUPPO\",\n        \"status\": \"DA_RICHIEDERE\",\n        \"ticket\": null\n      }\n    ],\n    \"messages\": [\n      {\n        \"id\": 126,\n        \"subject\": \"Accesso DB Oracle\",\n        \"senderAddress\": \"mario.rossi@example.it\",\n        \"receivedAt\": \"2026-10-07T09:30:00\",\n        \"to\": \"support@example.it\",\n        \"cc\": null,\n        \"bodyText\": \"Buongiorno, sono Mario Rossi, utenza u83172. Avrei bisogno dell'accesso al DB Oracle in ambiente di sviluppo.\",\n        \"entryId\": \"ABC126\",\n        \"conversationId\": \"CONV101\",\n        \"conversationTopic\": \"Accesso DB Oracle\",\n        \"importance\": 1,\n        \"hasAttachment\": false,\n        \"category\": null\n      }\n    ]\n  }\n}"},"done":true,"done_reason":"stop","total_duration":368286004456,"load_duration":3072769,"prompt_eval_count":1124,"prompt_eval_cached_count":954,"prompt_eval_duration":52105434000,"eval_count":580,"eval_duration":316159114000}
+{"model":"request-assistant-generatore-v2","created_at":"2026-10-08T10:57:45.619276311Z","message":{"role":"assistant","content":"{\n  \"message\": null,\n  \"request\": {\n    \"id\": 0,\n    \"createAt\": \"2026-10-07T10:00:00\",\n    \"updateAt\": \"2026-10-07T10:00:00\",\n    \"title\": \"Richiesta accesso DB Oracle\",\n    \"status\": \"NEW\",\n    \"user\": {\n      \"id\": 0,\n      \"cognome\": \"Rossi\",\n      \"nome\": \"Mario\",\n      \"codiceFiscale\": null,\n      \"email\": \"mario.rossi@example.it\",\n      \"utenza\": null\n    },\n    \"note\": null,\n    \"items\": [\n      {\n        \"id\": 0,\n        \"type\": \"DB_ORACLE\",\n        \"createAt\": \"2026-10-07T10:00:00\",\n        \"updateAt\": \"2026-10-07T10:00:00\",\n        \"dettaglio\": \"Accesso al DB Oracle in ambiente di sviluppo\",\n        \"nota\": null,\n        \"ambiente\": [\"SVILUPPO\"],\n        \"status\": \"DA_RICHIEDERE\",\n        \"ticket\": null\n      }\n    ],\n    \"messages\": [\n      {\n        \"id\": 126,\n        \"subject\": \"Richiesta accesso DB Oracle\",\n        \"senderAddress\": \"mario.rossi@example.it\",\n        \"receivedAt\": \"2026-10-07T10:00:00\",\n        \"to\": \"support@example.it\",\n        \"cc\": null,\n        \"bodyText\": \"Buongiorno, sono Mario Rossi. Avrei bisogno di un accesso al DB Oracle in ambiente di sviluppo. Grazie.\",\n        \"entryId\": \"ABC126\",\n        \"conversationId\": \"CONV101\",\n        \"conversationTopic\": \"Richiesta accesso DB Oracle\",\n        \"importance\": 1,\n        \"hasAttachment\": false,\n        \"category\": null\n      }\n    ]\n  }\n}"},"done":true,"done_reason":"stop","total_duration":629143325385,"load_duration":54940372176,"prompt_eval_count":1076,"prompt_eval_cached_count":0,"prompt_eval_duration":323468162000,"eval_count":477,"eval_duration":250629295000}
+
+Test 3 — MODIFICA_RICHIESTA con modifica evidente
+{
+  "model": "request-assistant-generatore-v1",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"action\":\"MODIFICA_RICHIESTA\",\"message\":{\"id\":127,\"subject\":\"Re: Accesso DB Oracle\",\"senderAddress\":\"mario.rossi@example.it\",\"receivedAt\":\"2026-10-07T10:00:00\",\"to\":\"support@example.it\",\"cc\":null,\"bodyText\":\"Buongiorno, confermo che ora riesco ad accedere correttamente al DB Oracle di sviluppo.\",\"entryId\":\"ABC127\",\"conversationId\":\"CONV101\",\"conversationTopic\":\"Accesso DB Oracle\",\"importance\":1,\"hasAttachment\":false,\"category\":null},\"request\":{\"id\":452,\"createAt\":\"2026-10-06T09:00:00\",\"updateAt\":\"2026-10-06T15:00:00\",\"title\":\"Accesso DB Oracle\",\"status\":\"IN_PROGRESS\",\"user\":{\"id\":21,\"cognome\":\"Rossi\",\"nome\":\"Mario\",\"codiceFiscale\":null,\"email\":\"mario.rossi@example.it\",\"utenza\":\"u83172\"},\"note\":\"Richiesta accesso database\",\"items\":[{\"id\":9001,\"type\":\"DB_ORACLE\",\"createAt\":\"2026-10-06T09:00:00\",\"updateAt\":\"2026-10-06T15:00:00\",\"dettaglio\":\"Accesso al DB Oracle\",\"nota\":null,\"ambiente\":[\"SVILUPPO\"],\"status\":\"IN_ATTESA_RISCONTRO_UTENTE\",\"ticket\":\"TCK12345\"}],\"messages\":[]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false,
+  "keep_alive": "30m"
+}
+
+risposta:
+{"model":"request-assistant-generatore-v1","created_at":"2026-10-07T10:13:20.542838475Z","message":{"role":"assistant","content":"{\n  \"message\": {\n    \"id\": 127,\n    \"subject\": \"Re: Accesso DB Oracle\",\n    \"senderAddress\": \"mario.rossi@example.it\",\n    \"receivedAt\": \"2026-10-07T10:00:00\",\n    \"to\": \"support@example.it\",\n    \"cc\": null,\n    \"bodyText\": \"Buongiorno, confermo che ora riesco ad accedere correttamente al DB Oracle di sviluppo.\",\n    \"entryId\": \"ABC127\",\n    \"conversationId\": \"CONV101\",\n    \"conversationTopic\": \"Accesso DB Oracle\",\n    \"importance\": 1,\n    \"hasAttachment\": false,\n    \"category\": null\n  },\n  \"request\": {\n    \"id\": 452,\n    \"createAt\": \"2026-10-06T09:00:00\",\n    \"updateAt\": \"2026-10-06T15:00:00\",\n    \"title\": \"Accesso DB Oracle\",\n    \"status\": \"IN_PROGRESS\",\n    \"user\": {\n      \"id\": 21,\n      \"cognome\": \"Rossi\",\n      \"nome\": \"Mario\",\n      \"codiceFiscale\": null,\n      \"email\": \"mario.rossi@example.it\",\n      \"utenza\": \"u83172\"\n    },\n    \"note\": \"Richiesta accesso database\",\n    \"items\": [\n      {\n        \"id\": 9001,\n        \"type\": \"DB_ORACLE\",\n        \"createAt\": \"2026-10-06T09:00:00\",\n        \"updateAt\": \"2026-10-06T15:00:00\",\n        \"dettaglio\": \"Accesso al DB Oracle\",\n        \"nota\": null,\n        \"ambiente\": [\n          \"SVILUPPO\"\n        ],\n        \"status\": \"RICHIESTO\",\n        \"ticket\": \"TCK12345\"\n      }\n    ],\n    \"messages\": []\n  }\n}"},"done":true,"done_reason":"stop","total_duration":393067465873,"load_duration":4574451,"prompt_eval_count":1341,"prompt_eval_cached_count":954,"prompt_eval_duration":119643776000,"eval_count":482,"eval_duration":273389967000}
+
+
+Test 4 — MODIFICA_RICHIESTA senza modifica reale
+{
+  "model": "request-assistant-generatore-v2",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"action\":\"MODIFICA_RICHIESTA\",\"message\":{\"id\":128,\"subject\":\"Re: Accesso DB Oracle\",\"senderAddress\":\"mario.rossi@example.it\",\"receivedAt\":\"2026-10-07T10:10:00\",\"to\":\"support@example.it\",\"cc\":null,\"bodyText\":\"Buongiorno, oggi lavoro dall'ufficio. Grazie.\",\"entryId\":\"ABC128\",\"conversationId\":\"CONV101\",\"conversationTopic\":\"Accesso DB Oracle\",\"importance\":1,\"hasAttachment\":false,\"category\":null},\"request\":{\"id\":452,\"createAt\":\"2026-10-06T09:00:00\",\"updateAt\":\"2026-10-06T15:00:00\",\"title\":\"Accesso DB Oracle\",\"status\":\"IN_PROGRESS\",\"user\":{\"id\":21,\"cognome\":\"Rossi\",\"nome\":\"Mario\",\"codiceFiscale\":null,\"email\":\"mario.rossi@example.it\",\"utenza\":\"u83172\"},\"note\":\"Richiesta accesso database\",\"items\":[{\"id\":9001,\"type\":\"DB_ORACLE\",\"createAt\":\"2026-10-06T09:00:00\",\"updateAt\":\"2026-10-06T15:00:00\",\"dettaglio\":\"Accesso al DB Oracle\",\"nota\":null,\"ambiente\":[\"SVILUPPO\"],\"status\":\"IN_ATTESA_RISCONTRO_UTENTE\",\"ticket\":\"TCK12345\"}],\"messages\":[]},\"attachmentContext\":null}"
+    }
+  ],
+  "think": false,
+  "stream": false,
+  "keep_alive": "30m",
+  "format": {
+    "type": "object",
+    "properties": {
+      "message": {
+        "type": ["object", "null"]
+      },
+      "request": {
+        "type": ["object", "null"]
+      }
+    },
+    "required": ["message", "request"],
+    "additionalProperties": false
+  }
+}
+
+risposta:
+{"model":"request-assistant-generatore-v1","created_at":"2026-10-07T13:07:19.093743983Z","message":{"role":"assistant","content":"{\n  \"message\": {\n    \"id\": 128,\n    \"subject\": \"Re: Accesso DB Oracle\",\n    \"senderAddress\": \"mario.rossi@example.it\",\n    \"receivedAt\": \"2026-10-07T10:10:00\",\n    \"to\": \"support@example.it\",\n    \"cc\": null,\n    \"bodyText\": \"Buongiorno, oggi lavoro dall'ufficio. Grazie.\",\n    \"entryId\": \"ABC128\",\n    \"conversationId\": \"CONV101\",\n    \"conversationTopic\": \"Accesso DB Oracle\",\n    \"importance\": 1,\n    \"hasAttachment\": false,\n    \"category\": null\n  },\n  \"request\": {\n    \"id\": 452,\n    \"createAt\": \"2026-10-06T09:00:00\",\n    \"updateAt\": \"2026-10-06T15:00:00\",\n    \"title\": \"Accesso DB Oracle\",\n    \"status\": \"IN_PROGRESS\",\n    \"user\": {\n      \"id\": 21,\n      \"cognome\": \"Rossi\",\n      \"nome\": \"Mario\",\n      \"codiceFiscale\": null,\n      \"email\": \"mario.rossi@example.it\",\n      \"utenza\": \"u83172\"\n    },\n    \"note\": \"Richiesta accesso database\",\n    \"items\": [\n      {\n        \"id\": 9001,\n        \"type\": \"DB_ORACLE\",\n        \"createAt\": \"2026-10-06T09:00:00\",\n        \"updateAt\": \"2026-10-06T15:00:00\",\n        \"dettaglio\": \"Accesso al DB Oracle\",\n        \"nota\": null,\n        \"ambiente\": [\n          \"SVILUPPO\"\n        ],\n        \"status\": \"IN_ATTESA_RISCONTRO_UTENTE\",\n        \"ticket\": \"TCK12345\"\n      }\n    ],\n    \"messages\": []\n  }\n}"},"done":true,"done_reason":"stop","total_duration":379974361654,"load_duration":3852837,"prompt_eval_count":1330,"prompt_eval_cached_count":968,"prompt_eval_duration":111407056000,"eval_count":477,"eval_duration":268534920999}
+
+{"model":"request-assistant-generatore-v2","created_at":"2026-10-07T14:04:42.500916569Z","message":{"role":"assistant","content":"{\n  \"message\": null,\n  \"request\": {\n    \"id\": 452,\n    \"createAt\": \"2026-10-06T09:00:00\",\n    \"updateAt\": \"2026-10-06T15:00:00\",\n    \"title\": \"Accesso DB Oracle\",\n    \"status\": \"IN_PROGRESS\",\n    \"user\": {\n      \"id\": 21,\n      \"cognome\": \"Rossi\",\n      \"nome\": \"Mario\",\n      \"codiceFiscale\": null,\n      \"email\": \"mario.rossi@example.it\",\n      \"utenza\": \"u83172\"\n    },\n    \"note\": \"Richiesta accesso database\",\n    \"items\": [\n      {\n        \"id\": 9001,\n        \"type\": \"DB_ORACLE\",\n        \"createAt\": \"2026-10-06T09:00:00\",\n        \"updateAt\": \"2026-10-06T15:00:00\",\n        \"dettaglio\": \"Accesso al DB Oracle\",\n        \"nota\": null,\n        \"ambiente\": [\"SVILUPPO\"],\n        \"status\": \"IN_ATTESA_RISCONTRO_UTENTE\",\n        \"ticket\": \"TCK12345\"\n      }\n    ],\n    \"messages\": []\n  }\n}"},"done":true,"done_reason":"stop","total_duration":563686644337,"load_duration":3877389013,"prompt_eval_count":1285,"prompt_eval_cached_count":0,"prompt_eval_duration":383724571000,"eval_count":320,"eval_duration":176061142000}
+
+{"model":"request-assistant-generatore-v2","created_at":"2026-10-07T14:20:54.386036557Z","message":{"role":"assistant","content":"{\n  \"message\": null,\n  \"request\": {\n    \"id\": 452,\n    \"createAt\": \"2026-10-06T09:00:00\",\n    \"updateAt\": \"2026-10-06T15:00:00\",\n    \"title\": \"Accesso DB Oracle\",\n    \"status\": \"IN_PROGRESS\",\n    \"user\": {\n      \"id\": 21,\n      \"cognome\": \"Rossi\",\n      \"nome\": \"Mario\",\n      \"codiceFiscale\": null,\n      \"email\": \"mario.rossi@example.it\",\n      \"utenza\": \"u83172\"\n    },\n    \"note\": \"Richiesta accesso database\",\n    \"items\": [\n      {\n        \"id\": 9001,\n        \"type\": \"DB_ORACLE\",\n        \"createAt\": \"2026-10-06T09:00:00\",\n        \"updateAt\": \"2026-10-06T15:00:00\",\n        \"dettaglio\": \"Accesso al DB Oracle\",\n        \"nota\": null,\n        \"ambiente\": [\"SVILUPPO\"],\n        \"status\": \"IN_ATTESA_RISCONTRO_UTENTE\",\n        \"ticket\": \"TCK12345\"\n      }\n    ],\n    \"messages\": []\n  }\n}"},"done":true,"done_reason":"stop","total_duration":178770892212,"load_duration":3309134,   "prompt_eval_count":1285,"prompt_eval_cached_count":1284,"prompt_eval_duration":548249000,"eval_count":324,"eval_duration":178194592000}
+
+
+Test 5 — NUOVA_RICHIESTA + VISION
+
+{
+  "model": "request-assistant-generatore-v1",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"action\":\"NUOVA_RICHIESTA\",\"message\":{\"id\":129,\"subject\":\"Problema accesso\",\"senderAddress\":\"mario.rossi@example.it\",\"receivedAt\":\"2026-10-07T10:20:00\",\"to\":\"support@example.it\",\"cc\":null,\"bodyText\":\"Buongiorno, riscontro un problema durante l'accesso.\",\"entryId\":\"ABC129\",\"conversationId\":\"CONV102\",\"conversationTopic\":\"Problema accesso\",\"importance\":1,\"hasAttachment\":true,\"category\":null},\"request\":null,\"attachmentContext\":\"Utente: u83172\\nNome e cognome: Mario Rossi\\nServizio o sistema: intrawseal.gbbper.priv\\nAmbiente: non presente\\nOperazione richiesta o tentata: accesso alla pagina\\nErrore: Account bloccato\\nCodice errore: ERROR_CODE=Account+bloccato\\nInformazioni tecniche: 172.28.144.120\\nInformazioni non presenti o non leggibili: ambiente\"}"
+    }
+  ],
+  "think": false,
+  "stream": false,
+  "keep_alive": "30m"
+}
+
+risposta:
+{"model":"request-assistant-generatore-v1","created_at":"2026-10-07T11:20:23.5574344Z","message":{"role":"assistant","content":"{\n  \"message\": {\n    \"id\": 0,\n    \"subject\": \"Problema accesso\",\n    \"senderAddress\": \"mario.rossi@example.it\",\n    \"receivedAt\": \"2026-10-07T10:20:00\",\n    \"to\": \"support@example.it\",\n    \"cc\": null,\n    \"bodyText\": \"Buongiorno, riscontro un problema durante l'accesso.\",\n    \"entryId\": \"ABC129\",\n    \"conversationId\": \"CONV102\",\n    \"conversationTopic\": \"Problema accesso\",\n    \"importance\": 1,\n    \"hasAttachment\": true,\n    \"category\": null\n  },\n  \"request\": {\n    \"id\": 0,\n    \"createAt\": null,\n    \"updateAt\": null,\n    \"title\": \"Problema accesso\",\n    \"status\": \"NEW\",\n    \"user\": {\n      \"id\": 0,\n      \"cognome\": \"Rossi\",\n      \"nome\": \"Mario\",\n      \"codiceFiscale\": \"\",\n      \"email\": \"mario.rossi@example.it\",\n      \"utenza\": \"u83172\"\n    },\n    \"note\": \"\",\n    \"items\": [\n      {\n        \"id\": 0,\n        \"type\": \"ALTRO\",\n        \"createAt\": null,\n        \"updateAt\": null,\n        \"dettaglio\": \"Problema accesso alla pagina intrawseal.gbbper.priv\",\n        \"nota\": \"\",\n        \"ambiente\": \"non presente\",\n        \"status\": \"DA_RICHIEDERE\",\n        \"ticket\": \"\"\n      }\n    ],\n    \"messages\": [\n      {\n        \"id\": 129,\n        \"subject\": \"Problema accesso\",\n        \"senderAddress\": \"mario.rossi@example.it\",\n        \"receivedAt\": \"2026-10-07T10:20:00\",\n        \"to\": \"support@example.it\",\n        \"cc\": null,\n        \"bodyText\": \"Buongiorno, riscontro un problema durante l'accesso.\",\n        \"entryId\": \"ABC129\",\n        \"conversationId\": \"CONV102\",\n        \"conversationTopic\": \"Problema accesso\",\n        \"importance\": 1,\n        \"hasAttachment\": true,\n        \"category\": null\n      }\n    ]\n  }\n}"},"done":true,"done_reason":"stop","total_duration":657111339758,"load_duration":3681108414,"prompt_eval_count":1209,"prompt_eval_cached_count":0,"prompt_eval_duration":359426851000,"eval_count":533,"eval_duration":293988491000}
+
+
+Test 6 — MODIFICA_RICHIESTA + VISION
+
+{
+  "model": "request-assistant-generatore-v1",
+  "messages": [
+    {
+      "role": "user",
+      "content": "{\"action\":\"MODIFICA_RICHIESTA\",\"message\":{\"id\":130,\"subject\":\"Re: Problema accesso DB\",\"senderAddress\":\"mario.rossi@example.it\",\"receivedAt\":\"2026-10-07T10:30:00\",\"to\":\"support@example.it\",\"cc\":null,\"bodyText\":\"Buongiorno, allego lo screenshot dell'errore che continuo a ricevere.\",\"entryId\":\"ABC130\",\"conversationId\":\"CONV103\",\"conversationTopic\":\"Problema accesso DB\",\"importance\":1,\"hasAttachment\":true,\"category\":null},\"request\":{\"id\":453,\"createAt\":\"2026-10-06T09:00:00\",\"updateAt\":\"2026-10-06T15:00:00\",\"title\":\"Accesso DB Oracle\",\"status\":\"IN_PROGRESS\",\"user\":{\"id\":21,\"cognome\":\"Rossi\",\"nome\":\"Mario\",\"codiceFiscale\":null,\"email\":\"mario.rossi@example.it\",\"utenza\":\"u83172\"},\"note\":null,\"items\":[{\"id\":9002,\"type\":\"DB_ORACLE\",\"createAt\":\"2026-10-06T09:00:00\",\"updateAt\":\"2026-10-06T15:00:00\",\"dettaglio\":\"Accesso al DB Oracle\",\"nota\":null,\"ambiente\":[\"SVILUPPO\"],\"status\":\"IN_ATTESA_RISCONTRO_UTENTE\",\"ticket\":\"TCK54321\"}],\"messages\":[]},\"attachmentContext\":\"Utente: u83172\\nNome e cognome: Mario Rossi\\nServizio o sistema: DB Oracle\\nAmbiente: SVILUPPO\\nOperazione richiesta o tentata: accesso al database\\nErrore: credenziali non valide\\nCodice errore: ORA-01017\\nInformazioni tecniche: accesso negato\\nInformazioni non presenti o non leggibili: non presente\"}"
+    }
+  ],
+  "think": false,
+  "stream": false,
+  "keep_alive": "30m"
+}
+
+risposta:
+{"model":"request-assistant-generatore-v1","created_at":"2026-10-07T12:22:50.208328987Z","message":{"role":"assistant","content":"{\n  \"message\": {\n    \"id\": 130,\n    \"subject\": \"Re: Problema accesso DB\",\n    \"senderAddress\": \"mario.rossi@example.it\",\n    \"receivedAt\": \"2026-10-07T10:30:00\",\n    \"to\": \"support@example.it\",\n    \"cc\": null,\n    \"bodyText\": \"Buongiorno, allegho lo screenshot dell'errore che continuo a ricevere.\",\n    \"entryId\": \"ABC130\",\n    \"conversationId\": \"CONV103\",\n    \"conversationTopic\": \"Problema accesso DB\",\n    \"importance\": 1,\n    \"hasAttachment\": true,\n    \"category\": null\n  },\n  \"request\": {\n    \"id\": 453,\n    \"createAt\": \"2026-10-06T09:00:00\",\n    \"updateAt\": \"2026-10-06T15:00:00\",\n    \"title\": \"Accesso DB Oracle\",\n    \"status\": \"IN_PROGRESS\",\n    \"user\": {\n      \"id\": 21,\n      \"cognome\": \"Rossi\",\n      \"nome\": \"Mario\",\n      \"codiceFiscale\": null,\n      \"email\": \"mario.rossi@example.it\",\n      \"utenza\": \"u83172\"\n    },\n    \"note\": null,\n    \"items\": [\n      {\n        \"id\": 9002,\n        \"type\": \"DB_ORACLE\",\n        \"createAt\": \"2026-10-06T09:00:00\",\n        \"updateAt\": \"2026-10-06T15:00:00\",\n        \"dettaglio\": \"Accesso al DB Oracle\",\n        \"nota\": null,\n        \"ambiente\": [\n          \"SVILUPPO\"\n        ],\n        \"status\": \"IN_ATTESA_RISCONTRO_UTENTE\",\n        \"ticket\": \"TCK54321\"\n      }\n    ],\n    \"messages\": []\n  }\n}"},"done":true,"done_reason":"stop","total_duration":707789224341,"load_duration":3697843634,"prompt_eval_count":1427,"prompt_eval_cached_count":0,"prompt_eval_duration":427200432000,"eval_count":480,"eval_duration":276859675000}

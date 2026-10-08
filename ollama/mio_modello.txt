@@ -1,14 +1,14 @@
 permessi
 
-chown -R ollama:ollama /usr/share/ollama/model-definitions/request-assistant/vision
-chmod 750 /usr/share/ollama/model-definitions/request-assistant/vision
-chmod 640 /usr/share/ollama/model-definitions/request-assistant/vision/Modelfile-v1
+chown -R ollama:ollama /usr/share/ollama/model-definitions/request-assistant/generatore
+chmod 750 /usr/share/ollama/model-definitions/request-assistant/generatore
+chmod 640 /usr/share/ollama/model-definitions/request-assistant/generatore/Modelfile-v2
 
 
 modello personalizzato
 
 cd /usr/share/ollama/model-definitions/request-assistant/v7
-ollama create request-assistant-vision-v1 -f Modelfile-v1
+ollama create request-assistant-generatore-v2 -f Modelfile-v2
 
 
 
