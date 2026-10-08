@@ -208,6 +208,27 @@ public final class PersistenceDomainMappers {
         );
     }
 
+    public static RequestItemRow toRow(RequestItem item, long requestId) {
+        String ambienteRaw = null;
+        if (item.getAmbiente() != null && !item.getAmbiente().isEmpty()) {
+            ambienteRaw = item.getAmbiente().stream()
+                    .map(Enum::name)
+                    .collect(java.util.stream.Collectors.joining(";"));
+        }
+        return new RequestItemRow(
+                0L,    // id generato dal DB
+                requestId,
+                item.getType() != null ? item.getType().name() : null,
+                item.getCreateAt(),
+                item.getUpdateAt(),
+                item.getDettaglio(),
+                item.getNota(),
+                ambienteRaw,
+                item.getStatus() != null ? item.getStatus().name() : null,
+                item.getTicket()
+        );
+    }
+
     public static RequestRow toRow(Request request) {
         return new RequestRow(
                 request.getId(),
@@ -238,6 +259,18 @@ public final class PersistenceDomainMappers {
                 pendingDecision.getType() != null ? pendingDecision.getType().name() : null,
                 pendingDecision.getTarget(),
                 0L,
+                Objects.isNull(pendingDecision.getRequest())?0:pendingDecision.getRequest().getId()
+        );
+    }
+
+    public static PendingDecisionRow toRow(PendingDecision pendingDecision, long messageId) {
+        //usato SOLO dall'INSERT
+        return new PendingDecisionRow(
+                0L, // id generato dal DB
+                pendingDecision.getCreatedAt(),
+                pendingDecision.getType() != null ? pendingDecision.getType().name() : null,
+                pendingDecision.getTarget(),
+                messageId,
                 Objects.isNull(pendingDecision.getRequest())?0:pendingDecision.getRequest().getId()
         );
     }

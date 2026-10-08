@@ -31,12 +31,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 @JdbcTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(PersistenceDao.class)
+@Import(PersistenceDaoService.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class PersistenceDaoInsertTest {
 
     @Autowired
-    private PersistenceDao persistenceDao;
+    private PersistenceDaoService persistenceDao;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;

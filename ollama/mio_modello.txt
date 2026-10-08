@@ -1,14 +1,14 @@
 permessi
 
-chown -R ollama:ollama /usr/share/ollama/model-definitions/request-assistant/v6
-chmod 750 /usr/share/ollama/model-definitions/request-assistant/v6
-chmod 640 /usr/share/ollama/model-definitions/request-assistant/v6/Modelfile-v6.6
+chown -R ollama:ollama /usr/share/ollama/model-definitions/request-assistant/generatore
+chmod 750 /usr/share/ollama/model-definitions/request-assistant/generatore
+chmod 640 /usr/share/ollama/model-definitions/request-assistant/generatore/Modelfile-v2
 
 
 modello personalizzato
 
-cd /usr/share/ollama/model-definitions/request-assistant/v6
-ollama create minicpm5-2b-request-assistant-v6.6 -f Modelfile-v6.6
+cd /usr/share/ollama/model-definitions/request-assistant/v7
+ollama create request-assistant-generatore-v2 -f Modelfile-v2
 
 
 
@@ -104,3 +104,5 @@ EOF
 prompt:
 
 {"message":{"id":0,"subject":"richiesta abilitazione db svil e coll","senderAddress":"voci.pasquale@gmail.com","receivedAt":"2026-09-21T11:34:07.238","to":"Voci Pasquale","cc":"","bodyText":"Ciao,\nper esigenze di progetto ho bisogno di essere abilitato in lettura ed in scrittura ai DB oracle di sviluppo e collaudo:\n\n* nome: Pasquale\n* cognome: Voci\n* user: u83172\n\nGrazie\nCiao\n","entryId":"00000000555ED1954FA6CF41A6B4B0950F001347070044095ECA768011449DB7F9A51EBD4A100001E8AEF182000044095ECA768011449DB7F9A51EBD4A100001E8AF4CA80000","conversationId":"62C7FAD1FCC7A84195FD0D65E5370839","conversationTopic":"richiesta abilitazione db svil e coll","importance":1,"hasAttachment":false,"category":""},"request":null}
+
+
