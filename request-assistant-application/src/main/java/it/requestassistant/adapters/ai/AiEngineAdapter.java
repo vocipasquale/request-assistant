@@ -165,9 +165,11 @@ public class AiEngineAdapter implements AiEnginePort {
 
             OllamaRequest request = new OllamaRequest(
                     model,
-                    List.of(new OllamaMessage("user", jsonRequestContent)),
+                    List.of(new OllamaMessage("user", jsonRequestContent, List.of())),
                     responseFormat,
-                    false
+                    false,
+                    false,
+                    null
             );
 
             logger.info("#################### Richiesta Ollama: {}", request);

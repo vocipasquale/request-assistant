@@ -780,13 +780,13 @@ TEST VISUAL
 
 IMG=$(base64 -w 0 /tmp/imagetest/certificatoScaduto_2.png)
 
-cat > /tmp/imagetest/qwen-request.json <<EOF
+cat > /usr/share/ollama/test/imagetest/qwen-request.json <<EOF
 {
   "model": "request-assistant-vision-v1",
   "messages": [
     {
       "role": "user",
-      "content": "Analizza l'immagine.",
+      "content": "Analizza l immagine.",
       "images": [
         "$IMG"
       ]
@@ -803,11 +803,11 @@ cat > /tmp/imagetest/qwen-request.json <<EOF
 EOF
 
 
-python3 -m json.tool /tmp/imagetest/qwen-request.json > /dev/null && echo "JSON OK"
+python3 -m json.tool /usr/share/ollama/test/imagetest/qwen-request.json > /dev/null && echo "JSON OK"
 
 curl -s http://127.0.0.1:11434/api/chat \
   -H "Content-Type: application/json" \
-  --data-binary @/tmp/imagetest/qwen-request.json
+  --data-binary @/usr/share/ollama/test/imagetest/qwen-request.json
   
   
   

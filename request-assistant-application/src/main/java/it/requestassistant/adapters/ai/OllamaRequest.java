@@ -6,6 +6,8 @@ public record OllamaRequest(
         String model,
         List<OllamaMessage> messages,
         Object format,
-        boolean stream
+        boolean think,
+        boolean stream,
+        OllamaOptions options
 ) {
 }
